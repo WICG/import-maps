@@ -288,21 +288,15 @@ At least for the case of packages (including host-provided packages), this propo
   "packages": {
     "moment": {
       "path": "/node_modules/moment",
-      "main": {
-        "default": "moment.js",
-        "fallback": ["https://backupcdn1.com/moment@2.21.0/moment.js", "https://backupcdn2.com/moment@2.21.0/moment.js"]
-      }
+      "main": "moment.js",
+      "fallback_main": ["https://backupcdn1.com/moment@2.21.0/moment.js", "https://backupcdn2.com/moment@2.21.0/moment.js"]
     },
     "std:async-local-storage": {
-      "main": {
-        "fallback": ["https://backupcdn3.com/async-local-storage.js", "/node_modules/std-als-polyfill/index.js"]
-      }
+      "fallback_main": ["https://backupcdn3.com/async-local-storage.js", "/node_modules/std-als-polyfill/index.js"]
     }
   }
 }
 ```
-
-This seems a little awkward as-written because `std:async-local-storage` doesn't have a real main module; maybe we could do better somehow? Still, you get the idea.
 
 Note that the module fallback imports syntax proposal is more general because it allows fallback for non-packages. If that's required, then the package name map is not a good fit, as discussed in the previous section on per-module metadata.
 
