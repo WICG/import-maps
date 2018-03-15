@@ -60,7 +60,7 @@ A package name map is a structure, represented as JSON, which contains all the i
 
 _We're not sure exactly how you install a package name map. The below represents a tentative idea. See the issue tracker for more discussion and alternatives._
 
-You can install a package name map using a `<script>` element, either inline (for best performance) or with a `src=""` attribute (in which case you'd better be using HTTP/2 push to get that thing to us as soon as possible):
+You can install a package name map for your application using a `<script>` element, either inline (for best performance) or with a `src=""` attribute (in which case you'd better be using HTTP/2 push to get that thing to us as soon as possible):
 
 ```html
 <script type="packagemap">
@@ -80,6 +80,8 @@ If any bare import specifiers are encountered with no package name map present, 
 Inserting a `<script type="packagemap">` after initial document parsing has no effect. Adding a second `<script type="packagemap">` has no effect. If the package map's JSON is not well-formed according to some relatively-strict validation criteria (see spec sketch below), it is ignored. Probably all of these cases should show up in dev tools, or even fire an `error` event at the `Window`.
 
 Package maps are meant to be an application-level thing, like service workers. They are not meant to be composed, but instead produced by a human or tool with a holistic view of your web application. For example, it would not make sense for a library to include a package name map; libraries can simply reference packages by name, and let the application decide what URLs those packages map to.
+
+_Some have expressed a desire for multiple package maps, e.g. specified as an attribute on `<script type="module">` elements. The idea being that these separate top-level scripts should each have their own separate bare import specifier resolution rules. This is quite tricky to implement, because in actuality these scripts are not separate; they take part in the same module map. See [related discussion about `import.meta.scriptElement`](https://github.com/whatwg/html/issues/1013#issuecomment-329344476); it is essentially the same problem._
 
 _What do we do in workers? Probably `new Worker(someURL, { type: "module", packageMap: ... })`? Or should you set it from inside the worker? Should dedicated workers use their controlling document's map, either by default or always?_
 
