@@ -134,6 +134,8 @@ The above package name map can equivalently be written like so:
 
 _We've also considered defaulting `"main"` to `packagename.js` or `index.js`, but this would basically build a default file extension for JavaScript modules into the web, which is troublesome._
 
+_Another potential shortening is to allow e.g. `"moment.js"` as a shortcut for `{ "main": "moment.js" }`. The only downside here is that it complicates the data model by introducing a union type that needs to be normalized away._
+
 #### Scoping package resolution
 
 It is often the case that you want to use the same package name to refer to multiple versions of a single library, depending on who is importing them. This encapsulates the versions of each dependency in use, and avoids [dependency hell](http://npm.github.io/how-npm-works-docs/theory-and-design/dependency-hell.html) ([longer blog post](http://blog.timoxley.com/post/20772365842/node-js-npm-reducing-dependency-overheads)).
