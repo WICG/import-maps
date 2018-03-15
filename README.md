@@ -298,6 +298,8 @@ At least for the case of packages (including host-provided packages), this propo
 }
 ```
 
+The advantage of this approach, over specifying the fallback at the import site, is that it ensures every import in the application uses the _same_ fallback behavior. With specifying at the import site, it's possible for one part of the application to specify the fallback as polyfill A, whereas another part of the application specifies polyfill B, and now both of them are active on your page, bloating your application and potentially causing subtle incompatibilities.
+
 Note that the module fallback imports syntax proposal is more general because it allows fallback for non-packages. If that's required, then the package name map is not a good fit, as discussed in the previous section on per-module metadata.
 
 ## Acknowledgments
