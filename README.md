@@ -126,52 +126,6 @@ The above package name map can equivalently be written like so:
 
 _We've also considered defaulting `"main"` to `packagename.js` or `index.js`, but this would basically build a default file extension for JavaScript modules into the web, which is troublesome._
 
-#### Non-main modules
-
-Although it is not ubiquitous, some packages include more than just one module. The desired syntax for accessing these is of the form
-
-```js
-import _ from "lodash/core";
-```
-
-To support this, you can specify an `"other"` entry alongside the `"main"` entry:
-
-```json
-{
-  "packages": {
-    "lodash": {
-      "path": "/node_modules/lodash-es",
-      "main": "lodash.js",
-      "other": {
-        "core": "core.js",
-        "fp": "fp.js"
-      }
-    }
-  }
-}
-```
-
-This would produce the following mappings, with earlier rows having precedence:
-
-|Specifier  |Referrer|Resulting URL                    |
-|-----------|--------|---------------------------------|
-|lodash     |(any)   |/node_modules/lodash-es/lodash.js|
-|lodash/core|(any)   |/node_modules/lodash-es/core.js  |
-|lodash/fp  |(any)   |/node_modules/lodash-es/fp.js    |
-|lodash/*   |(any)   |/node_modules/lodash-es/*        |
-
-<details>
-  <summary>This feature might be unnecessary…</summary>
-  
-  On further consideration, this feature seems unnecessary; in most cases, all it does is allow omitting the `.js` suffix. That is, even without the `"other"` entry in the package name map, we could easily make the following work:
-
-  ```js
-  import _ from "lodash/core.js";
-  ```
-
-  Maybe we should cut this, at least at first?
-</details>
-
 #### Scoping package resolution
 
 It is often the case that you want to use the same package name to refer to multiple versions of a single library, depending on who is importing them. This encapsulates the versions of each dependency in use, and avoids [dependency hell](http://npm.github.io/how-npm-works-docs/theory-and-design/dependency-hell.html) ([longer blog post](http://blog.timoxley.com/post/20772365842/node-js-npm-reducing-dependency-overheads)).
@@ -222,7 +176,7 @@ _Note: specs are serious business. What follows is still in the process of being
 The package name map is a recursive JSON structure:
 
 - A **scope** can contain a `"path_prefix"` string, a map of `"scopes"` (string → scope), and a map of `"packages"` (string → package)
-- A **package** can contain a `"path"` string, a `"main"` string, and a `"other"` map (string → string).
+- A **package** can contain a `"path"` string and a `"main"` string.
 - The top-level is a scope.
 
 Although we think using Web IDL is probably not a good idea for JSON formats, as the semantics are different, it may be helpful for implementers, so we supply the following:
@@ -237,7 +191,6 @@ dictionary Scope {
 dictionary Package {
   DOMString path;
   required DOMString main;
-  record<DOMString, DOMString> other;
 }
 ```
 
