@@ -81,7 +81,7 @@ Inserting a `<script type="packagemap">` after initial document parsing has no e
 
 Package maps are meant to be an application-level thing, like service workers. They are not meant to be composed, but instead produced by a human or tool with a holistic view of your web application. For example, it would not make sense for a library to include a package name map; libraries can simply reference packages by name, and let the application decide what URLs those packages map to.
 
-_What do we do in workers? Probably just a global API, `self.setPackageMap({ ... })`? Should dedicated workers use their controlling document's map?_
+_What do we do in workers? Probably `new Worker(someURL, { type: "module", packageMap: ... })`? Or should you set it from inside the worker? Should dedicated workers use their controlling document's map, either by default or always?_
 
 ### Example package name maps
 
