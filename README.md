@@ -79,11 +79,17 @@ If any bare import specifiers are encountered with no package name map present, 
 
 Inserting a `<script type="packagemap">` after initial document parsing has no effect. Adding a second `<script type="packagemap">` has no effect. If the package map's JSON is not well-formed according to some relatively-strict validation criteria (see spec sketch below), it is ignored. Probably all of these cases should show up in dev tools, or even fire an `error` event at the `Window`.
 
-Package maps are meant to be an application-level thing, like service workers. They are not meant to be composed, but instead produced by a human or tool with a holistic view of your web application. For example, it would not make sense for a library to include a package name map; libraries can simply reference packages by name, and let the application decide what URLs those packages map to.
-
-_Some have expressed a desire for multiple package maps, e.g. specified as an attribute on `<script type="module">` elements. The idea being that these separate top-level scripts should each have their own separate bare import specifier resolution rules. This is quite tricky to implement, because in actuality these scripts are not separate; they take part in the same module map. See [related discussion about `import.meta.scriptElement`](https://github.com/whatwg/html/issues/1013#issuecomment-329344476); it is essentially the same problem._
-
 _What do we do in workers? Probably `new Worker(someURL, { type: "module", packageMap: ... })`? Or should you set it from inside the worker? Should dedicated workers use their controlling document's map, either by default or always?_
+
+### The scope of package name maps
+
+Package maps are meant to be an application-level thing, somewhat like service workers. (More formally, they would be per-module map, and thus per-realm.) They are not meant to be composed, but instead produced by a human or tool with a holistic view of your web application. For example, it would not make sense for a library to include a package name map; libraries can simply reference packages by name, and let the application decide what URLs those packages map to.
+
+This, in addition to general simplicity, is in part what motivates the above restrictions on `<script type="packagemap">`.
+
+_Some have expressed a desire for multiple package maps, e.g. specified as an attribute on `<script type="module">` elements. The idea being that these separate top-level scripts should each have their own separate bare import specifier resolution rules. This is quite tricky to implement, because in actuality these scripts are not separate; they take part in the same module map. See [related discussion about `import.meta.scriptElement`](https://github.com/whatwg/html/issues/1013#issuecomment-329344476); it is essentially the same problem. To get actually separate scripts, you need to use a separate realm (e.g. via an iframe)._
+
+Since an application's package name map changes the resolution algorithm for every module in the module map, they are not impacted by whether a module's source text was originally from a cross-origin URL. If you load a module from a CDN that uses bare import specifiers, you'll need to know ahead of time what bare import specifiers that module adds to your app, and include them in the package name map. (That is, you need to know what all of your application's transitive dependencies are.) It's important that control of which URLs are use for each package stay in control of the application author, so they can holistically manage versioning and sharing of modules.
 
 ### Example package name maps
 
