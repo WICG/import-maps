@@ -56,6 +56,8 @@ Today, many web developers are even using JavaScript's native module syntax, but
 
 A package name map is a structure, represented as JSON, which contains all the information necessary to resolve bare import specifiers across the scope of a web app.
 
+If you are surprised by this choice of solution, you may want to briefly visit the ["Alternatives considered"](#alternatives-considered) section to read up on why we think this is the best path.
+
 ### Installing a package name map
 
 _We're not sure exactly how you install a package name map. The below represents a tentative idea. See the issue tracker for more discussion and alternatives._
