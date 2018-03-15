@@ -263,11 +263,10 @@ then the only information you need is
 
 - A base URL (in our app, `/node_modules_flattened/`)
 - The main module filename used (in our app, `index.js`)
-- The file extension used for any non-main modules (in our app, `.js`)
 
 You could imagine a package configuration format that only specified these things, or even only some subset (if we baked in assumptions for the others).
 
-This idea does not work for more complex applications which need scoped resolution, so we believe the full package name name proposal is necessary. But it remains attractive for simple applications, and we wonder if there's a way to make the package name map proposal also have an easy-mode that does not require listing all packages, but instead relies on conventions and tools to ensure minimal mapping is needed.
+This idea does not work for more complex applications which need scoped resolution, so we believe the full package name map proposal is necessary. But it remains attractive for simple applications, and we wonder if there's a way to make the package name map proposal also have an easy-mode that does not require listing all packages, but instead relies on conventions and tools to ensure minimal mapping is needed.
 
 ## Adjacent concepts
 
