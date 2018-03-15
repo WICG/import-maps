@@ -60,7 +60,7 @@ If you are surprised by this choice of solution, you may want to briefly visit t
 
 ### Installing a package name map
 
-_We're not sure exactly how you install a package name map. The below represents a tentative idea. See the issue tracker for more discussion and alternatives._
+_We're not sure exactly how you install a package name map. The below represents a tentative idea. See the issue tracker for more discussion and alternatives: [#1](https://github.com/domenic/package-name-maps/issues/1)._
 
 You can install a package name map for your application using a `<script>` element, either inline (for best performance) or with a `src=""` attribute (in which case you'd better be using HTTP/2 push to get that thing to us as soon as possible):
 
@@ -81,7 +81,7 @@ If any bare import specifiers are encountered with no package name map present, 
 
 Inserting a `<script type="packagemap">` after initial document parsing has no effect. Adding a second `<script type="packagemap">` has no effect. If the package map's JSON is not well-formed according to some relatively-strict validation criteria (see spec sketch below), it is ignored. Probably all of these cases should show up in dev tools, or even fire an `error` event at the `Window`.
 
-_What do we do in workers? Probably `new Worker(someURL, { type: "module", packageMap: ... })`? Or should you set it from inside the worker? Should dedicated workers use their controlling document's map, either by default or always?_
+_What do we do in workers? Probably `new Worker(someURL, { type: "module", packageMap: ... })`? Or should you set it from inside the worker? Should dedicated workers use their controlling document's map, either by default or always? Discussed in [#2](https://github.com/domenic/package-name-maps/issues/2)._
 
 ### The scope of package name maps
 
@@ -134,9 +134,9 @@ The above package name map can equivalently be written like so:
 - `"path_prefix"` gets used as the initial path segment for the resulting URL.
 - `"path"` defaults to the package name, and can be omitted when they are the same.
 
-_We've also considered defaulting `"main"` to `packagename.js` or `index.js`, but this would basically build a default file extension for JavaScript modules into the web, which is troublesome._
+_We've also considered defaulting `"main"` to `packagename.js` or `index.js`, but this would basically build a default file extension for JavaScript modules into the web, which is troublesome. Discuss in [#3](https://github.com/domenic/package-name-maps/issues/3)._
 
-_Another potential shortening is to allow e.g. `"moment.js"` as a shortcut for `{ "main": "moment.js" }`. The only downside here is that it complicates the data model by introducing a union type that needs to be normalized away._
+_Another potential shortening is to allow e.g. `"moment.js"` as a shortcut for `{ "main": "moment.js" }`. The only downside here is that it complicates the data model by introducing a union type that needs to be normalized away. Discuss in [#4](https://github.com/domenic/package-name-maps/issues/4)._
 
 #### Scoping package resolution
 
@@ -144,7 +144,7 @@ It is often the case that you want to use the same package name to refer to mult
 
 We support this use case in package name maps by allowing you to change the meaning of a specifier within a given _scope_:
 
-_TODO: find an actual in-the-wild example of incompatible version requirements. In reality these two packages are both happy with Lodash v4. Also maybe don't use lodash since it brings along the lodash → lodash-es mapping which is orthogonal to what we're trying to show here._
+_TODO: find an actual in-the-wild example of incompatible version requirements. In reality these two packages are both happy with Lodash v4. Also maybe don't use lodash since to be consistent with the rest of the document it brings along the lodash → lodash-es mapping which is orthogonal to what we're trying to show here. Help out in [#5](https://github.com/domenic/package-name-maps/issues/5)._
 
 ```json
 {
@@ -215,7 +215,7 @@ While parsing package name maps, we validate:
 
 ### Resolving a module specifier
 
-TODO: write down the algorithm for this.
+_TODO: write down the algorithm for this. Follow along in [#6](https://github.com/domenic/package-name-maps/issues/6)._
 
 ## Alternatives considered
 
@@ -266,7 +266,7 @@ then the only information you need is
 
 You could imagine a package configuration format that only specified these things, or even only some subset (if we baked in assumptions for the others).
 
-This idea does not work for more complex applications which need scoped resolution, so we believe the full package name map proposal is necessary. But it remains attractive for simple applications, and we wonder if there's a way to make the package name map proposal also have an easy-mode that does not require listing all packages, but instead relies on conventions and tools to ensure minimal mapping is needed.
+This idea does not work for more complex applications which need scoped resolution, so we believe the full package name map proposal is necessary. But it remains attractive for simple applications, and we wonder if there's a way to make the package name map proposal also have an easy-mode that does not require listing all packages, but instead relies on conventions and tools to ensure minimal mapping is needed. Discuss in [#7](https://github.com/domenic/package-name-maps/issues/7).
 
 ## Adjacent concepts
 
