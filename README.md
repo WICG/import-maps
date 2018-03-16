@@ -119,6 +119,22 @@ This would produce the following mappings:
 |lodash   |(any)   |/node_modules/lodash-es/lodash.js|
 |lodash/* |(any)   |/node_modules/lodash-es/*        |
 
+Thus, in addition to the basic cases like
+
+```js
+import moment from "moment";
+import _ from "lodash";
+```
+
+one would be able to also to import non-main modules in the package, e.g.
+
+```js
+import localeData from "moment/src/locale/zh-cn.js";
+import fp from "lodash/fp.js";
+```
+
+_Note how unlike some Node.js usages, we include the ending `.js` here. File extensions are required in browsers; unlike in Node, [we do not have the luxury](#the-nodejs-module-resolution-algorithm) of trying multiple file extensions until we find a good match. Fortunately, including file extensions also works in Node.js; that is, if everyone uses file extensions for submodules, their code will work in both environments._
+
 #### Using `"path_prefix"` and the default `"path"`
 
 The above package name map can equivalently be written like so:
