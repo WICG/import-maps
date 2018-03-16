@@ -274,7 +274,7 @@ This idea does not work for more complex applications which need scoped resoluti
 
 Several times now it's come up that people desire to supply metadata for each module; for example, [integrity metadata](https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity), or fetching options. Although some have proposed doing this with an import statement, [careful consideration of the options](https://docs.google.com/presentation/d/1qfoLTniLUVJ5YNFrha7BaVumAnW0ZgcCfUU8UbyyuYY/edit#slide=id.p) leads to preferring an out-of-band manifest file.
 
-The package name map is not that manifest file. It is specifically geared toward packages and bare import specifiers, leaving the rest of the application's modules (i.e. those imported via relative specifiers or absolute URLs) alone. A solution for per-module metadata needs to be encoded in a manifest file that cares about all modules, not in one that cares only about this specific case of bare import specifiers.
+The package name map is not that manifest file. It is specifically geared toward packages and bare import specifiers, leaving the rest of the application's modules (i.e. those imported via relative specifiers or absolute URLs) alone. A solution for per-module metadata needs to be encoded in a manifest file that cares about all modules, not in one that cares only about this specific case of bare import specifiers. Indeed, likely such a manifest would care about more than just JavaScript modules; all proposed metadata so far has been applicable to any sort of resource.
 
 ### Supplying fallbacks for host-supplied ("standard library") packages
 
