@@ -307,10 +307,16 @@ At least for the case of packages (including host-provided packages), this propo
     "moment": {
       "path": "/node_modules/moment",
       "main": "src/moment.js",
-      "fallback_main": ["https://backupcdn1.com/moment@2.21.0/src/moment.js", "https://backupcdn2.com/moment@2.21.0/src/moment.js"]
+      "fallbacks": [
+        { "path": "https://unpkg.com/moment@2.21.0" },
+        { "path": "https://backupcdn2.com/moment" }
+      ]
     },
     "std:async-local-storage": {
-      "fallback_main": ["https://backupcdn3.com/async-local-storage.js", "/node_modules/std-als-polyfill/index.js"]
+      "fallbacks": [
+        { "path": "https://backupcdn3.com/async-local-storage", "main": "async-local-storage.js" },
+        { "path": "/node_modules/std-als-polyfill", "main": "index.js" }
+      ]
     }
   }
 }
