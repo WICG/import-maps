@@ -17,7 +17,7 @@ Today, this throws, as such bare specifiers [are explicitly reserved](https://ht
 {
   "path_prefix": "/node_modules",
   "packages": {
-    "moment": { "main": "moment.js" },
+    "moment": { "main": "src/moment.js" },
     "lodash": { "path": "lodash-es", "main": "lodash.js" }
   }
 }
@@ -26,7 +26,7 @@ Today, this throws, as such bare specifiers [are explicitly reserved](https://ht
 the above would act as if you had written
 
 ```js
-import moment from "/node_modules/moment/moment.js";
+import moment from "/node_modules/moment/src/moment.js";
 import { partition } from "/node_modules/lodash-es/lodash.js";
 ```
 
@@ -104,7 +104,7 @@ An un-fancy package name map would be as follows:
 ```json
 {
   "packages": {
-    "moment": { "path": "/node_modules/moment", "main": "moment.js" },
+    "moment": { "path": "/node_modules/moment", "main": "src/moment.js" },
     "lodash": { "path": "/node_modules/lodash-es", "main": "lodash.js" }
   }
 }
@@ -112,12 +112,12 @@ An un-fancy package name map would be as follows:
 
 This would produce the following mappings:
 
-|Specifier|Referrer|Resulting URL                    |
-|---------|--------|---------------------------------|
-|moment   |(any)   |/node_modules/moment/moment.js   |
-|moment/* |(any)   |/node_modules/moment/*           |
-|lodash   |(any)   |/node_modules/lodash-es/lodash.js|
-|lodash/* |(any)   |/node_modules/lodash-es/*        |
+|Specifier|Referrer|Resulting URL                     |
+|---------|--------|----------------------------------|
+|moment   |(any)   |/node_modules/moment/src/moment.js|
+|moment/* |(any)   |/node_modules/moment/*            |
+|lodash   |(any)   |/node_modules/lodash-es/lodash.js |
+|lodash/* |(any)   |/node_modules/lodash-es/*         |
 
 Thus, in addition to the basic cases like
 
@@ -143,7 +143,7 @@ The above package name map can equivalently be written like so:
 {
   "path_prefix": "/node_modules",
   "packages": {
-    "moment": { "main": "moment.js" },
+    "moment": { "main": "src/moment.js" },
     "lodash": { "path": "lodash-es", "main": "lodash.js" }
   }
 }
@@ -154,7 +154,7 @@ The above package name map can equivalently be written like so:
 
 _We've also considered defaulting `"main"` to `packagename.js` or `index.js`, but this would basically build a default file extension for JavaScript modules into the web, which is troublesome. Discuss in [#3](https://github.com/domenic/package-name-maps/issues/3)._
 
-_Another potential shortening is to allow e.g. `"moment.js"` as a shortcut for `{ "main": "moment.js" }`. The only downside here is that it complicates the data model by introducing a union type that needs to be normalized away. Discuss in [#4](https://github.com/domenic/package-name-maps/issues/4)._
+_Another potential shortening is to allow e.g. `"src/moment.js"` as a shortcut for `{ "main": "src/moment.js" }`. The only downside here is that it complicates the data model by introducing a union type that needs to be normalized away. Discuss in [#4](https://github.com/domenic/package-name-maps/issues/4)._
 
 #### Scoping package resolution
 
@@ -306,8 +306,8 @@ At least for the case of packages (including host-provided packages), this propo
   "packages": {
     "moment": {
       "path": "/node_modules/moment",
-      "main": "moment.js",
-      "fallback_main": ["https://backupcdn1.com/moment@2.21.0/moment.js", "https://backupcdn2.com/moment@2.21.0/moment.js"]
+      "main": "src/moment.js",
+      "fallback_main": ["https://backupcdn1.com/moment@2.21.0/src/moment.js", "https://backupcdn2.com/moment@2.21.0/src/moment.js"]
     },
     "std:async-local-storage": {
       "fallback_main": ["https://backupcdn3.com/async-local-storage.js", "/node_modules/std-als-polyfill/index.js"]
