@@ -81,7 +81,7 @@ If any bare import specifiers are encountered with no package name map present, 
 
 Inserting a `<script type="packagemap">` after initial document parsing has no effect. Adding a second `<script type="packagemap">` has no effect. If the package map's JSON is not well-formed according to some relatively-strict validation criteria (see spec sketch below), it is ignored. Probably all of these cases should show up in dev tools, or even fire an `error` event at the `Window`.
 
-_We may be able to support more than one `<script type="packagemap">`, if the use cases are compelling enough and the merging process is simple enough. Discuss in #14._
+_We may be able to support more than one `<script type="packagemap">`, if the use cases are compelling enough and the merging process is simple enough. Discuss in [#14](https://github.com/domenic/package-name-maps/issues/14)._
 
 _What do we do in workers? Probably `new Worker(someURL, { type: "module", packageMap: ... })`? Or should you set it from inside the worker? Should dedicated workers use their controlling document's map, either by default or always? Discuss in [#2](https://github.com/domenic/package-name-maps/issues/2)._
 
@@ -230,7 +230,7 @@ While parsing package name maps, we validate:
 - If the `"packages"` member is missing in a scope object, the map is invalid.
 - If the `"main"` member is missing in a package object, the map is invalid.
 - _TODO: there is also some invariant that needs to be enforced about non-overlapping scope URLs. Formalize it._
-- _TODO: we may want to disallow some strings or characters inside strings. See #11 for more discussion._
+- _TODO: we may want to disallow some strings or characters inside strings. See [#11](https://github.com/domenic/package-name-maps/issues/11) for more discussion._
 
 ### Resolving a module specifier
 
