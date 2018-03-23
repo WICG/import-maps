@@ -74,7 +74,7 @@ You can install a package name map for your application using a `<script>` eleme
 ```
 
 ```html
-<script type="packagemap" href="package-map.json"></script>
+<script type="packagemap" src="package-map.json"></script>
 ```
 
 If any bare import specifiers are encountered with no package name map present, they cause the module graph to error (as today). If a package name map is being requested, then fetching of bare modules waits for the package name map fetch.
