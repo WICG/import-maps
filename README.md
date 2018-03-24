@@ -195,7 +195,7 @@ This produces the following mappings, with earlier rows having precedence:
 
 Effectively, within the `html-to-text` package, all references to the `lodash` package go to a different URL: that of the nested installation of `lodash`, in `/node_modules/html-to-text/node_modules/lodash-es`. This could be, for example, an incompatible version compared to the `lodash` found in `/node_modules/lodash-es`, which is used by the rest of the application (including inside the scope of any other packages such as `redux`).
 
-The scope name (`"html-to-text"` here) is resolved as a relative URL to the `"path_prefix"`, giving a scope URL space (`/node_modules/html-to-text/*`) in which all submodules will have the scope applied. When a parent module matches multiple scopes, the most specific scope URL for a given module path will take precedence.
+The scope name (`"html-to-text"` here) is resolved as a relative URL to the `"path_prefix"`, giving a scope URL space (`/node_modules/html-to-text/*`) in which all submodules will have the scope applied. When a parent module matches multiple scopes, the most specific scope URL space for that parent module path will take precedence.
 
 Notice also how the full URL path of the nested `lodash` package was composed: roughly resolving from top `"path_prefix"` → scope name → scope's `"path_prefix"` → package's `"path"`. This design minimizes repetition.
 
