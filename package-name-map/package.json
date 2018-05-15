@@ -1,0 +1,31 @@
+{
+  "name": "package-name-map",
+  "version": "0.1.0",
+  "description": "",
+  "main": "package-name-map.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "npm run build && mocha",
+    "test:quick": "mocha",
+    "format": "prettier --single-quote --trailing-comma=es5 --no-bracket-spacing --arrow-parens=always --write src/*.ts src/**/*.ts"
+  },
+  "author": "Justin Fagnani <justinfagnani@google.com>",
+  "license": "BSD-3-Clause",
+  "devDependencies": {
+    "prettier": "=1.12.1",
+    "source-map-support": "^0.5.5",
+    "typescript": "^2.8.3",
+    "@types/chai": "^4.1.3",
+    "@types/mocha": "^5.2.0",
+    "@types/whatwg-url": "^6.4.0",
+    "chai": "^4.1.2",
+    "mocha": "^5.1.1"
+  },
+  "files": [
+    "package-name-map.js",
+    "package-name-map.d.ts"
+  ],
+  "engines": {
+    "node": ">=10.0.0"
+  }
+}
