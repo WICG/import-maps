@@ -29,7 +29,12 @@ export interface Package {
  * A path/Scope pair for use in the internal algorithm.
  */
 interface ScopeEntry {
-  path: string;
+  /**
+   * The absolute prefix URL to be applied to any path within the scope. This
+   * includes this Scope's any ancestor's paths and path_prefixes.
+   */
+  prefixURL: string;
+
   scope: Scope;
 }
 
@@ -57,28 +62,32 @@ interface FindPackageResult {
  * it's still a TODO to implement a validate() method.
  */
 export class PackageNameMap {
+  private _baseURI: string;
   private _map: Scope;
 
-  constructor(map: Scope) {
+  constructor(map: Scope, baseURI: string) {
     this._map = map;
+    this._baseURI = new URL('.', baseURI).href;
   }
 
   resolve(specifier: string, referrerURL: string): string {
     // 1. If specifier parses as absolute URL, return the specifier.
-    try {
-      new URL(specifier);
+    if (isURL(specifier)) {
       return specifier;
-    } catch (e) {
-      // proceed
     }
 
-    // 2. If specifier starts with `./`, `../`,  or `/`, return the specifier.
+    // 2. If specifier starts with `./`, `../`,  or `/`, return the specifier
+    //    resolved from the referrerURL.
     if (/^\.{0,2}\//.test(specifier)) {
-      return specifier;
+      return new URL(specifier, referrerURL).href;
     }
 
     // 3. Find the applicable scope based on referrerURL.
-    const initialScopeContext = getScopeContext(this._map, referrerURL);
+    const initialScopeContext = getScopeContext(
+      this._map,
+      referrerURL,
+      this._baseURI
+    );
 
     // 4. Find the package entry.
     const {scopeContext, packageName, package: pkg} = findPackage(
@@ -88,10 +97,12 @@ export class PackageNameMap {
 
     // 5. If no package entry is found, throw an error.
     if (pkg === undefined) {
-      throw new Error(`Unable to resolve specifier ${specifier}`);
+      throw new Error(
+        `Unable to resolve specifier ${specifier} from referrer ${referrerURL}`
+      );
     }
 
-    // 6. If the specifier is to a submodel, but the package doesn't have a
+    // 6. If the specifier is to a sub-module, but the package doesn't have a
     //    path, throw an error.
     if (specifier !== packageName && pkg.path === undefined) {
       throw new Error(
@@ -99,58 +110,94 @@ export class PackageNameMap {
       );
     }
 
-    // 7. Build the path of the scope containing the found package
-    const packagePathPrefix = joinPaths(...scopeContext.map((s) => s.path));
+    // 7. Get the full path prefix of the scope containing the found package
+    const packagePathPrefix = scopeContext[scopeContext.length - 1].prefixURL;
 
-    // 8. Return the path to the module
-    const packageScope = scopeContext[scopeContext.length - 1].scope;
-
+    // 8. Compute package-relative path of the module.
+    //
     // If the specifier is fully "bare" (it's only a package name), then use
     // the Package's main file, otherwise remove the package name from the
     // specifier to get the package-internal path to the module.
-    const modulePath =
+    const packageRelativeModulePath =
       specifier === packageName
         ? pkg.main
-        : specifier.substring(packageName!.length);
+        : specifier.substring(packageName!.length + 1);
 
-    return joinPaths(
+    // 9. Return the resolved URL built from: the baseURI, the scope's prefix,
+    //    the package's path, and the package-relative path of the module.
+    return resolveURL(
+      this._baseURI,
       packagePathPrefix,
-      packageScope.path_prefix,
-      pkg.path || packageName,
-      modulePath
+      ensureTrailingSlash(pkg.path || packageName!),
+      packageRelativeModulePath
     );
   }
 }
+
+/**
+ * Returns true iff `s` parses as a URL.
+ */
+const isURL = (s: string): boolean => {
+  try {
+    new URL(s);
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
+const ensureTrailingSlash = (s: string) => (s.endsWith('/') ? s : s + '/');
+
+/**
+ * Performs successive URL resolution of fragments.
+ */
+const resolveURL = (...fragments: Array<string>) => {
+  return fragments.reduce((p, c) => new URL(c, p).href);
+};
 
 /**
  * Returns the appliciable Scope for `referrerURL`, and its ancestors.
  *
  * TODO: A recursive algorithm might be easier to write spec text for.
  */
-const getScopeContext = (rootScope: Scope, referrerURL: string) => {
+const getScopeContext = (
+  rootScope: Scope,
+  referrerURL: string,
+  baseURI: string
+) => {
   const scopeContext: ScopeEntry[] = [];
 
-  let currentScope: Scope = rootScope;
-  let currentScopePath = '';
-  let currentScopePathPrefix = '';
-  let foundChildScope = true;
+  let currentScopeEntry: ScopeEntry | undefined = {
+    prefixURL: resolveURL(
+      baseURI,
+      rootScope.path_prefix !== undefined
+        ? ensureTrailingSlash(rootScope.path_prefix)
+        : ''
+    ),
+    scope: rootScope,
+  };
 
-  while (foundChildScope) {
-    scopeContext.push({path: currentScopePath, scope: currentScope});
-    foundChildScope = false;
-    if (currentScope.scopes !== undefined) {
-      for (const [childScopePrefix, childScope] of Object.entries(
-        currentScope.scopes
-      )) {
-        const childScopeFullPrefix = joinPaths(
-          currentScopePathPrefix,
-          childScopePrefix
+  while (currentScopeEntry !== undefined) {
+    scopeContext.push(currentScopeEntry);
+    const {scope, prefixURL}: ScopeEntry = currentScopeEntry;
+    currentScopeEntry = undefined;
+    if (scope.scopes !== undefined) {
+      const childScopes = Object.entries(scope.scopes);
+      for (const [childScopePrefix, childScope] of childScopes) {
+        const childScopeFullPrefix = resolveURL(
+          prefixURL,
+          ensureTrailingSlash(childScopePrefix)
         );
         if (isPathSegmentPrefix(childScopeFullPrefix, referrerURL)) {
-          currentScope = childScope;
-          currentScopePath = childScopePrefix;
-          currentScopePathPrefix = childScopeFullPrefix;
-          foundChildScope = true;
+          currentScopeEntry = {
+            scope: childScope,
+            prefixURL: resolveURL(
+              childScopeFullPrefix,
+              childScope.path_prefix !== undefined
+                ? ensureTrailingSlash(childScope.path_prefix)
+                : ''
+            ),
+          };
           break;
         }
       }
@@ -200,26 +247,8 @@ const findPackage = (
 };
 
 /**
- * Joins together two or more strings, ensuring there's a '/' character
- * between each.
- */
-const joinPaths = (...paths: Array<string | undefined>) => {
-  let result = '';
-  for (const path of paths) {
-    if (path === undefined) {
-      continue;
-    }
-    if (result !== '' && result[result.length - 1] !== '/' && path[0] !== '/') {
-      result += '/';
-    }
-    result += path;
-  }
-  return result;
-};
-
-/**
- * Returns `true` iff `prefix` is a string prefix of `str` and `prefix` the rest
- * of `str` are separated by a path separator ('/').
+ * Returns true iff `prefix` is a string prefix of `str` and `prefix` and the
+ * rest of `str` and `prefix` are separated by a path separator ('/').
  *
  * This means that either `prefix` must end with a path separator, or the rest
  * of `str` after removing `prefix` must begin with a path separator.
@@ -234,15 +263,16 @@ const joinPaths = (...paths: Array<string | undefined>) => {
  * Exported for testing only.
  */
 export const isPathSegmentPrefix = (prefix: string, str: string): boolean => {
-  return (
+  const result =
     prefix.length === 0 ||
     (str.startsWith(prefix) &&
       (prefix.length === str.length ||
         str[prefix.length] === '/' ||
-        prefix[prefix.length - 1] === '/'))
-  );
+        prefix[prefix.length - 1] === '/'));
+  return result;
 };
 
 declare class URL {
   constructor(url: string, base?: string);
+  readonly href: string;
 }

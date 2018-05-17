@@ -1,7 +1,7 @@
 {
   "name": "package-name-map",
-  "version": "0.1.0",
-  "description": "",
+  "version": "1.0.0-pre.1",
+  "description": "A reference implementation of the Package Name Maps proposal",
   "main": "package-name-map.js",
   "scripts": {
     "build": "tsc",
