@@ -281,3 +281,252 @@ suite('isPathSegmentPrefix', () => {
     assert.isFalse(isPathSegmentPrefix('a', 'ab/c'));
   });
 });
+
+suite('some pathological cases', () => {
+
+  const referrerURL = 'http://foo.com/bar/baz.html';
+
+  suite('package map init validations', () => {
+    test('Invalid path_prefix type', () => {
+      try {
+        new PackageNameMap(
+          {
+            scopes: {
+              '/': {
+                path_prefix: <any>0,
+                packages: {
+                  'moment': {
+                    main: 'moment.js',
+                  },
+                },
+              },
+            },
+          },
+          referrerURL
+        );
+        assert.fail();
+      }
+      catch (err) {
+        assert.equal(err.message, 'path_prefix must be a valid string.');
+      }
+    });
+
+    test('Invalid packages type', () => {
+      try {
+        new PackageNameMap(
+          {
+            scopes: {
+              '/': {
+                path_prefix: 'node_modules',
+                packages: <any>'blah'
+              },
+            },
+          },
+          referrerURL
+        );
+        assert.fail();
+      }
+      catch (err) {
+        assert.equal(err.message, 'packages must be a valid object.');
+      }
+    });
+
+    test('Invalid scopes type', () => {
+      try {
+        new PackageNameMap(
+          {
+            scopes: <any>'asdf'
+          },
+          referrerURL
+        );
+        assert.fail();
+      }
+      catch (err) {
+        assert.equal(err.message, 'scopes must be a valid object.');
+      }
+    });
+
+    test('Invalid path', () => {
+      try {
+        new PackageNameMap(
+          {
+            path_prefix: '/node_modules',
+            packages: {
+              'moment': {
+                path: <any>1,
+                main: 'moment.js',
+              },
+            },
+          },
+          referrerURL
+        );    
+        assert.fail();
+      }
+      catch (err) {
+        assert.equal(err.message, `Invalid package for moment, path expected to be a string.`);
+      }
+    });
+
+    test('Invalid main', () => {
+      try {
+        new PackageNameMap(
+          {
+            path_prefix: '/node_modules',
+            packages: {
+              'moment': {
+                main: <any>1,
+              },
+            },
+          },
+          referrerURL
+        );
+        assert.fail();
+      }
+      catch (err) {
+        assert.equal(err.message, `Invalid package for moment, main expected to be a string.`);
+      }
+    });
+  });
+
+  suite('scopes', () => {
+    test('empty string scope', () => {
+      const map = new PackageNameMap(
+        {
+          scopes: {
+            '': {
+              path_prefix: 'node_modules',
+              packages: {
+                'moment': {
+                  main: 'moment.js',
+                },
+              },
+            },
+          },
+        },
+        referrerURL
+      );
+    
+      assert.equal(map.resolve('moment', referrerURL), 'http://foo.com/bar/node_modules/moment/moment.js');
+    });
+  });
+
+  suite('package name validations', () => {
+    test('dot segments at start of package name', () => {
+      try {
+        new PackageNameMap(
+          {
+            path_prefix: '/node_modules',
+            packages: {
+              '..\\moment': {
+                main: 'moment.js',
+              },
+            },
+          },
+          referrerURL
+        );
+        assert.fail();
+      }
+      catch (err) {
+        assert.equal(err.message, `Invalid package name ..\\moment, package names must not contain dot segments.`);
+      }
+    });
+
+    test('dot segments and separator at start of package name', () => {
+      try {
+        new PackageNameMap(
+          {
+            path_prefix: 'baz',
+            packages: {
+              '..\\/moment': {
+                main: 'moment.js',
+              },
+            },
+          },
+          referrerURL
+        );
+      }
+      catch (err) {
+        assert.equal(err.message, `Invalid package name ..\\/moment, package names must not contain dot segments.`);
+      }
+    });
+
+    test('dot segments within package name', () => {
+      try {
+        new PackageNameMap(
+          {
+            path_prefix: '/node_modules',
+            packages: {
+              'moment/../notmoment': {
+                main: 'moment.js',
+              },
+            },
+          },
+          referrerURL
+        );
+      }
+      catch (err) {
+        assert.equal(err.message, `Invalid package name moment/../notmoment, package names must not contain dot segments.`);
+      }
+    });
+
+    test('trailing slash', () => {
+      try {
+        new PackageNameMap(
+          {
+            path_prefix: '/node_modules',
+            packages: {
+              'moment/': {
+                path: 'y',
+                main: 'moment.js',
+              },
+            },
+          },
+          referrerURL
+        );
+      }
+      catch (err) {
+        assert.equal(err.message, `Invalid package name moment/, package names cannot start or end with a path separator.`);
+      }
+    });
+
+    test('leading slash', () => {
+      try {
+        new PackageNameMap(
+          {
+            path_prefix: '/node_modules',
+            packages: {
+              '/moment': {
+                path: 'y',
+                main: 'moment.js',
+              },
+            },
+          },
+          referrerURL
+        );
+      }
+      catch (err) {
+        assert.equal(err.message, `Invalid package name /moment, package names cannot start or end with a path separator.`);
+      }
+    });
+
+    test('url', () => {
+      try {
+        new PackageNameMap(
+          {
+            path_prefix: '/node_modules',
+            packages: {
+              'http://foo.com/pkg': {
+                path: 'y',
+                main: 'moment.js',
+              },
+            },
+          },
+          referrerURL
+        );
+      }
+      catch (err) {
+        assert.equal(err.message, `Invalid package name http://foo.com/pkg, package names cannot be URLs.`);
+      }
+    });
+  });
+});

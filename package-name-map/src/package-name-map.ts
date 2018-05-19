@@ -48,6 +48,56 @@ interface FindPackageResult {
 }
 
 /**
+ * Performs initialization-time scope validation
+ * Ensuring valid property types
+ */
+function validateScope(scope: Scope) {
+  if (scope.path_prefix !== undefined && typeof scope.path_prefix !== 'string') {
+    throw new Error(`path_prefix must be a valid string.`);
+  }
+  if (scope.packages !== undefined) {
+    if (typeof scope.packages !== 'object') {
+      throw new Error(`packages must be a valid object.`);
+    }
+    Object.entries(scope.packages).forEach(validatePackage);
+  }
+  if (scope.scopes !== undefined) {
+    if (typeof scope.scopes !== 'object') {
+      throw new Error(`scopes must be a valid object.`);
+    }
+    Object.values(scope.scopes).forEach(validateScope);
+  }
+}
+function validatePackage([pkgName, pkg]: [string, Package]) {
+  // package name validation
+  if (pkgName.match(/(^|\/|\\)\.\.?[\/\\]/)) {
+    throw new Error(
+      `Invalid package name ${pkgName}, package names must not contain dot segments.`
+    );
+  }
+  if (pkgName.match(/^\/\\|\/\\$/)) {
+    throw new Error(
+      `Invalid package name ${pkgName}, package names cannot start or end with a path separator.`
+    );
+  }
+  if (pkgName.indexOf(':') !== -1 && isURL(pkgName)) {
+    throw new Error(
+      `Invalid package name ${pkgName}, package names cannot be URLs.`
+    );
+  }
+  if (pkg.path !== undefined && typeof pkg.path !== 'string') {
+    throw new Error(
+      `Invalid package for ${pkgName}, path expected to be a string.`
+    );
+  }
+  if (pkg.main !== undefined && typeof pkg.main !== 'string') {
+    throw new Error(
+      `Invalid package for ${pkgName}, main expected to be a string.`
+    );
+  }
+}
+
+/**
  * An object that can resolve specifiers using its package name map
  * configuration object.
  *
@@ -66,6 +116,7 @@ export class PackageNameMap {
   private _map: Scope;
 
   constructor(map: Scope, baseURL: string) {
+    validateScope(map);
     this._map = map;
     this.baseURL = new URL('.', baseURL).href;
   }
@@ -134,7 +185,19 @@ export class PackageNameMap {
   }
 }
 
-const ensureTrailingSlash = (s: string) => (s.endsWith('/') ? s : s + '/');
+/**
+ * Returns true iff `s` parses as a URL.
+ */
+const isURL = (s: string): boolean => {
+  try {
+    new URL(s);
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
+const ensureTrailingSlash = (s: string) => (s.length === 0 || s.endsWith('/') ? s : s + '/');
 
 /**
  * Performs successive URL resolution of fragments.
@@ -217,7 +280,7 @@ const findPackage = (
 
   do {
     const scope = scopes[scopePathIndex].scope;
-    if (scope.packages !== undefined) {
+    if (scope.packages) {
       for (const [pkgName, pkg] of Object.entries(scope.packages)) {
         if (isPathSegmentPrefix(pkgName, specifier)) {
           foundPackage = pkg;
