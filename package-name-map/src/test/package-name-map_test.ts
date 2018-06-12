@@ -20,6 +20,7 @@ const {assert} = chai;
 suite('PackageNameMap', () => {
   suite('resolve', () => {
     const referrerURL = 'http://foo.com/bar/baz.html';
+    const baseURL = 'http://foo.com/resources/package-name-map.json';
 
     suite('does not modify already valid specifiers', () => {
       const map = new PackageNameMap(
@@ -30,13 +31,13 @@ suite('PackageNameMap', () => {
             },
           },
         },
-        referrerURL
+        baseURL
       );
 
       test('does not modify URLs', () => {
         assert.equal(
           map.resolve('https://bar.com', referrerURL),
-          'https://bar.com'
+          'https://bar.com/'
         );
       });
 
@@ -46,6 +47,7 @@ suite('PackageNameMap', () => {
           map.resolve('./foo', referrerURL),
           'http://foo.com/bar/foo'
         );
+        assert.equal(map.resolve('./foo', referrerURL), 'http://foo.com/bar/foo');
         assert.equal(map.resolve('../foo', referrerURL), 'http://foo.com/foo');
       });
     });
@@ -75,13 +77,13 @@ suite('PackageNameMap', () => {
             },
           },
         },
-        referrerURL
+        baseURL
       );
 
       test('resolves package name for a package with only a main', () => {
         assert.equal(
           map.resolve('app', referrerURL),
-          'http://foo.com/bar/app/src/index.js'
+          'http://foo.com/resources/app/src/index.js'
         );
       });
 
@@ -102,14 +104,14 @@ suite('PackageNameMap', () => {
       test('resolves package name for a package with a relative path and main', () => {
         assert.equal(
           map.resolve('relative', referrerURL),
-          'http://foo.com/bar/node_modules/relative/relative.js'
+          'http://foo.com/resources/node_modules/relative/relative.js'
         );
       });
 
       test('resolves a submodule for package with a relative path and main', () => {
         assert.equal(
           map.resolve('relative/bar.js', referrerURL),
-          'http://foo.com/bar/node_modules/relative/bar.js'
+          'http://foo.com/resources/node_modules/relative/bar.js'
         );
       });
 
@@ -150,7 +152,7 @@ suite('PackageNameMap', () => {
             },
           },
         },
-        'http://foo.com/'
+        baseURL
       );
 
       test('resolves package name for a package with only a main', () => {
@@ -214,16 +216,16 @@ suite('PackageNameMap', () => {
             },
           },
         },
-        referrerURL
+        baseURL
       );
 
       test('resolves package names in scopes', () => {
         assert.equal(
           map.resolve(
             'moment',
-            'http://foo.com/bar/node_modules/lodash-es/lodash.js'
+            'http://foo.com/resources/node_modules/lodash-es/lodash.js'
           ),
-          'http://foo.com/bar/node_modules/lodash-es/node_modules/moment/moment.js'
+          'http://foo.com/resources/node_modules/lodash-es/node_modules/moment/moment.js'
         );
       });
 
@@ -231,9 +233,9 @@ suite('PackageNameMap', () => {
         assert.equal(
           map.resolve(
             'not-moment',
-            'http://foo.com/bar/node_modules/lodash-es/node_modules/subpackage/foo.js'
+            'http://foo.com/resources/node_modules/lodash-es/node_modules/subpackage/foo.js'
           ),
-          'http://foo.com/bar/node_modules/lodash-es/node_modules/subpackage/not-moment/index.js'
+          'http://foo.com/resources/node_modules/lodash-es/node_modules/subpackage/not-moment/index.js'
         );
       });
 
@@ -241,7 +243,7 @@ suite('PackageNameMap', () => {
         assert.equal(
           map.resolve(
             'lodash',
-            'http://foo.com/bar/node_modules/lodash-es/lodash.js'
+            'http://foo.com/resources/node_modules/lodash-es/lodash.js'
           ),
           'http://foo.com/node_modules/lodash-es/lodash.js'
         );
@@ -251,9 +253,9 @@ suite('PackageNameMap', () => {
         assert.equal(
           map.resolve(
             'moment',
-            'http://foo.com/bar/node_modules/lodash-es/subpackage'
+            'http://foo.com/resources/node_modules/lodash-es/subpackage'
           ),
-          'http://foo.com/bar/node_modules/lodash-es/node_modules/moment/moment.js'
+          'http://foo.com/resources/node_modules/lodash-es/node_modules/moment/moment.js'
         );
       });
     });

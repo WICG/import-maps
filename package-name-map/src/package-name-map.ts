@@ -62,19 +62,19 @@ interface FindPackageResult {
  * it's still a TODO to implement a validate() method.
  */
 export class PackageNameMap {
-  private _baseURI: string;
+  private baseURL: string;
   private _map: Scope;
 
-  constructor(map: Scope, baseURI: string) {
+  constructor(map: Scope, baseURL: string) {
     this._map = map;
-    this._baseURI = new URL('.', baseURI).href;
+    this.baseURL = new URL('.', baseURL).href;
   }
 
   resolve(specifier: string, referrerURL: string): string {
     // 1. If specifier parses as absolute URL, return the specifier.
-    if (isURL(specifier)) {
-      return specifier;
-    }
+    try {
+      return new URL(specifier).href;
+    } catch (e) {}
 
     // 2. If specifier starts with `./`, `../`,  or `/`, return the specifier
     //    resolved from the referrerURL.
@@ -86,7 +86,7 @@ export class PackageNameMap {
     const initialScopeContext = getScopeContext(
       this._map,
       referrerURL,
-      this._baseURI
+      this.baseURL
     );
 
     // 4. Find the package entry.
@@ -123,28 +123,16 @@ export class PackageNameMap {
         ? pkg.main
         : specifier.substring(packageName!.length + 1);
 
-    // 9. Return the resolved URL built from: the baseURI, the scope's prefix,
+    // 9. Return the resolved URL built from: the baseURL, the scope's prefix,
     //    the package's path, and the package-relative path of the module.
     return resolveURL(
-      this._baseURI,
+      this.baseURL,
       packagePathPrefix,
       ensureTrailingSlash(pkg.path || packageName!),
       packageRelativeModulePath
     );
   }
 }
-
-/**
- * Returns true iff `s` parses as a URL.
- */
-const isURL = (s: string): boolean => {
-  try {
-    new URL(s);
-    return true;
-  } catch (e) {
-    return false;
-  }
-};
 
 const ensureTrailingSlash = (s: string) => (s.endsWith('/') ? s : s + '/');
 
@@ -163,13 +151,13 @@ const resolveURL = (...fragments: Array<string>) => {
 const getScopeContext = (
   rootScope: Scope,
   referrerURL: string,
-  baseURI: string
+  baseURL: string
 ) => {
   const scopeContext: ScopeEntry[] = [];
 
   let currentScopeEntry: ScopeEntry | undefined = {
     prefixURL: resolveURL(
-      baseURI,
+      baseURL,
       rootScope.path_prefix !== undefined
         ? ensureTrailingSlash(rootScope.path_prefix)
         : ''
