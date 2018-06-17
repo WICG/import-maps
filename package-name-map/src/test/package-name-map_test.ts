@@ -75,7 +75,7 @@ suite('PackageNameMap', () => {
               path: '/node_modules/@polymer/polymer-foo',
               main: 'polymer-foo.js',
             },
-          },
+          }
         },
         baseURL
       );
@@ -85,6 +85,10 @@ suite('PackageNameMap', () => {
           map.resolve('app', referrerURL),
           'http://foo.com/resources/app/src/index.js'
         );
+      });
+
+      test('uses the default path for a package with only a main', () => {
+        assert.equal(map.resolve('app/foo.js', referrerURL), 'http://foo.com/resources/app/foo.js');
       });
 
       test('resolves package name for a package with an absolute path and main', () => {
@@ -127,10 +131,6 @@ suite('PackageNameMap', () => {
           map.resolve('@polymer/polymer-foo', referrerURL),
           'http://foo.com/node_modules/@polymer/polymer-foo/polymer-foo.js'
         );
-      });
-
-      test('errors for a submodule with only a main', () => {
-        assert.throws(() => map.resolve('app/foo.js', referrerURL));
       });
     });
 
