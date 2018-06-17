@@ -70,19 +70,9 @@ function validateScope(scope: Scope) {
 }
 function validatePackage([pkgName, pkg]: [string, Package]) {
   // package name validation
-  if (pkgName.match(/(^|\/|\\)\.\.?[\/\\]/)) {
-    throw new Error(
-      `Invalid package name ${pkgName}, package names must not contain dot segments.`
-    );
-  }
-  if (pkgName.match(/^\/\\|\/\\$/)) {
+  if (pkgName.startsWith('/') || pkgName.endsWith('/')) {
     throw new Error(
       `Invalid package name ${pkgName}, package names cannot start or end with a path separator.`
-    );
-  }
-  if (pkgName.indexOf(':') !== -1 && isURL(pkgName)) {
-    throw new Error(
-      `Invalid package name ${pkgName}, package names cannot be URLs.`
     );
   }
   if (pkg.path !== undefined && typeof pkg.path !== 'string') {
@@ -184,18 +174,6 @@ export class PackageNameMap {
     );
   }
 }
-
-/**
- * Returns true iff `s` parses as a URL.
- */
-const isURL = (s: string): boolean => {
-  try {
-    new URL(s);
-    return true;
-  } catch (e) {
-    return false;
-  }
-};
 
 const ensureTrailingSlash = (s: string) => (s.length === 0 || s.endsWith('/') ? s : s + '/');
 

@@ -19,7 +19,7 @@ const {assert} = chai;
 
 suite('PackageNameMap', () => {
   suite('resolve', () => {
-    const referrerURL = 'http://foo.com/bar/baz.html';
+    const referrerURL = 'http://bar.com/bar/baz.html';
     const baseURL = 'http://foo.com/resources/package-name-map.json';
 
     suite('does not modify already valid specifiers', () => {
@@ -42,13 +42,13 @@ suite('PackageNameMap', () => {
       });
 
       test('does not modify valid paths', () => {
-        assert.equal(map.resolve('/foo', referrerURL), 'http://foo.com/foo');
+        assert.equal(map.resolve('/foo', referrerURL), 'http://bar.com/foo');
         assert.equal(
           map.resolve('./foo', referrerURL),
-          'http://foo.com/bar/foo'
+          'http://bar.com/bar/foo'
         );
-        assert.equal(map.resolve('./foo', referrerURL), 'http://foo.com/bar/foo');
-        assert.equal(map.resolve('../foo', referrerURL), 'http://foo.com/foo');
+        assert.equal(map.resolve('./foo', referrerURL), 'http://bar.com/bar/foo');
+        assert.equal(map.resolve('../foo', referrerURL), 'http://bar.com/foo');
       });
     });
 
@@ -285,6 +285,7 @@ suite('isPathSegmentPrefix', () => {
 suite('some pathological cases', () => {
 
   const referrerURL = 'http://foo.com/bar/baz.html';
+  const baseURL = 'http://foo.com/resources/package-name-map.json';
 
   suite('package map init validations', () => {
     test('Invalid path_prefix type', () => {
@@ -302,7 +303,7 @@ suite('some pathological cases', () => {
               },
             },
           },
-          referrerURL
+          baseURL
         );
         assert.fail();
       }
@@ -322,7 +323,7 @@ suite('some pathological cases', () => {
               },
             },
           },
-          referrerURL
+          baseURL
         );
         assert.fail();
       }
@@ -337,7 +338,7 @@ suite('some pathological cases', () => {
           {
             scopes: <any>'asdf'
           },
-          referrerURL
+          baseURL
         );
         assert.fail();
       }
@@ -358,7 +359,7 @@ suite('some pathological cases', () => {
               },
             },
           },
-          referrerURL
+          baseURL
         );    
         assert.fail();
       }
@@ -378,7 +379,7 @@ suite('some pathological cases', () => {
               },
             },
           },
-          referrerURL
+          baseURL
         );
         assert.fail();
       }
@@ -412,61 +413,48 @@ suite('some pathological cases', () => {
 
   suite('package name validations', () => {
     test('dot segments at start of package name', () => {
-      try {
-        new PackageNameMap(
-          {
-            path_prefix: '/node_modules',
-            packages: {
-              '..\\moment': {
-                main: 'moment.js',
-              },
+      const map = new PackageNameMap(
+        {
+          path_prefix: '/node_modules',
+          packages: {
+            '..\\moment': {
+              main: 'moment.js',
             },
           },
-          referrerURL
-        );
-        assert.fail();
-      }
-      catch (err) {
-        assert.equal(err.message, `Invalid package name ..\\moment, package names must not contain dot segments.`);
-      }
+        },
+        referrerURL
+      );
+      assert.equal(map.resolve('..\\moment', referrerURL), 'http://foo.com/moment/moment.js');
     });
 
     test('dot segments and separator at start of package name', () => {
-      try {
-        new PackageNameMap(
-          {
-            path_prefix: 'baz',
-            packages: {
-              '..\\/moment': {
-                main: 'moment.js',
-              },
+      const map = new PackageNameMap(
+        {
+          path_prefix: 'baz',
+          packages: {
+            '..\\/moment': {
+              main: 'moment.js',
             },
           },
-          referrerURL
-        );
-      }
-      catch (err) {
-        assert.equal(err.message, `Invalid package name ..\\/moment, package names must not contain dot segments.`);
-      }
+        },
+        referrerURL
+      );
+      assert.equal(map.resolve('..\\/moment', referrerURL), 'http://foo.com/bar//moment/moment.js');
     });
 
     test('dot segments within package name', () => {
-      try {
-        new PackageNameMap(
-          {
-            path_prefix: '/node_modules',
-            packages: {
-              'moment/../notmoment': {
-                main: 'moment.js',
-              },
+      const map = new PackageNameMap(
+        {
+          path_prefix: '/node_modules',
+          packages: {
+            'moment/../notmoment': {
+              main: 'moment.js',
             },
           },
-          referrerURL
-        );
-      }
-      catch (err) {
-        assert.equal(err.message, `Invalid package name moment/../notmoment, package names must not contain dot segments.`);
-      }
+        },
+        baseURL
+      );
+      assert.equal(map.resolve('moment/../notmoment', referrerURL), 'http://foo.com/node_modules/notmoment/moment.js');
     });
 
     test('trailing slash', () => {
@@ -481,8 +469,9 @@ suite('some pathological cases', () => {
               },
             },
           },
-          referrerURL
+          baseURL
         );
+        assert.fail();
       }
       catch (err) {
         assert.equal(err.message, `Invalid package name moment/, package names cannot start or end with a path separator.`);
@@ -501,8 +490,9 @@ suite('some pathological cases', () => {
               },
             },
           },
-          referrerURL
+          baseURL
         );
+        assert.fail();
       }
       catch (err) {
         assert.equal(err.message, `Invalid package name /moment, package names cannot start or end with a path separator.`);
@@ -510,23 +500,19 @@ suite('some pathological cases', () => {
     });
 
     test('url', () => {
-      try {
-        new PackageNameMap(
-          {
-            path_prefix: '/node_modules',
-            packages: {
-              'http://foo.com/pkg': {
-                path: 'y',
-                main: 'moment.js',
-              },
+      const map = new PackageNameMap(
+        {
+          path_prefix: '/node_modules',
+          packages: {
+            'http://foo.com/pkg': {
+              path: 'y',
+              main: 'moment.js',
             },
           },
-          referrerURL
-        );
-      }
-      catch (err) {
-        assert.equal(err.message, `Invalid package name http://foo.com/pkg, package names cannot be URLs.`);
-      }
+        },
+        baseURL
+      );
+      assert.equal(map.resolve('http://foo.com/pkg', referrerURL), 'http://foo.com/pkg');
     });
   });
 });
