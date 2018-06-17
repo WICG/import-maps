@@ -16,7 +16,7 @@
  */
 export interface Scope {
   path_prefix?: string;
-  packages?: {[name: string]: Package};
+  packages?: {[name: string]: Package | string};
   scopes?: {[path: string]: Scope};
 }
 
@@ -259,7 +259,7 @@ const findPackage = (
     if (scope.packages) {
       for (const [pkgName, pkg] of Object.entries(scope.packages)) {
         if (isPathSegmentPrefix(pkgName, specifier)) {
-          foundPackage = pkg;
+          foundPackage = typeof pkg === 'string' ? {main: pkg} : pkg;
           foundPackageName = pkgName;
           break;
         }

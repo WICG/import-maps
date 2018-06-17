@@ -134,6 +134,41 @@ suite('PackageNameMap', () => {
       });
     });
 
+    suite('package main variations', () => {
+      const map = new PackageNameMap(
+        {
+          path_prefix: '/node_modules',
+          packages: {
+            lodash: '/lodash.js',
+            moment: {
+              main: 'http://moment.com/moment.js'
+            },
+            '@polymer/polymer': 'index.js',
+            '@polymer/polymer-foo': {
+              main: '../polymer-foo.js'
+            }
+          }
+        },
+        baseURL
+      );
+
+      test('supports main sugar case', () => {
+        assert.equal(map.resolve('lodash', referrerURL), 'http://foo.com/lodash.js');
+      });
+
+      test('supports URL main', () => {
+        assert.equal(map.resolve('moment', referrerURL), 'http://moment.com/moment.js');
+      });
+
+      test('supports relative main sugar', () => {
+        assert.equal(map.resolve('@polymer/polymer', referrerURL), 'http://foo.com/node_modules/@polymer/polymer/index.js');
+      });
+
+      test('supports relative URL main', () => {
+        assert.equal(map.resolve('@polymer/polymer-foo', referrerURL), 'http://foo.com/node_modules/@polymer/polymer-foo.js');
+      });
+    });
+
     suite('path_prefix', () => {
       const map = new PackageNameMap(
         {
