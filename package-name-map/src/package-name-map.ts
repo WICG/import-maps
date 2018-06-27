@@ -143,18 +143,10 @@ export class PackageNameMap {
       );
     }
 
-    // 6. If the specifier is to a sub-module, but the package doesn't have a
-    //    path, throw an error.
-    if (specifier !== packageName && pkg.path === undefined) {
-      throw new Error(
-        `Cannot resolve specifier, no path found for package ${packageName}`
-      );
-    }
-
-    // 7. Get the full path prefix of the scope containing the found package
+    // 6. Get the full path prefix of the scope containing the found package
     const packagePathPrefix = scopeContext[scopeContext.length - 1].prefixURL;
 
-    // 8. Compute package-relative path of the module.
+    // 7. Compute package-relative path of the module.
     //
     // If the specifier is fully "bare" (it's only a package name), then use
     // the Package's main file, otherwise remove the package name from the
@@ -164,7 +156,7 @@ export class PackageNameMap {
         ? pkg.main
         : specifier.substring(packageName!.length + 1);
 
-    // 9. Return the resolved URL built from: the baseURL, the scope's prefix,
+    // 8. Return the resolved URL built from: the baseURL, the scope's prefix,
     //    the package's path, and the package-relative path of the module.
     return resolveURL(
       this.baseURL,
