@@ -140,6 +140,7 @@ suite('PackageNameMap', () => {
           path_prefix: '/node_modules',
           packages: {
             lodash: '/lodash.js',
+            'lodash-es': {},
             moment: {
               main: 'http://moment.com/moment.js'
             },
@@ -152,8 +153,26 @@ suite('PackageNameMap', () => {
         baseURL
       );
 
-      test('supports main sugar case', () => {
+      test('supports package string case for main', () => {
         assert.equal(map.resolve('lodash', referrerURL), 'http://foo.com/lodash.js');
+      });
+
+      test('package string case for submodules errors', () => {
+        assert.equal(map.resolve('lodash/x', referrerURL), 'http://foo.com/node_modules/lodash/x');
+      });
+
+      test('package empty object case for main', () => {
+        try {
+          map.resolve('lodash-es', referrerURL);
+          assert.fail('Should error');
+        }
+        catch (e) {
+          assert.equal(e.message, 'Cannot resolve specifier lodash-es, no main found for package lodash-es');
+        }
+      });
+
+      test('package empty object case for submodules', () => {
+        assert.equal(map.resolve('lodash-es/x', referrerURL), 'http://foo.com/node_modules/lodash-es/x');
       });
 
       test('supports URL main', () => {

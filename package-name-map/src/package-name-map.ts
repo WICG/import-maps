@@ -68,21 +68,28 @@ function validateScope(scope: Scope) {
     Object.values(scope.scopes).forEach(validateScope);
   }
 }
-function validatePackage([pkgName, pkg]: [string, Package]) {
+function validatePackage([pkgName, pkg]: [string, Package | string]) {
   // package name validation
   if (pkgName.startsWith('/') || pkgName.endsWith('/')) {
     throw new Error(
       `Invalid package name ${pkgName}, package names cannot start or end with a path separator.`
     );
   }
-  if (pkg.path !== undefined && typeof pkg.path !== 'string') {
-    throw new Error(
-      `Invalid package for ${pkgName}, path expected to be a string.`
-    );
+  if (typeof pkg === 'object') {
+    if (pkg.path !== undefined && typeof pkg.path !== 'string') {
+      throw new Error(
+        `Invalid package for ${pkgName}, path expected to be a string.`
+      );
+    }
+    if (pkg.main !== undefined && typeof pkg.main !== 'string') {
+      throw new Error(
+        `Invalid package for ${pkgName}, main expected to be a string.`
+      );
+    }
   }
-  if (pkg.main !== undefined && typeof pkg.main !== 'string') {
+  else if (typeof pkg !== 'string') {
     throw new Error(
-      `Invalid package for ${pkgName}, main expected to be a string.`
+      `Invalid package for ${pkgName}, must be a string or package object.`
     );
   }
 }
