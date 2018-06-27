@@ -146,6 +146,9 @@ suite('PackageNameMap', () => {
               path: 'lodash-es',
               main: 'lodash.js',
             },
+            'lodash-es': {
+              path: 'lodash-es'
+            },
             '@polymer/polymer': {
               path: '@polymer/polymer',
               main: 'polymer.js',
@@ -172,6 +175,23 @@ suite('PackageNameMap', () => {
       test('resolves a submodule for package with a path and main', () => {
         assert.equal(
           map.resolve('lodash/bar.js', referrerURL),
+          'http://foo.com/node_modules/lodash-es/bar.js'
+        );
+      });
+
+      test('throws resolving main for a package with only a path', () => {
+        try {
+          map.resolve('lodash-es', referrerURL);
+          assert.fail();
+        }
+        catch (err) {
+          assert.equal(err.message, 'Cannot resolve specifier lodash-es, no main found for package lodash-es');
+        }
+      });
+
+      test('resolves a submodule for a package with only a path', () => {
+        assert.equal(
+          map.resolve('lodash-es/bar.js', referrerURL),
           'http://foo.com/node_modules/lodash-es/bar.js'
         );
       });

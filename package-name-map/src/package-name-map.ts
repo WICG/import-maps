@@ -21,7 +21,7 @@ export interface Scope {
 }
 
 export interface Package {
-  main: string;
+  main?: string;
   path?: string;
 }
 
@@ -146,6 +146,12 @@ export class PackageNameMap {
     // 6. Get the full path prefix of the scope containing the found package
     const packagePathPrefix = scopeContext[scopeContext.length - 1].prefixURL;
 
+    if (specifier === packageName && pkg.main === undefined) {
+      throw new Error(
+        `Cannot resolve specifier ${specifier}, no main found for package ${packageName}`
+      );
+    }
+
     // 7. Compute package-relative path of the module.
     //
     // If the specifier is fully "bare" (it's only a package name), then use
@@ -153,7 +159,7 @@ export class PackageNameMap {
     // specifier to get the package-internal path to the module.
     const packageRelativeModulePath =
       specifier === packageName
-        ? pkg.main
+        ? <string>pkg.main
         : specifier.substring(packageName!.length + 1);
 
     // 8. Return the resolved URL built from: the baseURL, the scope's prefix,
