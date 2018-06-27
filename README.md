@@ -246,7 +246,7 @@ Unlike in Node.js, in the browser we don't have the luxury of a reasonably-fast 
 
 ### A programmable resolution hook
 
-Some have suggested customizing the browser's module resolution algorithm using a JavaScript hook to interpret each module specifier. 
+Some have suggested customizing the browser's module resolution algorithm using a JavaScript hook to interpret each module specifier.
 
 Unfortunately, this is fatal to performance; jumping into and back out of JavaScript for every edge of a module graph drastically slows down application startup. (Typical web applications have on the order of thousands of modules, with 3-4× that many import statements.) You can imagine various mitigations, such as restricting the calls to only bare import specifiers or requiring that the hook take batches of specifiers and return batches of URLs, but in the end nothing beats precomputation.
 
@@ -327,6 +327,31 @@ At least for the case of packages (including host-provided packages), this propo
 The advantage of this approach, over specifying the fallback at the import site, is that it ensures every import in the application uses the _same_ fallback behavior. With specifying at the import site, it's possible for one part of the application to specify the fallback as polyfill A, whereas another part of the application specifies polyfill B, and now both of them are active on your page, bloating your application and potentially causing subtle incompatibilities.
 
 Note that the module fallback imports syntax proposal is more general because it allows fallback for non-packages. If that's required, then the package name map is not a good fit, as discussed in the previous section on per-module metadata.
+
+### Referencing host-supplied packages by their fallback URL
+
+This concept is essentially an inversion of the previous one. The idea is that you want to have a reference like
+
+```js
+import { storage } from "https://backupcdn3.com/async-local-storage/async-local-storage.js";
+```
+
+but in browsers that both implement package name maps and implement the host-supplied `std:async-local-storage` package, instead import the built-in version.
+
+This "inverted fallback" is more backward-compatible than the previous version, where the page author used `import "std:async-local-storage"` and relied on the package name map perform the fallback mapping. This is because it has the desired behavior (loading the polyfill) even in browsers that don't implement package name maps at all.
+
+The syntax for this might be something like
+
+```json
+{
+  "replacements": {
+    "std:async-local-storage": {
+      "path": "https://backupcdn3.com/async-local-storage",
+      "main": "async-local-storage.js"
+    }
+  }
+}
+```
 
 ## Acknowledgments
 
