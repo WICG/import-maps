@@ -154,7 +154,18 @@ The above package name map can equivalently be written like so:
 
 _We've also considered defaulting `"main"` to `packagename.js` or `index.js`, but this would basically build a default file extension for JavaScript modules into the web, which is troublesome. Discuss in [#3](https://github.com/domenic/package-name-maps/issues/3)._
 
-_Another potential shortening is to allow e.g. `"src/moment.js"` as a shortcut for `{ "main": "src/moment.js" }`. The only downside here is that it complicates the data model by introducing a union type that needs to be normalized away. Discuss in [#4](https://github.com/domenic/package-name-maps/issues/4)._
+#### Package `"main"` sugar
+
+Providing a _string_ value directly for the package is treated as if setting just the main directly on the package:
+
+```json
+{
+  "path_prefix": "/node_modules",
+  "packages": {
+    "moment": "src/moment.js"
+  }
+}
+```
 
 #### Scoping package resolution
 
@@ -207,7 +218,7 @@ _Note: specs are serious business. What follows is still in the process of being
 
 The package name map is a recursive JSON structure:
 
-- A **scope** can contain a `"path_prefix"` string, a map of `"scopes"` (string → scope), and a map of `"packages"` (string → package)
+- A **scope** can contain a `"path_prefix"` string, a map of `"scopes"` (string → scope), and a map of `"packages"` (string → package | string)
 - A **package** can contain a `"path"` string and a `"main"` string.
 - The top-level is a scope.
 
@@ -217,12 +228,12 @@ Although we think using Web IDL is probably not a good idea for JSON formats, as
 dictionary Scope {
   DOMString path_prefix;
   record<DOMString, Scope> scopes;
-  required record<DOMString, Package> packages;
+  required record<DOMString, Package | DOMString> packages;
 }
 
 dictionary Package {
   DOMString path;
-  required DOMString main;
+  DOMString main;
 }
 ```
 
@@ -230,7 +241,8 @@ While parsing package name maps, we validate:
 - If non-strings show up where strings were expected, the map is invalid.
 - If non-objects show up where objects were expected, the map is invalid.
 - If the `"packages"` member is missing in a scope object, the map is invalid.
-- If the `"main"` member is missing in a package object, the map is invalid.
+- If any `"packages"` record keys start or end with a `/` separator, the map is invalid.
+- Any _string_ entries in the `"packages"` record are converted into package entries with a `"main"`.
 - _TODO: there is also some invariant that needs to be enforced about non-overlapping scope URLs. Formalize it._
 - _TODO: we may want to disallow some strings or characters inside strings. See [#11](https://github.com/domenic/package-name-maps/issues/11) for more discussion._
 
