@@ -16,7 +16,7 @@
  */
 export interface Scope {
   path_prefix?: string;
-  packages?: {[name: string]: Package};
+  packages?: {[name: string]: Package | string};
   scopes?: {[path: string]: Scope};
 }
 
@@ -68,21 +68,28 @@ function validateScope(scope: Scope) {
     Object.values(scope.scopes).forEach(validateScope);
   }
 }
-function validatePackage([pkgName, pkg]: [string, Package]) {
+function validatePackage([pkgName, pkg]: [string, Package | string]) {
   // package name validation
   if (pkgName.startsWith('/') || pkgName.endsWith('/')) {
     throw new Error(
       `Invalid package name ${pkgName}, package names cannot start or end with a path separator.`
     );
   }
-  if (pkg.path !== undefined && typeof pkg.path !== 'string') {
-    throw new Error(
-      `Invalid package for ${pkgName}, path expected to be a string.`
-    );
+  if (typeof pkg === 'object') {
+    if (pkg.path !== undefined && typeof pkg.path !== 'string') {
+      throw new Error(
+        `Invalid package for ${pkgName}, path expected to be a string.`
+      );
+    }
+    if (pkg.main !== undefined && typeof pkg.main !== 'string') {
+      throw new Error(
+        `Invalid package for ${pkgName}, main expected to be a string.`
+      );
+    }
   }
-  if (pkg.main !== undefined && typeof pkg.main !== 'string') {
+  else if (typeof pkg !== 'string') {
     throw new Error(
-      `Invalid package for ${pkgName}, main expected to be a string.`
+      `Invalid package for ${pkgName}, must be a string or package object.`
     );
   }
 }
@@ -259,7 +266,7 @@ const findPackage = (
     if (scope.packages) {
       for (const [pkgName, pkg] of Object.entries(scope.packages)) {
         if (isPathSegmentPrefix(pkgName, specifier)) {
-          foundPackage = pkg;
+          foundPackage = typeof pkg === 'string' ? {main: pkg} : pkg;
           foundPackageName = pkgName;
           break;
         }
