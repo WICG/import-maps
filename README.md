@@ -228,7 +228,7 @@ Although we think using Web IDL is probably not a good idea for JSON formats, as
 dictionary Scope {
   DOMString path_prefix;
   record<DOMString, Scope> scopes;
-  required record<DOMString, Package | DOMString> packages;
+  required record<DOMString, Package or DOMString> packages;
 }
 
 dictionary Package {
