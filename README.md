@@ -62,7 +62,7 @@ If you are surprised by this choice of solution, you may want to briefly visit t
 
 _We're not sure exactly how you install a package name map. The below represents a tentative idea. See the issue tracker for more discussion and alternatives: [#1](https://github.com/domenic/package-name-maps/issues/1)._
 
-You can install a package name map for your application using a `<script>` element, either inline (for best performance) or with a `src=""` attribute (ideally a prioritised request with far-future cache expires):
+You can install a package name map for your application using a `<script>` element, either inline (for best performance) or with a `src=""` attribute (ideally a prioritised unique URL with far-future cache expires):
 
 ```html
 <script type="packagemap">
