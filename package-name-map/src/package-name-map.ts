@@ -266,7 +266,10 @@ const findPackage = (
     if (scope.packages) {
       for (const [pkgName, pkg] of Object.entries(scope.packages)) {
         if (isPathSegmentPrefix(pkgName, specifier)) {
-          foundPackage = typeof pkg === 'string' ? {main: pkg} : pkg;
+          foundPackage = typeof pkg === 'string' ? {
+            main: pkg,
+            path: pkg.substr(0, pkg.lastIndexOf('/')) || undefined
+          } : pkg;
           foundPackageName = pkgName;
           break;
         }

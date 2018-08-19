@@ -144,7 +144,7 @@ suite('PackageNameMap', () => {
             moment: {
               main: 'http://moment.com/moment.js'
             },
-            '@polymer/polymer': 'index.js',
+            '@polymer/polymer': '/dist/polymer/index.js',
             '@polymer/polymer-foo': {
               main: '../polymer-foo.js'
             }
@@ -180,7 +180,11 @@ suite('PackageNameMap', () => {
       });
 
       test('supports relative main sugar', () => {
-        assert.equal(map.resolve('@polymer/polymer', referrerURL), 'http://foo.com/node_modules/@polymer/polymer/index.js');
+        assert.equal(map.resolve('@polymer/polymer', referrerURL), 'http://foo.com/dist/polymer/index.js');
+      });
+
+      test('supports sensible path for relative main sugar', () => {
+        assert.equal(map.resolve('@polymer/polymer/x', referrerURL), 'http://foo.com/dist/polymer/x');
       });
 
       test('supports relative URL main', () => {
