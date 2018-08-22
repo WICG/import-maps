@@ -10,11 +10,11 @@ This proposal allows control over what URLs get fetched by JavaScript `import` s
 
 - Providing fallback resolution, so that `import $ from "jquery"` can try to go to a CDN first, but fall back to a local version if the CDN server is down.
 
-- Enabling polyfilling of built-in modules (including [layered APIs](https://github.com/drufball/layered-apis))
+- Enabling polyfilling of, or other control over, built-in modules (including [layered APIs](https://github.com/drufball/layered-apis))
 
-- Sharing the notion of a "package" between JavaScript importing contexts and traditional URL contexts, such as `<img src="">` or `<link href="">`
+- Sharing the notion of a "package" between JavaScript importing contexts and traditional URL contexts, such as `fetch()`, `<img src="">` or `<link href="">`
 
-The mechanism for doing this is via a new `import:` URL scheme, plus a _module resolver map_ which can be used to control the resolution of `import:` URLs, or other URLs in a module-importing context. As an introductory example, consider the code
+The mechanism for doing this is via a new `import:` URL scheme, plus a _module resolver map_ which can be used to control the resolution of `import:` URLs. As an introductory example, consider the code
 
 ```js
 import moment from "moment";
@@ -47,13 +47,13 @@ Given an `import:` URL _url_ and a base URL _baseURL_, we can **resolve the `imp
 
 1. Let _path_ be _url_'s path component.
 1. If _path_ starts with `/`, `./`, or `../`, then
-  1. Let _resolved_ be the result of resolving _path_ relative to _baseURL_.
-  1. If the package name map contains an entry for _resolved_, return that entry's value.
-  1. Otherwise, return _resolved_.
+    1. Let _resolved_ be the result of resolving _path_ relative to _baseURL_.
+    1. If the package name map contains an entry for _resolved_, return that entry's value.
+    1. Otherwise, return _resolved_.
 1. Otherwise,
-  1. If the package name map contains an entry for _path_, return that entry's value.
-  1. If _path_ specifies a built-in module, return _url_.
-  1. Otherwise, return null.
+    1. If the package name map contains an entry for _path_, return that entry's value.
+    1. If _path_ specifies a built-in module, return _url_.
+    1. Otherwise, return null.
 
 _TODO: this is more formal than I'd like to be at this point in the document. Can I explain it simpler, and leave the algorithm for later? The algorithm also needs to get more complex to handle fallbacks._
 
