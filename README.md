@@ -1,25 +1,32 @@
-# Package name maps
+# Module import maps
 
-_Or, how to solve the web's "bare import specifier" problem_
+_Or, how to control the behavior of JavaScript imports_
 
 ## The basic idea
 
-This proposal makes importing JavaScript modules via "bare import specifiers" work, using an ahead-of-time computed mapping. For example, consider the code
+This proposal allows control over what URLs get fetched by JavaScript `import` statements and `import()` expressions, and allows this mapping to be reused in non-import contexts. This solves a variety of important use cases, such as:
+
+- Allowing "bare import specifiers", such as `import moment from "moment"`, to work.
+
+- Providing fallback resolution, so that `import $ from "jquery"` can try to go to a CDN first, but fall back to a local version if the CDN server is down.
+
+- Enabling polyfilling of built-in modules (including [layered APIs](https://github.com/drufball/layered-apis))
+
+- Sharing the notion of a "package" between JavaScript importing contexts and traditional URL contexts, such as `<img src="">` or `<link href="">`
+
+The mechanism for doing this is via a new `import:` URL scheme, plus a _module resolver map_ which can be used to control the resolution of `import:` URLs, or other URLs in a module-importing context. As an introductory example, consider the code
 
 ```js
 import moment from "moment";
 import { partition } from "lodash";
 ```
 
-Today, this throws, as such bare specifiers [are explicitly reserved](https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier). By supplying the browser with a _package name map_ of the following form
+Today, this throws, as such bare specifiers [are explicitly reserved](https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier). By supplying the browser with the following module resolver map
 
 ```json
 {
-  "path_prefix": "/node_modules",
-  "packages": {
-    "moment": { "main": "src/moment.js" },
-    "lodash": { "path": "lodash-es", "main": "lodash.js" }
-  }
+  "moment": "/node_modules/src/moment.js",
+  "lodash": "/node_modules/src/lodash-es/lodash.js"
 }
 ```
 
@@ -30,7 +37,162 @@ import moment from "/node_modules/moment/src/moment.js";
 import { partition } from "/node_modules/lodash-es/lodash.js";
 ```
 
-## Background
+## The proposal
+
+### `import:` URLs
+
+`import:` is a new URL scheme which is reserved for purposes related to JavaScript module resolution. As non-[special](https://url.spec.whatwg.org/#special-scheme) URLs, `import:` URLs just consist of two parts: the leading `import:`, and the following [path](https://url.spec.whatwg.org/#concept-url-path) component. (This is the same as `blob:` or `data:` URLs.)
+
+Given an `import:` URL _url_ and a base URL _baseURL_, we can **resolve the `import:` URL** with the following algorithm:
+
+1. Let _path_ be _url_'s path component.
+1. If _path_ starts with `/`, `./`, or `../`, then
+  1. Let _resolved_ be the result of resolving _path_ relative to _baseURL_.
+  1. If the package name map contains an entry for _resolved_, return that entry's value.
+  1. Otherwise, return _resolved_.
+1. Otherwise,
+  1. If the package name map contains an entry for _path_, return that entry's value.
+  1. If _path_ specifies a built-in module, return _url_.
+  1. Otherwise, return null.
+
+_TODO: this is more formal than I'd like to be at this point in the document. Can I explain it simpler, and leave the algorithm for later? The algorithm also needs to get more complex to handle fallbacks._
+
+Some readers will notice the similarity to today's [module specifier resolution algorithm](https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier), with the special handling of `/`, `./`, and `../`. Indeed, if we ignore all the package name map steps for now, we'll see that this gives us a nice tidy way of doing [URL resolution relative to the module](https://github.com/whatwg/html/issues/3871): instead of
+
+```js
+const response = await fetch(new URL('../hamsters.jpg', import.meta.url).href);
+```
+
+we can just do
+
+```js
+const response = await fetch('import:../hamsters.jpg');
+```
+
+### Module resolution modifications
+
+In fact, we propose to reframe the existing module resolution algorithm in terms of `import:` URLs. It becomes, simply:
+
+1. Return the result of resolving the import URL given by `import:` + _specifier_ against _baseURL_.
+
+In othre words, `import` statements and `import()` expressions are now much more like every other part of the platform that loads resources, like `fetch()` or `<script src="">`: they operate on URLs. The only difference is that, for convenience, you omit the leading `import:`.
+
+### The module resolver map
+
+With this stage set, we can explain the module resolver map.
+
+A module resolver map is a structure, represented as JSON, which gives a declarative way of modifying the resolution of `import:` URLs, per the above algorithm.
+
+If you are surprised by this choice of solution, you may want to briefly visit the ["Alternatives considered"](#alternatives-considered) section to read up on why we think this is the best path.
+
+We explain its features and use cases here via a series of examples.
+
+#### Bare import specifiers
+
+As noted above, a module resolver map of
+
+```json
+{
+  "moment": "/node_modules/src/moment.js",
+  "lodash": "/node_modules/src/lodash-es/lodash.js"
+}
+```
+
+gives bare import specifier support in JavaScript code:
+
+```js
+import moment from "moment";
+import("lodash").then(_ => ...);
+```
+
+#### Packages and `import:` URLs
+
+Equipped with our new understanding of how this is all based on `import:` URLs, we see that we can use the module resolver map to make `import:` URLs that would be useful in more contexts than just JavaScript `import` statements. For example, consider a widget package that contains not only a JavaScript module, but also CSS themes, and corresponding images. You could configure a module resolver map like
+
+```json
+{
+  "widget": "/node_modules/widget/index.mjs",
+  "widget/themes/light": "/node_modules/widget/themes/light.css",
+  "widget/assets/back": "/node_modules/widget/assets/back.svg"
+}
+```
+
+and then do
+
+```html
+<link rel="stylesheet" href="import:widget/themes/light">
+<script src="import:widget"></script>
+```
+
+or
+
+```css
+.back-button {
+  background: url('import:widget/assets/back');
+}
+```
+
+#### Submodules
+
+Some libraries are delivered as packages containing multiple modules: a main module, usually referenced by the package name (e.g. `import "lodash"`), and submodules, which are referenced by a specifier derived from the package name (e.g. `import "lodash/fp"`).
+
+To get this experience on the web, we'd use a module resolver map like
+
+```json
+{
+  "lodash": "/node_modules/src/lodash-es/lodash.js",
+  "lodash/fp": "/node_modules/src/lodash-es/fp.js"
+}
+```
+
+That is, we'd explicitly list out each submodule.
+
+#### Fallbacks
+
+Consider the case of wanting to use a CDN's copy of a library, but fall back to a local copy if the CDN is unavailable. Today this is often accomplished via [terrible `document.write()`-using sync-script-loading hacks](https://www.hanselman.com/blog/CDNsFailButYourScriptsDontHaveToFallbackFromCDNToLocalJQuery.aspx). With module resolver maps providing a first-class way of controlling module resolution, we can do better.
+
+To provide fallbacks, use an array instead of a string for the right-hand side of your mapping:
+
+```json
+{
+  "jquery": [
+    "https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js",
+    "/node_modules/jquery/dist/jquery.js"
+  ]
+}
+```
+
+In this case, any references to `import:query` will first try to fetch the CDN URL, but if that fails, fall back to the copy in `/node_modules/`. (This fallback process will happen only once, and the choice will be cached for all future `import:` URL resolutions.)
+
+#### Scoping
+
+TODO this went missing. Not even sure what the format is now that we're more flat. Maybe do [#51](https://github.com/domenic/package-name-maps/issues/51)?
+
+#### Built-in module cases
+
+When built-in modules enter the browser, there are several important things people will want to be able to control about how they load. Module resolver maps provide the tools to do so.
+
+##### Provide polyfills for when a built-in module is not present
+
+_See also [drufball/layered-apis#34](https://github.com/drufball/layered-apis/issues/34) user story (B)_
+
+TODO
+
+##### Provide "fall-forwards" to built-in modules
+
+_See also [drufball/layered-apis#34](https://github.com/drufball/layered-apis/issues/34) user story (C)_
+
+TODO
+
+##### Override or restrict access to built-in modules
+
+TODO
+
+----
+
+# Below here is old stuff that needs triaging
+
+### Appendix: bare module specifier motivation
 
 Web developers with experience with pre-ES2015 module systems, such as CommonJS (either in Node or bundled using webpack/browserify for the browser), are used to being able to import modules using a simple syntax:
 
@@ -51,12 +213,6 @@ In such systems, these bare import specifiers of `"jquery"` or `"lodash"` are ma
 The main benefit of this system is that it allows easy coordination across the ecosystem. Anyone can write a module and include an import statement using a package's well-known name, and let the Node.js runtime or their build-time tooling take care of translating it into an actual file on disk (including figuring out versioning considerations).
 
 Today, many web developers are even using JavaScript's native module syntax, but combining it with bare import specifiers, thus making their code unable to run on the web without per-application, ahead-of-time modification. We'd like to solve that, and bring these benefits to the web.
-
-## Our solution: package name maps
-
-A package name map is a structure, represented as JSON, which contains all the information necessary to resolve bare import specifiers across the scope of a web app.
-
-If you are surprised by this choice of solution, you may want to briefly visit the ["Alternatives considered"](#alternatives-considered) section to read up on why we think this is the best path.
 
 ### Installing a package name map
 
