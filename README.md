@@ -6,9 +6,9 @@ _Or, how to control the behavior of JavaScript imports_
 
 This proposal allows control over what URLs get fetched by JavaScript `import` statements and `import()` expressions, and allows this mapping to be reused in non-import contexts. This solves a variety of important use cases, such as:
 
-- Allowing "bare import specifiers", such as `import moment from "moment"`, to work.
+- Allowing "bare import specifiers", such as `import moment from "moment"`, to work
 
-- Providing fallback resolution, so that `import $ from "jquery"` can try to go to a CDN first, but fall back to a local version if the CDN server is down.
+- Providing fallback resolution, so that `import $ from "jquery"` can try to go to a CDN first, but fall back to a local version if the CDN server is down
 
 - Enabling polyfilling of, or other control over, built-in modules (including [layered APIs](https://github.com/drufball/layered-apis))
 
@@ -37,162 +37,15 @@ import moment from "/node_modules/moment/src/moment.js";
 import { partition } from "/node_modules/lodash-es/lodash.js";
 ```
 
-## The proposal
-
-### `import:` URLs
-
-`import:` is a new URL scheme which is reserved for purposes related to JavaScript module resolution. As non-[special](https://url.spec.whatwg.org/#special-scheme) URLs, `import:` URLs just consist of two parts: the leading `import:`, and the following [path](https://url.spec.whatwg.org/#concept-url-path) component. (This is the same as `blob:` or `data:` URLs.)
-
-Given an `import:` URL _url_ and a base URL _baseURL_, we can **resolve the `import:` URL** with the following algorithm:
-
-1. Let _path_ be _url_'s path component.
-1. If _path_ starts with `/`, `./`, or `../`, then
-    1. Let _resolved_ be the result of resolving _path_ relative to _baseURL_.
-    1. If the package name map contains an entry for _resolved_, return that entry's value.
-    1. Otherwise, return _resolved_.
-1. Otherwise,
-    1. If the package name map contains an entry for _path_, return that entry's value.
-    1. If _path_ specifies a built-in module, return _url_.
-    1. Otherwise, return null.
-
-_TODO: this is more formal than I'd like to be at this point in the document. Can I explain it simpler, and leave the algorithm for later? The algorithm also needs to get more complex to handle fallbacks._
-
-Some readers will notice the similarity to today's [module specifier resolution algorithm](https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier), with the special handling of `/`, `./`, and `../`. Indeed, if we ignore all the package name map steps for now, we'll see that this gives us a nice tidy way of doing [URL resolution relative to the module](https://github.com/whatwg/html/issues/3871): instead of
-
-```js
-const response = await fetch(new URL('../hamsters.jpg', import.meta.url).href);
-```
-
-we can just do
-
-```js
-const response = await fetch('import:../hamsters.jpg');
-```
-
-### Module resolution modifications
-
-In fact, we propose to reframe the existing module resolution algorithm in terms of `import:` URLs. It becomes, simply:
-
-1. Return the result of resolving the import URL given by `import:` + _specifier_ against _baseURL_.
-
-In othre words, `import` statements and `import()` expressions are now much more like every other part of the platform that loads resources, like `fetch()` or `<script src="">`: they operate on URLs. The only difference is that, for convenience, you omit the leading `import:`.
-
-### The module resolver map
-
-With this stage set, we can explain the module resolver map.
-
-A module resolver map is a structure, represented as JSON, which gives a declarative way of modifying the resolution of `import:` URLs, per the above algorithm.
-
-If you are surprised by this choice of solution, you may want to briefly visit the ["Alternatives considered"](#alternatives-considered) section to read up on why we think this is the best path.
-
-We explain its features and use cases here via a series of examples.
-
-#### Bare import specifiers
-
-As noted above, a module resolver map of
-
-```json
-{
-  "moment": "/node_modules/src/moment.js",
-  "lodash": "/node_modules/src/lodash-es/lodash.js"
-}
-```
-
-gives bare import specifier support in JavaScript code:
-
-```js
-import moment from "moment";
-import("lodash").then(_ => ...);
-```
-
-#### Packages and `import:` URLs
-
-Equipped with our new understanding of how this is all based on `import:` URLs, we see that we can use the module resolver map to make `import:` URLs that would be useful in more contexts than just JavaScript `import` statements. For example, consider a widget package that contains not only a JavaScript module, but also CSS themes, and corresponding images. You could configure a module resolver map like
-
-```json
-{
-  "widget": "/node_modules/widget/index.mjs",
-  "widget/themes/light": "/node_modules/widget/themes/light.css",
-  "widget/assets/back": "/node_modules/widget/assets/back.svg"
-}
-```
-
-and then do
+You would also be able to use these mappings in other contexts via the `import:` URL scheme, e.g.
 
 ```html
-<link rel="stylesheet" href="import:widget/themes/light">
-<script src="import:widget"></script>
+<link rel="modulepreload" href="import:lodash">
 ```
 
-or
+## Background
 
-```css
-.back-button {
-  background: url('import:widget/assets/back');
-}
-```
-
-#### Submodules
-
-Some libraries are delivered as packages containing multiple modules: a main module, usually referenced by the package name (e.g. `import "lodash"`), and submodules, which are referenced by a specifier derived from the package name (e.g. `import "lodash/fp"`).
-
-To get this experience on the web, we'd use a module resolver map like
-
-```json
-{
-  "lodash": "/node_modules/src/lodash-es/lodash.js",
-  "lodash/fp": "/node_modules/src/lodash-es/fp.js"
-}
-```
-
-That is, we'd explicitly list out each submodule.
-
-#### Fallbacks
-
-Consider the case of wanting to use a CDN's copy of a library, but fall back to a local copy if the CDN is unavailable. Today this is often accomplished via [terrible `document.write()`-using sync-script-loading hacks](https://www.hanselman.com/blog/CDNsFailButYourScriptsDontHaveToFallbackFromCDNToLocalJQuery.aspx). With module resolver maps providing a first-class way of controlling module resolution, we can do better.
-
-To provide fallbacks, use an array instead of a string for the right-hand side of your mapping:
-
-```json
-{
-  "jquery": [
-    "https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js",
-    "/node_modules/jquery/dist/jquery.js"
-  ]
-}
-```
-
-In this case, any references to `import:query` will first try to fetch the CDN URL, but if that fails, fall back to the copy in `/node_modules/`. (This fallback process will happen only once, and the choice will be cached for all future `import:` URL resolutions.)
-
-#### Scoping
-
-TODO this went missing. Not even sure what the format is now that we're more flat. Maybe do [#51](https://github.com/domenic/package-name-maps/issues/51)?
-
-#### Built-in module cases
-
-When built-in modules enter the browser, there are several important things people will want to be able to control about how they load. Module resolver maps provide the tools to do so.
-
-##### Provide polyfills for when a built-in module is not present
-
-_See also [drufball/layered-apis#34](https://github.com/drufball/layered-apis/issues/34) user story (B)_
-
-TODO
-
-##### Provide "fall-forwards" to built-in modules
-
-_See also [drufball/layered-apis#34](https://github.com/drufball/layered-apis/issues/34) user story (C)_
-
-TODO
-
-##### Override or restrict access to built-in modules
-
-TODO
-
-----
-
-# Below here is old stuff that needs triaging
-
-### Appendix: bare module specifier motivation
+### Bare specifiers
 
 Web developers with experience with pre-ES2015 module systems, such as CommonJS (either in Node or bundled using webpack/browserify for the browser), are used to being able to import modules using a simple syntax:
 
@@ -213,6 +66,273 @@ In such systems, these bare import specifiers of `"jquery"` or `"lodash"` are ma
 The main benefit of this system is that it allows easy coordination across the ecosystem. Anyone can write a module and include an import statement using a package's well-known name, and let the Node.js runtime or their build-time tooling take care of translating it into an actual file on disk (including figuring out versioning considerations).
 
 Today, many web developers are even using JavaScript's native module syntax, but combining it with bare import specifiers, thus making their code unable to run on the web without per-application, ahead-of-time modification. We'd like to solve that, and bring these benefits to the web.
+
+### Built-in modules
+
+When considering the introduction of built-in modules to the web, e.g. [via TC39](https://github.com/tc39/proposal-javascript-standard-library) or [via web standards](https://github.com/drufball/layered-apis), we need to ensure that we do not lose any of the important features we have today when introducing features via new globals. Notably, these include:
+
+- Polyfilling: the ability to supply a polyfill module that acts as the built-in one
+- Virtualization: the ability to wrap, extend, or remove access to the built-in module
+
+Both of these capabilities are easy to achieve with globals, but without some mechanism for modifying module resolution, they are not possible for modules (including built-in modules). The module import maps proposal provides that mechanism.
+
+Note that these use cases are complicated by the need to support browsers without module import map support. More on that below.
+
+## The proposal
+
+### `import:` URLs and the module resolver map
+
+`import:` is a new URL scheme which is reserved for purposes related to JavaScript module resolution. As non-[special](https://url.spec.whatwg.org/#special-scheme) URLs, `import:` URLs just consist of two parts: the leading `import:`, and the following [path](https://url.spec.whatwg.org/#concept-url-path) component. (This is the same as `blob:` or `data:` URLs.)
+
+The behavior of `import:` URLs is controlled by the _module resolver map_, which is a JSON structure that gives a declarative way of modifying the resolution of `import:` URLs, per the above algorithm. (If you are surprised by the use of a declarative solution, you may want to briefly visit the ["Alternatives considered"](#alternatives-considered) section to read up on why we think this is the best path.)
+
+In addition to being usable in all the places a URL normally is available, such as `fetch()`, `<link>`, `<img>`, etc., `import:` URLs are also made to underpin specifier resolution into JavaScript modules. That is, any import statements such as
+
+```js
+import "./x";
+import "../y";
+import "/z";
+import "w";     // bare specifier!
+```
+
+will resolve the URLs `import:./x`, `import:../y`, `import:/z`, and `import:w`, using the module import map where applicable. This means module import maps have complete control over specifier resolution—both "bare" and "URL-like".
+
+We explain the features of the module resolver map via a series of examples.
+
+### Bare specifier examples
+
+#### Bare specifiers for JavaScript modules
+
+As mentioned in the introduction,
+
+```json
+{
+  "moment": "/node_modules/src/moment.js",
+  "lodash": "/node_modules/src/lodash-es/lodash.js"
+}
+```
+
+gives bare import specifier support in JavaScript code:
+
+```js
+import moment from "moment";
+import("lodash").then(_ => ...);
+```
+
+and in HTML:
+
+```html
+<link rel="modulepreload" href="import:moment">
+```
+
+#### Bare specifiers for other resources
+
+Because `import:` URLs can be used anywhere, they aren't only applicable to JavaScript imports. For example, consider a widget package that contains not only a JavaScript module, but also CSS themes, and corresponding images. You could configure a module resolver map like
+
+```json
+{
+  "widget": "/node_modules/widget/index.mjs",
+  "widget-light": "/node_modules/widget/themes/light.css",
+  "widget-back-button": "/node_modules/widget/assets/back.svg"
+}
+```
+
+and then do
+
+```html
+<link rel="stylesheet" href="import:widget-light">
+<script type="module" src="import:widget"></script>
+```
+
+or
+
+```css
+.back-button {
+  background: url('import:widget-back-button');
+}
+```
+
+Things brings the name-coordination benefits of JavaScript "packages" to all web resources.
+
+(Does this use of separate `widget`, `widget-light`, and `widget-back-button` entries seem weird to you? Does it seem like they'd be better grouped under some sort of "package"? Read on to our next example...)
+
+#### "Packages" via trailing slashes
+
+It's common in the JavaScript ecosystem to have a package (in the sense of [npm](https://www.npmjs.com/)) contain multiple modules, or other files. For such cases, we want to map a prefix in the `import:`-URL space, onto another prefix in the fetchable-URL space.
+
+Module import maps do this by giving special meaning to mappings that end with a trailing slash. Thus, a map like
+
+```json
+{
+  "moment": "/node_modules/moment/src/moment.js",
+  "moment/": "/node_modules/moment/src/",
+  "lodash": "/node_modules/lodash-es/lodash.js",
+  "lodash/": "/node_modules/lodash-es/"
+}
+```
+
+would allow not only importing the main modules like
+
+```js
+import moment from "moment";
+import _ from "lodash";
+```
+
+but also non-main modules, e.g.
+
+```js
+import localeData from "moment/locale/zh-cn.js";
+import fp from "lodash/fp.js";
+```
+
+_Note how unlike some Node.js usages, we include the ending `.js` here. File extensions are required in browsers; unlike in Node, [we do not have the luxury](#the-nodejs-module-resolution-algorithm) of trying multiple file extensions until we find a good match. Fortunately, including file extensions also works in Node.js; that is, if everyone uses file extensions for submodules, their code will work in both environments._
+
+As usual, since the module import map affects `import:` resolution generally, this package concept can be used for other resources, and in other contexts.
+
+<details>
+<summary>Here's our previous example converted to use packages:</summary>
+
+```json
+{
+  "widget": "/node_modules/widget/index.mjs",
+  "widget/": "/node_modules/widget/",
+}
+```
+
+```html
+<link rel="stylesheet" href="import:widget/themes/light.css">
+<script type="module" src="import:widget"></script>
+```
+
+```css
+.back-button {
+  background: url('import:widget/assets/back.svg');
+}
+```
+</details>
+
+### Fallback examples
+
+#### For user-supplied packages
+
+Consider the case of wanting to use a CDN's copy of a library, but fall back to a local copy if the CDN is unavailable. Today this is often accomplished via [terrible `document.write()`-using sync-script-loading hacks](https://www.hanselman.com/blog/CDNsFailButYourScriptsDontHaveToFallbackFromCDNToLocalJQuery.aspx). With module resolver maps providing a first-class way of controlling module resolution, we can do better.
+
+To provide fallbacks, use an array instead of a string for the right-hand side of your mapping:
+
+```json
+{
+  "jquery": [
+    "https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js",
+    "/node_modules/jquery/dist/jquery.js"
+  ]
+}
+```
+
+In this case, any references to `import:query` will first try to fetch the CDN URL, but if that fails, fall back to the copy in `/node_modules/`. (This fallback process will happen only once, and the choice will be cached for all future `import:` URL resolutions.)
+
+#### For built-in modules, in module-import-map-supporting browsers
+
+When a browser supports module import maps, we can use the same principle as the above example to support fallbacks for built-in modules.
+
+For example, consider the following package name map, which supplies a polyfill fallback for [async local storage](https://domenic.github.io/async-local-storage/):
+
+```json
+{
+  "@std/async-local-storage": [
+    "import:@std/async-local-storage",
+    "/node_modules/als-polyfill/index.mjs"
+  ]
+}
+```
+
+Now, statements like
+
+```js
+import { StorageArea } from "@std/async-local-storage";
+```
+
+will first try to resolve to `import:@std/async-local-storage`, i.e. the browser's built-in implementation of async local storage. If fetching that URL fails, because the browser does not implement async local storage, then instead it will fetch the polyfill, at `/node_modules/als-polyfill/index.mjs`.
+
+_Potential issue: right now we require the right-hand side to be a URL. But this means you have to use the `import:` prefix on the right-hand side, and not on the left-hand side. This seems a bit confusing. Also, it opens us up to footguns: if you forget the `import:` prefix, then you're looking for the relative URL `@std/async-local-storage` (i.e., `./@std/async-local-storage`). Maybe the right hand side should be some fuzzier concept, e.g. "absolute URL or `./`-prefixed or `../`-prefixed or `/`-prefixed or built-in module specifier"? Seems less elegant, but perhaps more ergonomic._
+
+#### For built-in modules, in browsers without module import maps
+
+The goal of the previous example is to use a polyfill in older browsers, but the built-in module in newer browsers. But it falls down in the case of browsers that are old enough to not support module import maps at all. (That is, all of today's currently-shipping browsers.) In such cases, the statement `import { StorageArea } from "@std/async-local-storage"` will always fail, with no chance to remap it.
+
+How can we write code that uses a polyfill in today's browsers, but uses built-in modules in future browsers that support them? We do this by changing our import statement to import the _polyfill_'s URL:
+
+```js
+import { StorageArea } from "/node_modules/als-polyfill/index.mjs";
+```
+
+and then remapping the polyfill to the built-in module for module-import-map-supporting browsers:
+
+```json
+{
+  "/node_modules/als-polyfill/index.mjs": [
+    "import:@std/async-local-storage",
+    "/node_modules/als-polyfill/index.mjs"
+  ]
+}
+```
+
+With this mapping, each class of browser behaves as desired, for our above import statement:
+
+- Browsers that do not support module import maps will receive the polyfill.
+- Browsers that support module import maps, but do not support async local storage, will end up with a mapping from the polyfill URL to itself, and so will receive the polyfill anyway.
+- Browsers that support both module import maps and async local storage will end up with a mapping from the polyfill URL to `import:@std/async-local-storage`, and so will receive the built-in module.
+
+Note how we're using a capability here that we haven't explored in previous examples: remapping imports of "URL-like" specifiers, not just bare specifiers. But it works exactly the same. Previous examples changed the resolution of URLs like `import:lodash`, and thus changed the meaning of `import "lodash"`. Here we're changing the resolution of `import:/node_modules/als-polyfill/index.mjs`, and thus changing the meaning of `import "/node_modules/als-polyfill/index.mjs"`.
+
+### Scoping examples
+
+TODO: Not even sure what the format is now that we're more flat. Maybe do [#51](https://github.com/domenic/package-name-maps/issues/51)?
+
+### Virtualization examples
+
+As mentioned above, it's important to be able to wrap, extend, or remove access to built-in modules, the same way you can do with globals. The following examples show how to do this.
+
+Many of these examples become more interesting, or useful, when combined with [scoping](#scoping), so that they only apply to some subset of your application. See that section for more details.
+
+_Note: All of the following examples can apply to non built-in modules too. However, those cases are less interesting, as non built-in modules are already under the control of the application author. They can again become more interesting when combined with [scoping](#scoping)._
+
+#### Denying access to a built-in module
+
+Although it is drastic and fairly rare, sometimes it is desirable to remove access to certain capabilities from your application. With globals, this can be done via code such as
+
+```js
+delete self.WebSocket;
+```
+
+With module import maps, you can restrict access by mapping a built-in module to the special module `@std/blank`:
+
+```json
+{
+  "@std/async-local-storage": "import:@std/blank"
+}
+```
+
+This module has no exports, so any attempts to import from it will fail:
+
+```js
+import { Storage } from "@std/async-local-storage"; // throws, since @std/blank has no exports
+```
+
+_Question: should we introduce a module, e.g. `@std/thrower`, which just throws an exception? The difference would be in cases like `import "@std/async-local-storage"`, where you wouldn't get an exception with `@std/blank` because you're not asking for any imports. This is pretty edge-casey._
+
+#### Wrapping a built-in module
+
+TODO: OK scoping needs to come first
+
+#### Extending a built-in module
+
+TODO: OK scoping needs to come first
+
+----
+----
+----
+
+# Below here is old stuff that needs triaging
 
 ### Installing a package name map
 
@@ -252,65 +372,6 @@ _Some have expressed a desire for multiple package maps, e.g. specified as an at
 Since an application's package name map changes the resolution algorithm for every module in the module map, they are not impacted by whether a module's source text was originally from a cross-origin URL. If you load a module from a CDN that uses bare import specifiers, you'll need to know ahead of time what bare import specifiers that module adds to your app, and include them in the package name map. (That is, you need to know what all of your application's transitive dependencies are.) It's important that control of which URLs are use for each package stay in control of the application author, so they can holistically manage versioning and sharing of modules.
 
 ### Example package name maps
-
-#### Basic URL mapping
-
-An un-fancy package name map would be as follows:
-
-```json
-{
-  "packages": {
-    "moment": { "path": "/node_modules/moment", "main": "src/moment.js" },
-    "lodash": { "path": "/node_modules/lodash-es", "main": "lodash.js" }
-  }
-}
-```
-
-This would produce the following mappings:
-
-|Specifier|Referrer|Resulting URL                     |
-|---------|--------|----------------------------------|
-|moment   |(any)   |/node_modules/moment/src/moment.js|
-|moment/* |(any)   |/node_modules/moment/*            |
-|lodash   |(any)   |/node_modules/lodash-es/lodash.js |
-|lodash/* |(any)   |/node_modules/lodash-es/*         |
-
-Thus, in addition to the basic cases like
-
-```js
-import moment from "moment";
-import _ from "lodash";
-```
-
-one would be able to also to import non-main modules in the package, e.g.
-
-```js
-import localeData from "moment/src/locale/zh-cn.js";
-import fp from "lodash/fp.js";
-```
-
-_Note how unlike some Node.js usages, we include the ending `.js` here. File extensions are required in browsers; unlike in Node, [we do not have the luxury](#the-nodejs-module-resolution-algorithm) of trying multiple file extensions until we find a good match. Fortunately, including file extensions also works in Node.js; that is, if everyone uses file extensions for submodules, their code will work in both environments._
-
-#### Using `"path_prefix"` and the default `"path"`
-
-The above package name map can equivalently be written like so:
-
-```json
-{
-  "path_prefix": "/node_modules",
-  "packages": {
-    "moment": { "main": "src/moment.js" },
-    "lodash": { "path": "lodash-es", "main": "lodash.js" }
-  }
-}
-```
-
-- `"path_prefix"` gets used as the initial path segment for the resulting URL.
-- `"path"` defaults to the package name, and can be omitted when they are the same.
-
-_We've also considered defaulting `"main"` to `packagename.js` or `index.js`, but this would basically build a default file extension for JavaScript modules into the web, which is troublesome. Discuss in [#3](https://github.com/domenic/package-name-maps/issues/3)._
-
-_Another potential shortening is to allow e.g. `"src/moment.js"` as a shortcut for `{ "main": "src/moment.js" }`. The only downside here is that it complicates the data model by introducing a union type that needs to be normalized away. Discuss in [#4](https://github.com/domenic/package-name-maps/issues/4)._
 
 #### Scoping package resolution
 
@@ -453,61 +514,44 @@ Several times now it's come up that people desire to supply metadata for each mo
 
 The package name map is not that manifest file. It is specifically geared toward packages and bare import specifiers, leaving the rest of the application's modules (i.e. those imported via relative specifiers or absolute URLs) alone. A solution for per-module metadata needs to be encoded in a manifest file that cares about all modules, not in one that cares only about this specific case of bare import specifiers. Indeed, likely such a manifest would care about more than just JavaScript modules; all proposed metadata so far has been applicable to any sort of resource.
 
-### Supplying fallbacks for host-supplied ("standard library") packages
+## More scratchwork
 
-A few efforts, such as [layered web APIs](https://github.com/drufball/layered-apis) or Keith's [module fallback imports](https://github.com/kmiller68/module-fallback-imports/) proposal, are geared toward allowing fallback to a polyfill when a host-supplied module is not present. Both of these proposals do so by modifying the `import` statement, either by using a special specifier syntax, or modifying the `import` statement syntax.
 
-At least for the case of packages (including host-provided packages), this proposal gives an alternative: we could specify fallback URLs inside the package name map. For example,
+Given an `import:` URL _url_ and a base URL _baseURL_, we can **resolve the `import:` URL** with the following algorithm:
 
-```json
-{
-  "packages": {
-    "moment": {
-      "path": "/node_modules/moment",
-      "main": "src/moment.js",
-      "fallbacks": [
-        { "path": "https://unpkg.com/moment@2.21.0" },
-        { "path": "https://backupcdn2.com/moment" }
-      ]
-    },
-    "std:async-local-storage": {
-      "fallbacks": [
-        { "path": "https://backupcdn3.com/async-local-storage", "main": "async-local-storage.js" },
-        { "path": "/node_modules/std-als-polyfill", "main": "index.js" }
-      ]
-    }
-  }
-}
-```
+1. Let _path_ be _url_'s path component.
+1. If _path_ starts with `/`, `./`, or `../`, then
+    1. Let _resolved_ be the result of resolving _path_ relative to _baseURL_.
+    1. If the package name map contains an entry for _resolved_, return that entry's value.
+    1. Otherwise, return _resolved_.
+1. Otherwise,
+    1. If the package name map contains an entry for _path_, return that entry's value.
+    1. If _path_ specifies a built-in module, return _url_.
+    1. Otherwise, return null.
 
-The advantage of this approach, over specifying the fallback at the import site, is that it ensures every import in the application uses the _same_ fallback behavior. With specifying at the import site, it's possible for one part of the application to specify the fallback as polyfill A, whereas another part of the application specifies polyfill B, and now both of them are active on your page, bloating your application and potentially causing subtle incompatibilities.
+_TODO: this is more formal than I'd like to be at this point in the document. Can I explain it simpler, and leave the algorithm for later? The algorithm also needs to get more complex to handle fallbacks._
 
-Note that the module fallback imports syntax proposal is more general because it allows fallback for non-packages. If that's required, then the package name map is not a good fit, as discussed in the previous section on per-module metadata.
-
-### Referencing host-supplied packages by their fallback URL
-
-This concept is essentially an inversion of the previous one. The idea is that you want to have a reference like
+Some readers will notice the similarity to today's [module specifier resolution algorithm](https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier), with the special handling of `/`, `./`, and `../`. Indeed, if we ignore all the package name map steps for now, we'll see that this gives us a nice tidy way of doing [URL resolution relative to the module](https://github.com/whatwg/html/issues/3871): instead of
 
 ```js
-import { storage } from "https://backupcdn3.com/async-local-storage/async-local-storage.js";
+const response = await fetch(new URL('../hamsters.jpg', import.meta.url).href);
 ```
 
-but in browsers that both implement package name maps and implement the host-supplied `std:async-local-storage` package, instead import the built-in version.
+we can just do
 
-This "inverted fallback" is more backward-compatible than the previous version, where the page author used `import "std:async-local-storage"` and relied on the package name map perform the fallback mapping. This is because it has the desired behavior (loading the polyfill) even in browsers that don't implement package name maps at all.
-
-The syntax for this might be something like
-
-```json
-{
-  "replacements": {
-    "std:async-local-storage": {
-      "path": "https://backupcdn3.com/async-local-storage",
-      "main": "async-local-storage.js"
-    }
-  }
-}
+```js
+const response = await fetch('import:../hamsters.jpg');
 ```
+
+### Module resolution modifications
+
+In fact, we propose to reframe the existing module resolution algorithm in terms of `import:` URLs. It becomes, simply:
+
+1. Return the result of resolving the import URL given by `import:` + _specifier_ against _baseURL_.
+
+In othre words, `import` statements and `import()` expressions are now much more like every other part of the platform that loads resources, like `fetch()` or `<script src="">`: they operate on URLs. The only difference is that, for convenience, you omit the leading `import:`.
+
+
 
 ## Acknowledgments
 
