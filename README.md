@@ -91,10 +91,13 @@ The behavior of `import:` URLs is controlled by the _module import map_, which i
 In addition to being usable in all the places a URL normally is available, such as `fetch()`, `<link>`, `<img>`, etc., `import:` URLs are also made to underpin specifier resolution into JavaScript modules. That is, any import statements such as
 
 ```js
+// URL-like specifiers:
 import "./x";
 import "../y";
 import "/z";
-import "w";     // bare specifier!
+
+// Bare specifier:
+import "w";
 ```
 
 will resolve the URLs `import:./x`, `import:../y`, `import:/z`, and `import:w`, using the module import map where applicable. This means module import maps have complete control over specifier resolution—both "bare" and "URL-like".
@@ -158,7 +161,7 @@ or
 }
 ```
 
-Things brings the name-coordination benefits of JavaScript "packages" to all web resources.
+Things brings the name-coordination benefits of JavaScript's bare import specifiers to all web resources.
 
 (Does this use of separate `widget`, `widget-light`, and `widget-back-button` entries seem weird to you? Does it seem like they'd be better grouped under some sort of "package"? Read on to our next example...)
 
@@ -319,11 +322,11 @@ We support this use case in module import maps by allowing you to change the mea
 }
 ```
 
-(This is example is one of several [in the wild examples](https://github.com/domenic/package-name-maps/issues/5#issuecomment-374175653) provided by @zkat. Thanks, @zkat!)
+(This is example is one of several [in-the-wild examples](https://github.com/domenic/package-name-maps/issues/5#issuecomment-374175653) of multiple versions per application provided by @zkat. Thanks, @zkat!)
 
 With this mapping, inside any modules whose URLs start with `/node_modules/socksjs-client/`, the `import:querystringify` URL will refer to `/node_modules/socksjs-client/querystringify/index.js`. Whereas otherwise, the top-level mapping will ensure that `import:querystringify` refers to `/node_modules/querystringify/index.js`.
 
-_TODO: how does this work for non-`import` statement`/import()` expression contexts? Open an issue to discuss, then link to it._
+_TODO: how does this work for `import:` URLs generally, in non-`import` statement`/import()` expression contexts? Open an issue to discuss, then link to it._
 
 ### Virtualization examples
 
@@ -424,7 +427,7 @@ export { storage, StorageArea } from "@std/async-local-storage";
 export class SuperAwesomeStorageArea { ... };
 ```
 
-(Note: if we just wanted to add a new method to `StorageArea`, there's no need for a wrapper module or a module import map. We would just include a polyfill module that imported `StorageArea` and patched its `.prototype` property.)
+(Note: if we just wanted to add a new method to `StorageArea`, there's no need for a wrapper module or a module import map. We would just include a polyfill module that imported `StorageArea` and patched a new method onto `StorageArea.prototype`.)
 
 This same principle would apply for removing exports, if for some reason that was desirable.
 
@@ -458,9 +461,9 @@ TODO figure out the processing model in more detail. Ideas:
 - Talk a bit about combining multiple maps.
 - Talk about validation criteria.
 
-_We may be able to support more than one `<script type="packagemap">`, if the use cases are compelling enough and the merging process is simple enough. Discuss in [#14](https://github.com/domenic/package-name-maps/issues/14)._
+_We may be able to support more than one `<script type="importmap">`, if the use cases are compelling enough and the merging process is simple enough. Discuss in [#14](https://github.com/domenic/package-name-maps/issues/14)._
 
-_What do we do in workers? Probably `new Worker(someURL, { type: "module", packageMap: ... })`? Or should you set it from inside the worker? Should dedicated workers use their controlling document's map, either by default or always? Discuss in [#2](https://github.com/domenic/package-name-maps/issues/2)._
+_What do we do in workers? Probably `new Worker(someURL, { type: "module", importMap: ... })`? Or should you set it from inside the worker? Should dedicated workers use their controlling document's map, either by default or always? Discuss in [#2](https://github.com/domenic/package-name-maps/issues/2)._
 
 ### Scope
 
