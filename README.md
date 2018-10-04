@@ -26,8 +26,8 @@ Today, this throws, as such bare specifiers [are explicitly reserved](https://ht
 ```json
 {
   "modules": {
-    "moment": "/node_modules/src/moment.js",
-    "lodash": "/node_modules/src/lodash-es/lodash.js"
+    "moment": "/node_modules/moment/src/moment.js",
+    "lodash": "/node_modules/lodash-es/lodash.js"
   }
 }
 ```
@@ -102,6 +102,10 @@ import "w";
 
 will resolve the URLs `import:./x`, `import:../y`, `import:/z`, and `import:w`, using the module import map where applicable. This means module import maps have complete control over specifier resolution—both "bare" and "URL-like".
 
+In other words, `import` statements and `import()` expressions are now much more like every other part of the platform that loads resources, e.g. `fetch()` or `<script src="">`: they operate on URLs. The only difference is that, for convenience, you omit the leading `import:`.
+
+_What happens if you do `import "import:x"`? To be determined. We could make it fail, or make it recurse._
+
 We explain the features of the module import map via a series of examples.
 
 ### Bare specifier examples
@@ -113,8 +117,8 @@ As mentioned in the introduction,
 ```json
 {
   "modules": {
-    "moment": "/node_modules/src/moment.js",
-    "lodash": "/node_modules/src/lodash-es/lodash.js"
+    "moment": "/node_modules/moment/src/moment.js",
+    "lodash": "/node_modules/lodash-es/lodash.js"
   }
 }
 ```
@@ -303,7 +307,9 @@ With this mapping, each class of browser behaves as desired, for our above impor
 
 Note how we're using a capability here that we haven't explored in previous examples: remapping imports of "URL-like" specifiers, not just bare specifiers. But it works exactly the same. Previous examples changed the resolution of URLs like `import:lodash`, and thus changed the meaning of `import "lodash"`. Here we're changing the resolution of `import:/node_modules/als-polyfill/index.mjs`, and thus changing the meaning of `import "/node_modules/als-polyfill/index.mjs"`.
 
-### Scoping example
+### Scoping examples
+
+#### Multiple versions of the same module
 
 It is often the case that you want to use the same import specifier to refer to multiple versions of a single library, depending on who is importing them. This encapsulates the versions of each dependency in use, and avoids [dependency hell](http://npm.github.io/how-npm-works-docs/theory-and-design/dependency-hell.html) ([longer blog post](http://blog.timoxley.com/post/20772365842/node-js-npm-reducing-dependency-overheads)).
 
@@ -326,7 +332,46 @@ We support this use case in module import maps by allowing you to change the mea
 
 With this mapping, inside any modules whose URLs start with `/node_modules/socksjs-client/`, the `import:querystringify` URL will refer to `/node_modules/socksjs-client/querystringify/index.js`. Whereas otherwise, the top-level mapping will ensure that `import:querystringify` refers to `/node_modules/querystringify/index.js`.
 
-_TODO: how does this work for `import:` URLs generally, in non-`import` statement`/import()` expression contexts? Open an issue to discuss, then link to it._
+_Note: this sensitivity to the current script file in URL parsing is novel, and requires changes to the URL parser. See [the proto-spec](./spec.md#resolution) for details._
+
+#### Scope inheritance
+
+Scopes "inherit" from each other in an intentionally-simple manner, merging but overriding as they go. For example, the following package name map:
+
+```json
+{
+  "modules": {
+    "a": "/a-1.mjs",
+    "b": "/b-1.mjs",
+    "c": "/c-1.mjs"
+  },
+  "scopes": {
+    "/scope2/": {
+      "a": "/a-2.mjs"
+    },
+    "/scope2/scope3/": {
+      "a": "/a-3.mjs",
+      "b": "/b-3.mjs"
+    }
+  }
+}
+```
+
+would give the following resolutions:
+
+|Specifier|Referrer               |Resulting URL |
+|---------|-----------------------|--------------|
+|a        |/scope1/foo.mjs        |/a-1.mjs      |
+|b        |/scope1/foo.mjs        |/b-1.mjs      |
+|c        |/scope1/foo.mjs        |/c-1.mjs      |
+|         |                       |              |
+|a        |/scope2/foo.mjs        |/a-2.mjs      |
+|b        |/scope2/foo.mjs        |/b-1.mjs      |
+|c        |/scope2/foo.mjs        |/c-1.mjs      |
+|         |                       |              |
+|a        |/scope2/scope3/foo.mjs |/a-3.mjs      |
+|b        |/scope2/scope3/foo.mjs |/b-3.mjs      |
+|c        |/scope2/scope3/foo.mjs |/c-1.mjs      |
 
 ### Virtualization examples
 
@@ -454,14 +499,18 @@ You can install a module import map for your application using a `<script>` elem
 
 Because they affect all imports, any module import maps must be present and succesfully fetched before any module resolution is done. This means that module graph fetching, or any fetching of `import:` URLs, is blocked on module import map fetching.
 
-TODO figure out the processing model in more detail. Ideas:
+Similarly, attempting to add a new `<script type="importmap">` after any module graph fetching, or fetching of `import:` URLs, has started, is an error. The module import map will be ignored, and the `<script>` element will fire an error.
 
-- The moment any `import:` URLs, `import` statements, or `import()` expressions are encountered, the current realm is marked as "no more import maps allowed"
-- If any import maps are encountered, the current realm is marked as "fetching import maps"
-- Talk a bit about combining multiple maps.
-- Talk about validation criteria.
+Multiple `<script type="importmap">`s are allowed on the page. (See previous discussion in [#14](https://github.com/domenic/package-name-maps/issues/14).) They are merged by an intentionally-simple procedure, roughly equivalent to the JavaScript code
 
-_We may be able to support more than one `<script type="importmap">`, if the use cases are compelling enough and the merging process is simple enough. Discuss in [#14](https://github.com/domenic/package-name-maps/issues/14)._
+```js
+const result = {
+  modules: { ...a.modules, ...b.modules },
+  scopes: { ...a.scopes, ...b.scopes }
+};
+```
+
+See [the proto-spec](./spec.md) for more details on how this all works.
 
 _What do we do in workers? Probably `new Worker(someURL, { type: "module", importMap: ... })`? Or should you set it from inside the worker? Should dedicated workers use their controlling document's map, either by default or always? Discuss in [#2](https://github.com/domenic/package-name-maps/issues/2)._
 
@@ -536,24 +585,9 @@ The module import map _could_ be that manifest file. However, it may not be the 
 
 - All proposed metadata so far is applicable to any sort of resource, not just JavaScript modules. A solution should probably work at a more general level.
 
-## TODO move this scratchwork around
+## Module-relative URL resolution
 
-
-Given an `import:` URL _url_ and a base URL _baseURL_, we can **resolve the `import:` URL** with the following algorithm:
-
-1. Let _path_ be _url_'s path component.
-1. If _path_ starts with `/`, `./`, or `../`, then
-    1. Let _resolved_ be the result of resolving _path_ relative to _baseURL_.
-    1. If the package name map contains an entry for _resolved_, return that entry's value.
-    1. Otherwise, return _resolved_.
-1. Otherwise,
-    1. If the package name map contains an entry for _path_, return that entry's value.
-    1. If _path_ specifies a built-in module, return _url_.
-    1. Otherwise, return null.
-
-_TODO: this is more formal than I'd like to be at this point in the document. Can I explain it simpler, and leave the algorithm for later? The algorithm also needs to get more complex to handle fallbacks._
-
-Some readers will notice the similarity to today's [module specifier resolution algorithm](https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier), with the special handling of `/`, `./`, and `../`. Indeed, if we ignore all the package name map steps for now, we'll see that this gives us a nice tidy way of doing [URL resolution relative to the module](https://github.com/whatwg/html/issues/3871): instead of
+Another nice feature of `import:` URLs is that it gives us a solution for [URL resolution relative to the module](https://github.com/whatwg/html/issues/3871). Instead of
 
 ```js
 const response = await fetch(new URL('../hamsters.jpg', import.meta.url).href);
@@ -565,28 +599,13 @@ we can just do
 const response = await fetch('import:../hamsters.jpg');
 ```
 
-TODO this involves modifications either to the URL parser or to all URL resolution calls to look at some concept of "the current script base URL". That might be over-ambitious. But, we might need that to handle scopes anyway? Hmmmmm.
-
-### Module resolution modifications
-
-In fact, we propose to reframe the existing module resolution algorithm in terms of `import:` URLs. It becomes, simply:
-
-1. Return the result of resolving the import URL given by `import:` + _specifier_ against _baseURL_.
-
-In othre words, `import` statements and `import()` expressions are now much more like every other part of the platform that loads resources, like `fetch()` or `<script src="">`: they operate on URLs. The only difference is that, for convenience, you omit the leading `import:`.
-
-### Other TODOs
+## Other TODOs
 
 Talk about / prove out how we can conceptualize built-in modules as a built-in module import map.
 
 Ensure that this works even with some of the trickiness in the examples.
 
 Talk about recursive resolution of bare specifiers.
-
-Talk about how scopes do/don't affect each other. (I think the answer is: you inherit mappings from above, but you also override them, and when overriding them, the inherited ones aren't taken into account. So, straightforward `{ ...x, ... y }` basically.)
-
-Proto-spec for format/parser. More formal rules for slashes, prefix-matching, URL resolution, etc.
-
 
 ## Acknowledgments
 
