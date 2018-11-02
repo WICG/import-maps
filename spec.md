@@ -1,10 +1,10 @@
-# Module import maps proto-spec
+# Import maps proto-spec
 
 ## Installation
 
-### When module import maps can be encountered
+### When import maps can be encountered
 
-Each realm (environment settings object) has a boolean, **acquiring module import maps**. It is initially true.
+Each realm (environment settings object) has a boolean, **acquiring import maps**. It is initially true.
 
 The [internal module script graph fetching procedure](https://html.spec.whatwg.org/multipage/webappapis.html#internal-module-script-graph-fetching-procedure) flips the boolean to false. Practically speaking, this happens when:
 
@@ -14,35 +14,35 @@ The [internal module script graph fetching procedure](https://html.spec.whatwg.o
 
 Additionally, fetching any `import:` URLs will flip this boolean to false. (See below.)
 
-If a `<script type="importmap">` is encountered when _acquiring module import maps_ is false, then the developer has made an error. We should signal this at the least via the developer console, and probably also by firing an `error` event on the `<script type="importmap">` element.
+If a `<script type="importmap">` is encountered when _acquiring import maps_ is false, then the developer has made an error. We will signal this by firing an `error` event on the `<script type="importmap">` element, and implementations should also display the error in the developer console.
 
-### Acquiring module import maps
+### Acquiring import maps
 
-Encountering a `<script type="importmap">` while _acquiring module import maps_ is true will kick off a procedure roughly like this:
+Encountering a `<script type="importmap">` while _acquiring import maps_ is true will kick off a procedure roughly like this:
 
 1. If it's an external script (i.e. has a `src=""`), fetch it, using the usual "good defaults" of `<script type="module">`. (E.g., always UTF-8, "cors" mode, MIME type must match, ...)
   - What should be the MIME type? Let's say `application/json+importmap`? Maybe accept any JSON MIME type.
 1. Parse the result as JSON into a spec-level struct (see below). (Will need to solve [whatwg/infra#159](https://github.com/whatwg/infra/issues/159) as part of this.)
-1. Merge the resulting struct into our realm's **merged module import map** (see below).
+1. Merge the resulting struct into our realm's **merged import map** (see below).
 
-Any **ongoing fetches of module import maps** are noted, while ongoing, so that `import:` URL fetching can block on them (see below).
+Any **ongoing fetches of import maps** are noted, while ongoing, so that `import:` URL fetching can block on them (see below).
 
-### module import map spec structure
+### Import map spec structure
 
 A **specifier map** is a map of `import:` URLs to URLs.
 
-An **module import map** is a struct with two fields:
+An **import map** is a struct with two fields:
 
 - **modules**: a specifier map
 - **scopes**: a map of URLs to specifier maps
 
 Getting from JSON to this structure will involve some URL parsing and type validation.
 
-### Merging module import maps
+### Merging import maps
 
 We're looking to do the minimal thing that could work here. As such, I propose the following:
 
-Given two module import maps _A_ and _B_, the merged module import map is a new module import map whose modules are the result of merging _A_'s modules and _B_'s modules, and whose scopes are the result of merging _A_'s scopes and _B_'s scopes. Here, merging two maps means appending their entries to each other, with any conflicting keys from the first map removed.
+Given two import maps _A_ and _B_, the merged import map is a new import map whose modules are the result of merging _A_'s modules and _B_'s modules, and whose scopes are the result of merging _A_'s scopes and _B_'s scopes. Here, merging two maps means appending their entries to each other, with any conflicting keys from the first map removed.
 
 Example:
 
@@ -72,13 +72,13 @@ Note that we do not introspect the scopes. If there's two conflicting definition
 
 ## Resolution
 
-### Modifications to the URL parser for `import:` URLs??
+### Modifications to the URL parser for `import:` URLs
 
 #### Wait, what?
 
-It would be _nice_ if we could modify the URL parser. However, it's unclear whether it's "worth it" to disturb such a foundational piece of the ecosystem, meant to be shared across not only the web platform, but the whole internet, for these module-specific purposes.
+The URL parser is a foundational piece of the ecosystem, meant to be shared across not only the web platform, but the whole internet. So changing it should not be done lightly.
 
-My argument for why it's OK is via analogy with `blob:` URLs. We need to do some parse-time association of data, in web browsers only, for better handling by the fetch algorithm later. Concretely, we would modify the [URL parser](https://url.spec.whatwg.org/#concept-url-parser), but not the [basic URL parser](https://url.spec.whatwg.org/#concept-basic-url-parser).
+However, we have a useful precedent to follow: `blob:` URLs. `blob:` URLs are a type of browser-specific URL; they impact only the [URL parser](https://url.spec.whatwg.org/#concept-url-parser) used by web browsers, not the [basic URL parser](https://url.spec.whatwg.org/#concept-basic-url-parser) used by the rest of the internet. `import:` URLs would be similar. Also similar to for `blob:` URLs, for `import:` URLs, we need to do some parse-time association of data, in web browsers only, for better handling by the fetch algorithm later.
 
 #### Proposed modification
 
@@ -110,7 +110,7 @@ since the URL parser will resolve `import:../hamsters.jpg` relative to the activ
 
 Without these URL resolution modifications, the fetch algorithm would just receive the raw URL `import:../hamsters.jpg`. It would need to either fail the fetch, or assume that it's meant to be relative to the current settings object's API base URL, i.e. treat it as just `../hamsters.jpg`.
 
-This is also crucial for making module import maps' scopes feature work as expected with `import:` URLs. Consider the following module import map:
+This is also crucial for making import maps' scopes feature work as expected with `import:` URLs. Consider the following import map:
 
 ```json
 {
@@ -134,20 +134,20 @@ const source = await (await fetch("import:lodash")).text(); // (2)
 
 As we know, the `_` imported in `(1)` will be from `/node_modules/underscore/underscore.js`, per the scope configuration. But what will be the result of `(2)`?
 
-With these URL resolution modifications, it will also be from `/node_modules/underscore/underscore.js`, since we have enough context to know that we're inside the `/js/different-lodash-here/` scope. Without them, though, the fetch algorithm will only receive the raw data `import:lodash`, without any knowledge of scopes. In that case it will probably use the module import map's non-scoped mapping, and retrieve `/node_modules/lodash-es/lodash.js`.
+With these URL resolution modifications, it will also be from `/node_modules/underscore/underscore.js`, since we have enough context to know that we're inside the `/js/different-lodash-here/` scope. Without them, though, the fetch algorithm will only receive the raw data `import:lodash`, without any knowledge of scopes. In that case it will probably use the import map's non-scoped mapping, and retrieve `/node_modules/lodash-es/lodash.js`.
 
 ### Modifications to Fetch for `import:` URLs
 
 We treat `import:` URLs like `blob:` URLs, in that they get a special entry in [scheme fetch](https://fetch.spec.whatwg.org/#scheme-fetch). Roughly it would do this:
 
-1. Wait for any _ongoing fetches of module import maps_.
+1. Wait for any _ongoing fetches of import maps_.
 1. Let _url_ be _request_'s current URL.
 1. Let _baseURL_ be _url_'s module base URL.
 1. Let _specifier_ be _url_'s path.
 1. Let _underlyingURL_ be null.
 1. If _specifier_ starts with `/`, `./`, or `../`, then set _underlyingURL_ to the result of URL-parsing _specifier_ with _baseURL_ as the base URL.
     - This is recursive. Should we just use the basic URL parser? Need to explore the consequences.
-1. Otherwise, set _underlyingURL_ to the the result of consulting the current realm's merged module import map, given _specifier_ and _baseURL_. (_baseURL_ is used to determine what scope we're in.)
+1. Otherwise, set _underlyingURL_ to the the result of consulting the current realm's merged import map, given _specifier_ and _baseURL_. (_baseURL_ is used to determine what scope we're in.)
     - This should return nothing for built-in modules by default, i.e., unless they have been remapped, you can't fetch their source code.
 1. "Do a request to _underlyingURL_". Details unclear; things to consider:
     - Should we just change _request_'s current URL?
@@ -156,9 +156,11 @@ We treat `import:` URLs like `blob:` URLs, in that they get a special entry in [
     - Should we restrict to GETs like `blob:` does?
     - Should _baseURL_ be the referrer, or should we use the referrer we're given in _request_?
 
-### Consulting the module import map
+TODO: this needs to loop for fallbacks
 
-Given a module import map _M_, a specifier _specifier_, and a base URL _baseURL_:
+### Consulting the import map
+
+Given a import map _M_, a specifier _specifier_, and a base URL _baseURL_:
 
 ... TODO ...
 
