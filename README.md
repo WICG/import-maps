@@ -2,6 +2,54 @@
 
 _Or, how to control the behavior of JavaScript imports_
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+## Table of contents
+
+- [The basic idea](#the-basic-idea)
+- [Background](#background)
+  - [Bare specifiers](#bare-specifiers)
+  - [Built-in modules](#built-in-modules)
+- [The import map](#the-import-map)
+  - [`import:` URLs](#import-urls)
+  - [Bare specifier examples](#bare-specifier-examples)
+    - [Bare specifiers for JavaScript modules](#bare-specifiers-for-javascript-modules)
+    - [Bare specifiers for other resources](#bare-specifiers-for-other-resources)
+    - ["Packages" via trailing slashes](#packages-via-trailing-slashes)
+  - [Fallback examples](#fallback-examples)
+    - [For user-supplied packages](#for-user-supplied-packages)
+    - [For built-in modules, in module-import-map-supporting browsers](#for-built-in-modules-in-module-import-map-supporting-browsers)
+    - [For built-in modules, in browsers without import maps](#for-built-in-modules-in-browsers-without-import-maps)
+      - [This doesn't work for `<script>`](#this-doesnt-work-for-script)
+  - [Scoping examples](#scoping-examples)
+    - [Multiple versions of the same module](#multiple-versions-of-the-same-module)
+    - [Scope inheritance](#scope-inheritance)
+  - [Virtualization examples](#virtualization-examples)
+    - [Denying access to a built-in module](#denying-access-to-a-built-in-module)
+    - [Selective denial](#selective-denial)
+    - [Wrapping a built-in module](#wrapping-a-built-in-module)
+    - [Extending a built-in module](#extending-a-built-in-module)
+- [Import map processing](#import-map-processing)
+  - [Installation](#installation)
+  - [Scope](#scope)
+- [Alternatives considered](#alternatives-considered)
+  - [The Node.js module resolution algorithm](#the-nodejs-module-resolution-algorithm)
+  - [A programmable resolution hook](#a-programmable-resolution-hook)
+  - [Ahead-of-time rewriting](#ahead-of-time-rewriting)
+  - [Service workers](#service-workers)
+  - [A convention-based flat mapping](#a-convention-based-flat-mapping)
+- [Adjacent concepts](#adjacent-concepts)
+  - [Supplying out-of-band metadata for each module](#supplying-out-of-band-metadata-for-each-module)
+  - [Module-relative URL resolution](#module-relative-url-resolution)
+- [Implementation notes](#implementation-notes)
+  - [`import:` URL staging](#import-url-staging)
+  - [Further implementation staging](#further-implementation-staging)
+  - [`import:` URL loads and origins](#import-url-loads-and-origins)
+  - [`import:` URL interaction with other loading infrastructure](#import-url-interaction-with-other-loading-infrastructure)
+- [Acknowledgments](#acknowledgments)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## The basic idea
 
 This proposal allows control over what URLs get fetched by JavaScript `import` statements and `import()` expressions, and allows this mapping to be reused in non-import contexts. This solves a variety of important use cases, such as:
