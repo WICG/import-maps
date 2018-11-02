@@ -33,7 +33,7 @@ A **specifier map** is a map of `import:` URLs to URLs.
 
 An **import map** is a struct with two fields:
 
-- **modules**: a specifier map
+- **imports**: a specifier map
 - **scopes**: a map of URLs to specifier maps
 
 Getting from JSON to this structure will involve some URL parsing and type validation.
@@ -42,13 +42,13 @@ Getting from JSON to this structure will involve some URL parsing and type valid
 
 We're looking to do the minimal thing that could work here. As such, I propose the following:
 
-Given two import maps _A_ and _B_, the merged import map is a new import map whose modules are the result of merging _A_'s modules and _B_'s modules, and whose scopes are the result of merging _A_'s scopes and _B_'s scopes. Here, merging two maps means appending their entries to each other, with any conflicting keys from the first map removed.
+Given two import maps _A_ and _B_, the merged import map is a new import map whose imports are the result of merging _A_'s imports and _B_'s imports, and whose scopes are the result of merging _A_'s scopes and _B_'s scopes. Here, merging two maps means appending their entries to each other, with any conflicting keys from the first map removed.
 
 Example:
 
 ```json
 {
-  "modules": { "a": "1", "b": "2" }
+  "imports": { "a": "1", "b": "2" }
 }
 ```
 
@@ -56,7 +56,7 @@ Example:
 
 ```json
 {
-  "modules": { "a": "3" }
+  "imports": { "a": "3" }
 }
 ```
 
@@ -64,7 +64,7 @@ Example:
 
 ```json
 {
-  "modules": { "b": "2", "a": "3" }
+  "imports": { "b": "2", "a": "3" }
 }
 ```
 
@@ -114,7 +114,7 @@ This is also crucial for making import maps' scopes feature work as expected wit
 
 ```json
 {
-  "modules": {
+  "imports": {
     "lodash": "/node_modules/lodash-es/lodash.js"
   },
   "scopes": {

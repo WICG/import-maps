@@ -73,7 +73,7 @@ Today, this throws, as such bare specifiers [are explicitly reserved](https://ht
 
 ```json
 {
-  "modules": {
+  "imports": {
     "moment": "/node_modules/moment/src/moment.js",
     "lodash": "/node_modules/lodash-es/lodash.js"
   }
@@ -164,7 +164,7 @@ As mentioned in the introduction,
 
 ```json
 {
-  "modules": {
+  "imports": {
     "moment": "/node_modules/moment/src/moment.js",
     "lodash": "/node_modules/lodash-es/lodash.js"
   }
@@ -192,7 +192,7 @@ Because `import:` URLs can be used anywhere, they aren't only applicable to Java
 
 ```json
 {
-  "modules": {
+  "imports": {
     "widget": "/node_modules/widget/index.mjs",
     "widget-light": "/node_modules/widget/themes/light.css",
     "widget-back-button": "/node_modules/widget/assets/back.svg"
@@ -227,7 +227,7 @@ Import maps do this by giving special meaning to mappings that end with a traili
 
 ```json
 {
-  "modules": {
+  "imports": {
     "moment": "/node_modules/moment/src/moment.js",
     "moment/": "/node_modules/moment/src/",
     "lodash": "/node_modules/lodash-es/lodash.js",
@@ -259,7 +259,7 @@ As usual, since the import map affects `import:` resolution generally, this pack
 
 ```json
 {
-  "modules": {
+  "imports": {
     "widget": "/node_modules/widget/index.mjs",
     "widget/": "/node_modules/widget/"
   }
@@ -288,7 +288,7 @@ To provide fallbacks, use an array instead of a string for the right-hand side o
 
 ```json
 {
-  "modules": {
+  "imports": {
     "jquery": [
       "https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js",
       "/node_modules/jquery/dist/jquery.js"
@@ -307,7 +307,7 @@ For example, consider the following package name map, which supplies a polyfill 
 
 ```json
 {
-  "modules": {
+  "imports": {
     "@std/async-local-storage": [
       "@std/async-local-storage",
       "/node_modules/als-polyfill/index.mjs"
@@ -340,7 +340,7 @@ and then remapping the polyfill to the built-in module for module-import-map-sup
 
 ```json
 {
-  "modules": {
+  "imports": {
     "/node_modules/als-polyfill/index.mjs": [
       "@std/async-local-storage",
       "/node_modules/als-polyfill/index.mjs"
@@ -395,7 +395,7 @@ We support this use case in import maps by allowing you to change the meaning of
 
 ```json
 {
-  "modules": {
+  "imports": {
     "querystringify": "/node_modules/querystringify/index.js"
   },
   "scopes": {
@@ -418,7 +418,7 @@ Scopes "inherit" from each other in an intentionally-simple manner, merging but 
 
 ```json
 {
-  "modules": {
+  "imports": {
     "a": "/a-1.mjs",
     "b": "/b-1.mjs",
     "c": "/c-1.mjs"
@@ -469,7 +469,7 @@ With import maps, you can restrict access by mapping a built-in module to the sp
 
 ```json
 {
-  "modules": {
+  "imports": {
     "@std/async-local-storage": "@std/blank"
   }
 }
@@ -489,7 +489,7 @@ You can use the scoping feature to restrict access to a built-in module to only 
 
 ```json
 {
-  "modules": {
+  "imports": {
     "@std/async-local-storage": "@std/blank"
   },
   "scopes": {
@@ -518,7 +518,7 @@ It may be desirable to wrap a built-in module, e.g. to instrument it, and then e
 
 ```json
 {
-  "modules": {
+  "imports": {
     "@std/async-local-storage": "/js/als-wrapper.mjs"
   },
   "scopes": {
@@ -565,7 +565,7 @@ You can install an import map for your application using a `<script>` element, e
 ```html
 <script type="importmap">
 {
-  "modules": { ... },
+  "imports": { ... },
   "scopes": { ... }
 }
 </script>
