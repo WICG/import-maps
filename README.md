@@ -249,7 +249,7 @@ To provide fallbacks, use an array instead of a string for the right-hand side o
 }
 ```
 
-In this case, any references to `import:query` will first try to fetch the CDN URL, but if that fails, fall back to the copy in `/node_modules/`. (This fallback process will happen only once, and the choice will be cached for all future `import:` URL resolutions.)
+In this case, any references to `import:jquery` will first try to fetch the CDN URL, but if that fails, fall back to the copy in `/node_modules/`. (This fallback process will happen only once, and the choice will be cached for all future `import:` URL resolutions.)
 
 #### For built-in modules, in module-import-map-supporting browsers
 
@@ -527,7 +527,7 @@ You can install an import map for your application using a `<script>` element, e
 <script type="importmap" src="import-map.json"></script>
 ```
 
-Because they affect all imports, any import maps must be present and succesfully fetched before any module resolution is done. This means that module graph fetching, or any fetching of `import:` URLs, is blocked on import map fetching.
+Because they affect all imports, any import maps must be present and successfully fetched before any module resolution is done. This means that module graph fetching, or any fetching of `import:` URLs, is blocked on import map fetching.
 
 Similarly, attempting to add a new `<script type="importmap">` after any module graph fetching, or fetching of `import:` URLs, has started, is an error. The import map will be ignored, and the `<script>` element will fire an error.
 
@@ -615,7 +615,7 @@ The import map _could_ be that manifest file. However, it may not be the best fi
 
 - All proposed metadata so far is applicable to any sort of resource, not just JavaScript modules. A solution should probably work at a more general level.
 
-## Module-relative URL resolution
+### Module-relative URL resolution
 
 Another nice feature of `import:` URLs is that it gives us a solution for [URL resolution relative to the module](https://github.com/whatwg/html/issues/3871). Instead of
 
@@ -628,6 +628,41 @@ we can just do
 ```js
 const response = await fetch('import:../hamsters.jpg');
 ```
+
+## Implementation notes
+
+### `import:` URL staging
+
+The most dramatic and scary feature of this proposal is the introduction of a new URL scheme, `import:`. Logistically, this involves cross-cutting implementation work that goes outside of the usual "module loading" pipeline, and starts affecting network code.
+
+We believe `import:` URLs are valuable, and solve a real developer need. They were a [prominent feature request](https://github.com/domenic/package-name-maps/issues/23) against earlier versions of this proposal. We believe that having a proposal that incorporates them is better than trying to tack them on later.
+
+That said, in terms of implementation staging, it's easy to slice this proposal into a "without `import:` URLs" implementation that later gets followed by a "with `import:` URLs" implementation. Simply by making import maps only affect `import` statements and `import()` expressions at first, an implementation can deliver much of the value, and later work on the `import:` URL implementation.
+
+### Further implementation staging
+
+Speaking of delivering incremental value, it's worth noting that by even before getting to `import:` URLs, implementations can ship subsets of the proposal that solve important use cases. For example, one implementation plan could be:
+
+- Only support map entries of the form `"http(s) URL": ["built-in module", "same http(s) URL"]`. ([See above](#for-built-in-modules-in-module-import-map-supporting-browsers) for a realistic example.) This enables built-in module polyfilling in a backward-compatible way.
+- Support general URL and non-array right-hand sides of the map entries. This enables basic bare import specifier support.
+- Support scoping. This enables full "npm parity" bare import specifier support.
+- Support fallbacks from HTTP(S) URLs to HTTP(S) URLs. This allows supplanting the [terrible `document.write()`-using sync-script-loading hacks](https://www.hanselman.com/blog/CDNsFailButYourScriptsDontHaveToFallbackFromCDNToLocalJQuery.aspx).
+
+### `import:` URL loads and origins
+
+Particular questions come up around whether `import:` URLs can be used for navigations or worker loads. In these cases, the origin of such URLs would become important. Some potential answers:
+
+- These URLs cannot be used for navigations or workers
+- These URLs can be used for navigations or workers, but have an opaque origin
+- These URLs can be used for navigations or workers, and have an origin derived from where they resolve to? (This might not be possible.)
+
+Almost certainly the right path is to start by disallowing such uses of `import:` URLs
+
+### `import:` URL interaction with other loading infrastructure
+
+Several implementer questions come up around how `import:` URLs are envisioned to interact with other loading infrastructure, for example service workers. Initial attempts to answer these sorts of questions are in [the proto-spec](./spec.md).
+
+The high-level summary is that any fetch of an `import:` URL should be thought of as sugar for a series of if-then-else statements that in turn fetch the mapped-to URLs. For example, each fetch will pass through the service worker, until one succeeds.
 
 ## Acknowledgments
 
