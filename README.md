@@ -184,7 +184,7 @@ and in HTML:
 <link rel="modulepreload" href="import:moment">
 ```
 
-Note that the right-hand side of the mapping must start with `/`, `../`, or `./` to identify a URL. (Other cases are explained [later](#for-built-in-modules-in-module-import-map-supporting-browsers).)
+Note that the right-hand side of the mapping must start with `/`, `../`, or `./`, or be parseable as an absolute URL, to identify a URL. (Other cases are explained [later](#for-built-in-modules-in-module-import-map-supporting-browsers).)
 
 #### Bare specifiers for other resources
 
