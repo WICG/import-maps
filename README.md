@@ -659,7 +659,7 @@ Several times now it's come up that people desire to supply metadata for each mo
 
 The import map _could_ be that manifest file. However, it may not be the best fit, for a few reasons:
 
-- As currently envisioned, most modules in an application would not have entires in the import map. The main use case is for modules you need to refer to by bare specifiers, or modules where you need to do something tricky like polyfilling or virtualizing. If we envisioned every module being in the map, we would not include convenience features like packages-via-trailing-slashes.
+- As currently envisioned, most modules in an application would not have entries in the import map. The main use case is for modules you need to refer to by bare specifiers, or modules where you need to do something tricky like polyfilling or virtualizing. If we envisioned every module being in the map, we would not include convenience features like packages-via-trailing-slashes.
 
 - All proposed metadata so far is applicable to any sort of resource, not just JavaScript modules. A solution should probably work at a more general level.
 
