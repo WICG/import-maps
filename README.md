@@ -10,7 +10,7 @@ This proposal allows control over what URLs get fetched by JavaScript `import` s
 
 - Providing fallback resolution, so that `import $ from "jquery"` can try to go to a CDN first, but fall back to a local version if the CDN server is down
 
-- Enabling polyfilling of, or other control over, built-in modules (including [layered APIs](https://github.com/drufball/layered-apis))
+- Enabling polyfilling of, or other control over, [built-in modules](https://github.com/tc39/proposal-javascript-standard-library/)
 
 - Sharing the notion of a "package" between JavaScript importing contexts and traditional URL contexts, such as `fetch()`, `<img src="">` or `<link href="">`
 
@@ -71,7 +71,7 @@ Today, many web developers are even using JavaScript's native module syntax, but
 
 ### Built-in modules
 
-When considering the introduction of built-in modules to the web, e.g. [via TC39](https://github.com/tc39/proposal-javascript-standard-library) or [via web standards](https://github.com/drufball/layered-apis), we need to ensure that we do not lose any of the important features we have today when introducing features via new globals. Notably, these include:
+When considering the introduction of [built-in modules](https://github.com/tc39/proposal-javascript-standard-library/) to the web, we need to ensure that we do not lose any of the important features we have today when introducing features via new globals. Notably, these include:
 
 - Polyfilling: the ability to supply a polyfill module that acts as the built-in one
 - Virtualization: the ability to wrap, extend, or remove access to the built-in module
@@ -135,6 +135,8 @@ and in HTML:
 ```html
 <link rel="modulepreload" href="import:moment">
 ```
+
+Note that the right-hand side of the mapping must start with `/`, `../`, or `./` to identify a URL. (Other cases are explained [later](#for-built-in-modules-in-module-import-map-supporting-browsers).)
 
 #### Bare specifiers for other resources
 
@@ -259,12 +261,14 @@ For example, consider the following package name map, which supplies a polyfill 
 {
   "modules": {
     "@std/async-local-storage": [
-      "import:@std/async-local-storage",
+      "@std/async-local-storage",
       "/node_modules/als-polyfill/index.mjs"
     ]
   }
 }
 ```
+
+Note here how we see our first example of the right-hand side not starting with `./`, `../`, or `/`. If the right-hand side does not start with those prefixes, then it is interpreted as identifying a built-in module.
 
 Now, statements like
 
@@ -272,9 +276,7 @@ Now, statements like
 import { StorageArea } from "@std/async-local-storage";
 ```
 
-will first try to resolve to `import:@std/async-local-storage`, i.e. the browser's built-in implementation of async local storage. If fetching that URL fails, because the browser does not implement async local storage, then instead it will fetch the polyfill, at `/node_modules/als-polyfill/index.mjs`.
-
-_Potential issue: right now we require the right-hand side to be a URL. But this means you have to use the `import:` prefix on the right-hand side, and not on the left-hand side. This seems a bit confusing. Also, it opens us up to footguns: if you forget the `import:` prefix, then you're looking for the relative URL `@std/async-local-storage` (i.e., `./@std/async-local-storage`). Maybe the right hand side should be some fuzzier concept, e.g. "absolute URL or `./`-prefixed or `../`-prefixed or `/`-prefixed or built-in module specifier"? Seems less elegant, but perhaps more ergonomic._
+will first try to resolve to `@std/async-local-storage`, i.e. the browser's built-in implementation of async local storage. If fetching that URL fails, because the browser does not implement async local storage, then instead it will fetch the polyfill, at `/node_modules/als-polyfill/index.mjs`.
 
 #### For built-in modules, in browsers without import maps
 
@@ -292,7 +294,7 @@ and then remapping the polyfill to the built-in module for module-import-map-sup
 {
   "modules": {
     "/node_modules/als-polyfill/index.mjs": [
-      "import:@std/async-local-storage",
+      "@std/async-local-storage",
       "/node_modules/als-polyfill/index.mjs"
     ]
   }
@@ -303,9 +305,37 @@ With this mapping, each class of browser behaves as desired, for our above impor
 
 - Browsers that do not support import maps will receive the polyfill.
 - Browsers that support import maps, but do not support async local storage, will end up with a mapping from the polyfill URL to itself, and so will receive the polyfill anyway.
-- Browsers that support both import maps and async local storage will end up with a mapping from the polyfill URL to `import:@std/async-local-storage`, and so will receive the built-in module.
+- Browsers that support both import maps and async local storage will end up with a mapping from the polyfill URL to `@std/async-local-storage`, and so will receive the built-in module.
 
 Note how we're using a capability here that we haven't explored in previous examples: remapping imports of "URL-like" specifiers, not just bare specifiers. But it works exactly the same. Previous examples changed the resolution of URLs like `import:lodash`, and thus changed the meaning of `import "lodash"`. Here we're changing the resolution of `import:/node_modules/als-polyfill/index.mjs`, and thus changing the meaning of `import "/node_modules/als-polyfill/index.mjs"`.
+
+##### This doesn't work for `<script>`
+
+An important caveat to the above example is that it does _not_ help for `<script src="">` scenarios. That is, while
+
+```js
+import "/node_modules/als-polyfill/index.mjs";
+```
+
+would have the correct behavior (using the built-in version when appropriate) in all classes of browser,
+
+```html
+<script type="module" src="/node_modules/als-polyfill/index.mjs"></script>
+```
+
+would not: in all classes of browsers, it would fetch the polyfill unconditionally. What _would_ work, in import-map-supporting browsers, would be
+
+```html
+<script type="module" src="import:/node_modules/als-polyfill/index.mjs"></script>
+```
+
+But alas, in browsers without support for import maps, this will result in a network error. Thus, for side-effecting modules, you'd instead want to use the pattern
+
+```html
+<script type="module">import "/node_modules/als-polyfill/index.mjs";</script>
+```
+
+which will work as desired in all classes of browser.
 
 ### Scoping examples
 
@@ -392,7 +422,7 @@ With import maps, you can restrict access by mapping a built-in module to the sp
 ```json
 {
   "modules": {
-    "@std/async-local-storage": "import:@std/blank"
+    "@std/async-local-storage": "@std/blank"
   }
 }
 ```
@@ -412,11 +442,11 @@ You can use the scoping feature to restrict access to a built-in module to only 
 ```json
 {
   "modules": {
-    "@std/async-local-storage": "import:@std/blank"
+    "@std/async-local-storage": "@std/blank"
   },
   "scopes": {
     "/js/storage-code/": {
-      "@std/async-local-storage": "import:@std/async-local-storage"
+      "@std/async-local-storage": "@std/async-local-storage"
     }
   }
 }
@@ -428,7 +458,7 @@ Alternately, you can use similar techniques to prevent only certain parts of you
 {
   "scopes": {
     "/node_modules/untrusted-third-party/": {
-      "@std/async-local-storage": "import:@std/blank"
+      "@std/async-local-storage": "@std/blank"
     }
   }
 }
@@ -445,7 +475,7 @@ It may be desirable to wrap a built-in module, e.g. to instrument it, and then e
   },
   "scopes": {
     "/js/als-wrapper.mjs": {
-      "@std/async-local-storage": "import:@std/async-local-storage"
+      "@std/async-local-storage": "@std/async-local-storage"
     }
   }
 }
@@ -598,14 +628,6 @@ we can just do
 ```js
 const response = await fetch('import:../hamsters.jpg');
 ```
-
-## Other TODOs
-
-Talk about / prove out how we can conceptualize built-in modules as a built-in import map.
-
-Ensure that this works even with some of the trickiness in the examples.
-
-Talk about recursive resolution of bare specifiers.
 
 ## Acknowledgments
 
