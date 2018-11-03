@@ -355,7 +355,7 @@ With this mapping, each class of browser behaves as desired, for our above impor
 - Browsers that support import maps, but do not support async local storage, will end up with a mapping from the polyfill URL to itself, and so will receive the polyfill anyway.
 - Browsers that support both import maps and async local storage will end up with a mapping from the polyfill URL to `@std/async-local-storage`, and so will receive the built-in module.
 
-Note how we're using a capability here that we haven't explored in previous examples: remapping imports of "URL-like" specifiers, not just bare specifiers. But it works exactly the same. Previous examples changed the resolution of URLs like `import:lodash`, and thus changed the meaning of `import "lodash"`. Here we're changing the resolution of `import:/node_modules/als-polyfill/index.mjs`, and thus changing the meaning of `import "/node_modules/als-polyfill/index.mjs"`.
+Note how we're using a capability here that we haven't explored in previous examples: remapping imports of "URL-like" specifiers, not just bare specifiers. But it works exactly the same. Previous examples changed the resolution of URLs like `import:lodash`, and thus changed the meaning of `import "lodash"`. Here we're changing the resolution of `import:/node_modules/als-polyfill/index.mjs`, and thus changing the meaning of `import "/node_modules/als-polyfill/index.mjs"`. There is only one level of resolution for such cases; the target is no longer an `import:` URL, and therefore the import map is not consulted a second time.
 
 ##### This doesn't work for `<script>`
 
