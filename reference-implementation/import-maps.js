@@ -48,7 +48,9 @@ function normalizeSpecifierMap(obj) {
           continue;
         }
       }
-    } else if (typeof value !== 'string') {
+    } else if (typeof value === 'string') {
+      obj[key] = [value];
+    } else {
       delete obj[key];
     }
   }

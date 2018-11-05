@@ -54,10 +54,10 @@ describe('Mismatching the specifier map schema', () => {
         expect(parseFromString(`{
           "imports": {
             "foo": ${invalid},
-            "bar": "./valid"
+            "bar": ["./valid"]
           }
         }`))
-          .toEqual({ imports: { bar: './valid' }, scopes: {} });
+          .toEqual({ imports: { bar: ['./valid'] }, scopes: {} });
       }
     });
 
@@ -66,10 +66,10 @@ describe('Mismatching the specifier map schema', () => {
         expect(parseFromString(`{
           "imports": {
             "foo": ["./valid", ${invalid}],
-            "bar": "./valid"
+            "bar": ["./valid"]
           }
         }`))
-          .toEqual({ imports: { bar: './valid' }, scopes: {} });
+          .toEqual({ imports: { bar: ['./valid'] }, scopes: {} });
       }
     });
   });
@@ -87,11 +87,11 @@ describe('Mismatching the specifier map schema', () => {
           "scopes": {
             "someScope": {
               "foo": ${invalid},
-              "bar": "./valid"
+              "bar": ["./valid"]
             }
           }
         }`))
-          .toEqual({ imports: {}, scopes: { someScope: { bar: './valid' } } });
+          .toEqual({ imports: {}, scopes: { someScope: { bar: ['./valid'] } } });
       }
     });
 
@@ -101,12 +101,36 @@ describe('Mismatching the specifier map schema', () => {
           "scopes": {
             "someScope": {
               "foo": ["./valid", ${invalid}],
-              "bar": "./valid"
+              "bar": ["./valid"]
             }
           }
         }`))
-          .toEqual({ imports: {}, scopes: { someScope: { bar: './valid' } } });
+          .toEqual({ imports: {}, scopes: { someScope: { bar: ['./valid'] } } });
       }
     });
+  });
+});
+
+describe('Normalization', () => {
+  it('should normalize map targets to arrays inside "imports"', () => {
+    expect(parseFromString(`{
+      "imports": {
+        "foo": "./valid1",
+        "bar": ["./valid2"]
+      }
+    }`))
+      .toEqual({ imports: { foo: ['./valid1'], bar: ['./valid2'] }, scopes: {} });
+  });
+
+  it('should normalize map targets to arrays inside scopes', () => {
+    expect(parseFromString(`{
+      "scopes": {
+        "aScope": {
+          "foo": "./valid1",
+          "bar": ["./valid2"]
+        }
+      }
+    }`))
+      .toEqual({ imports: {}, scopes: { aScope: { foo: ['./valid1'], bar: ['./valid2'] } } });
   });
 });
