@@ -1,0 +1,18 @@
+{
+  "name": "import-maps",
+  "version": "1.0.0-pre",
+  "private": true,
+  "description": "Reference implementation playground for import maps proposal",
+  "main": "import-maps.js",
+  "scripts": {
+    "lint": "eslint .",
+    "test": "jest"
+  },
+  "repository": "domenic/import-maps",
+  "author": "Domenic Denicola <d@domenic.me> (https://domenic.me/)",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^5.8.0",
+    "jest": "^23.6.0"
+  }
+}
