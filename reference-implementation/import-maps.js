@@ -7,10 +7,6 @@ exports.parseFromString = input => {
     throw new TypeError('Import map JSON must be an object.');
   }
 
-  if (!('imports' in parsed) && !('scopes' in parsed)) {
-    throw new TypeError('Import map must have either an imports or scopes field, or both.');
-  }
-
   if ('imports' in parsed && !isJSONObject(parsed.imports)) {
     throw new TypeError('Import map\'s imports value must be an object.');
   }

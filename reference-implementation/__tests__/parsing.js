@@ -18,11 +18,6 @@ describe('Mismatching the top-level schema', () => {
     }
   });
 
-  it('should throw if neither imports nor scopes keys are present', () => {
-    expectBad('{}');
-    expectBad('{ "importz": {} }');
-  });
-
   it('should throw if imports is a non-object', () => {
     for (const nonObject of nonObjectStrings) {
       expectBad(`{ "imports": ${nonObject} }`);
@@ -35,7 +30,7 @@ describe('Mismatching the top-level schema', () => {
     }
   });
 
-  it('should strip out unspecified top-level entries', () => {
+  it('should ignore unspecified top-level entries', () => {
     expect(parseFromString(`{
       "imports": {},
       "new-feature": {}
@@ -112,6 +107,18 @@ describe('Mismatching the specifier map schema', () => {
 });
 
 describe('Normalization', () => {
+  it('should normalize empty maps to have imports and scopes keys', () => {
+    expect(parseFromString(`{}`)).toEqual({ imports: {}, scopes: {} });
+  });
+
+  it('should normalize a map without imports to have imports', () => {
+    expect(parseFromString(`{ "scopes": {} }`)).toEqual({ imports: {}, scopes: {} });
+  });
+
+  it('should normalize a map without scopes to have scopes', () => {
+    expect(parseFromString(`{ "imports": {} }`)).toEqual({ imports: {}, scopes: {} });
+  });
+
   it('should normalize map targets to arrays inside "imports"', () => {
     expect(parseFromString(`{
       "imports": {
