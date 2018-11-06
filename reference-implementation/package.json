@@ -3,7 +3,10 @@
   "version": "1.0.0-pre",
   "private": true,
   "description": "Reference implementation playground for import maps proposal",
-  "main": "import-maps.js",
+  "main": "lib/import-maps.js",
+  "files": [
+    "lib/"
+  ],
   "scripts": {
     "lint": "eslint .",
     "test": "jest"
