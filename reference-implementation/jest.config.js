@@ -1,5 +1,6 @@
 'use strict';
 
 module.exports = {
-  testEnvironment: 'node'
+  testEnvironment: 'node',
+  testPathIgnorePatterns: ['<rootDir>/__tests__/helpers/']
 };
