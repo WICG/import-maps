@@ -209,11 +209,11 @@ describe('Map target string validation', () => {
         "about": "about:good",
         "blob": "blob:good",
         "data": "data:good",
-        "file": "file:good",
+        "file": "file:///good",
         "filesystem": "filesystem:good",
-        "http": "http:good",
-        "https": "https:good",
-        "ftp": "ftp:good",
+        "http": "http://good/",
+        "https": "https://good/",
+        "ftp": "ftp://good/",
         "import": "import:bad",
         "mailto": "mailto:bad",
         "javascript": "javascript:bad",
@@ -223,11 +223,11 @@ describe('Map target string validation', () => {
         about: ['about:good'],
         blob: ['blob:good'],
         data: ['data:good'],
-        file: ['file:good'],
+        file: ['file:///good'],
         filesystem: ['filesystem:good'],
-        http: ['http:good'],
-        https: ['https:good'],
-        ftp: ['ftp:good'],
+        http: ['http://good/'],
+        https: ['https://good/'],
+        ftp: ['ftp://good/'],
         import: [],
         mailto: [],
         javascript: [],
@@ -242,11 +242,11 @@ describe('Map target string validation', () => {
         "about": ["./valid1", "about:good", "../valid2"],
         "blob": ["./valid1", "blob:good", "../valid2"],
         "data": ["./valid1", "data:good", "../valid2"],
-        "file": ["./valid1", "file:good", "../valid2"],
+        "file": ["./valid1", "file:///good", "../valid2"],
         "filesystem": ["./valid1", "filesystem:good", "../valid2"],
-        "http": ["./valid1", "http:good", "../valid2"],
-        "https": ["./valid1", "https:good", "../valid2"],
-        "ftp": ["./valid1", "ftp:good", "../valid2"],
+        "http": ["./valid1", "http://good/", "../valid2"],
+        "https": ["./valid1", "https://good/", "../valid2"],
+        "ftp": ["./valid1", "ftp://good/", "../valid2"],
         "import": ["./valid1", "import:bad", "../valid2"],
         "mailto": ["./valid1", "mailto:bad", "../valid2"],
         "javascript": ["./valid1", "javascript:bad", "../valid2"],
@@ -256,15 +256,65 @@ describe('Map target string validation', () => {
         about: ['./valid1', 'about:good', '../valid2'],
         blob: ['./valid1', 'blob:good', '../valid2'],
         data: ['./valid1', 'data:good', '../valid2'],
-        file: ['./valid1', 'file:good', '../valid2'],
+        file: ['./valid1', 'file:///good', '../valid2'],
         filesystem: ['./valid1', 'filesystem:good', '../valid2'],
-        http: ['./valid1', 'http:good', '../valid2'],
-        https: ['./valid1', 'https:good', '../valid2'],
-        ftp: ['./valid1', 'ftp:good', '../valid2'],
+        http: ['./valid1', 'http://good/', '../valid2'],
+        https: ['./valid1', 'https://good/', '../valid2'],
+        ftp: ['./valid1', 'ftp://good/', '../valid2'],
         import: ['./valid1', '../valid2'],
         mailto: ['./valid1', '../valid2'],
         javascript: ['./valid1', '../valid2'],
         wss: ['./valid1', '../valid2']
+      }
+    );
+  });
+
+  it('should parse and serialize absolute URLs, ignoring unparseable ones', () => {
+    expectSpecifierMap(
+      `{
+        "unparseable1": "https://ex ample.org/",
+        "unparseable2": "https://example.com:demo",
+        "unparseable3": "http://[www.example.com]/",
+        "invalidButParseable1": "https:example.org",
+        "invalidButParseable2": "https://///example.com///",
+        "prettyNormal": "https://example.net",
+        "percentDecoding": "https://ex%41mple.com/",
+        "noPercentDecoding": "https://example.com/%41"
+      }`,
+      {
+        unparseable1: [],
+        unparseable2: [],
+        unparseable3: [],
+        invalidButParseable1: ['https://example.org/'],
+        invalidButParseable2: ['https://example.com///'],
+        prettyNormal: ['https://example.net/'],
+        percentDecoding: ['https://example.com/'],
+        noPercentDecoding: ['https://example.com/%41']
+      }
+    );
+  });
+
+  it('should parse and serialize absolute URLs, ignoring unparseable ones inside arrays', () => {
+    expectSpecifierMap(
+      `{
+        "unparseable1": ["./valid1", "https://ex ample.org/", "../valid2"],
+        "unparseable2": ["./valid1", "https://example.com:demo", "../valid2"],
+        "unparseable3": ["./valid1", "http://[www.example.com]/", "../valid2"],
+        "invalidButParseable1": ["./valid1", "https:example.org", "../valid2"],
+        "invalidButParseable2": ["./valid1", "https://///example.com///", "../valid2"],
+        "prettyNormal": ["./valid1", "https://example.net", "../valid2"],
+        "percentDecoding": ["./valid1", "https://ex%41mple.com/", "../valid2"],
+        "noPercentDecoding": ["./valid1", "https://example.com/%41", "../valid2"]
+      }`,
+      {
+        unparseable1: ['./valid1', '../valid2'],
+        unparseable2: ['./valid1', '../valid2'],
+        unparseable3: ['./valid1', '../valid2'],
+        invalidButParseable1: ['./valid1', 'https://example.org/', '../valid2'],
+        invalidButParseable2: ['./valid1', 'https://example.com///', '../valid2'],
+        prettyNormal: ['./valid1', 'https://example.net/', '../valid2'],
+        percentDecoding: ['./valid1', 'https://example.com/', '../valid2'],
+        noPercentDecoding: ['./valid1', 'https://example.com/%41', '../valid2']
       }
     );
   });

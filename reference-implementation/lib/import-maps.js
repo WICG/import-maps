@@ -52,32 +52,33 @@ function normalizeSpecifierMap(obj) {
   }
 
   for (const [key, mapTargetsArray] of Object.entries(obj)) {
-    obj[key] = mapTargetsArray.filter(isValidMapTarget);
+    obj[key] = mapTargetsArray.map(normalizeMapTargetString).filter(target => target !== null);
   }
 }
 
-function isValidMapTarget(string) {
+// Returns null if the value is not a valid map target; a string otherwise
+function normalizeMapTargetString(string) {
   if (typeof string !== 'string') {
-    return false;
+    return null;
   }
 
   if (string.startsWith('./') || string.startsWith('../') || string.startsWith('/') ||
       string.startsWith(exports.BUILT_IN_MODULE_PREFIX)) {
-    return true;
+    return string;
   }
 
   let url;
   try {
     url = new URL(string);
   } catch (e) { // TODO remove useless binding when eslint and Jest support it
-    return false;
+    return null;
   }
 
   if (FETCH_SCHEMES.has(url.protocol.slice(0, -1))) {
-    return true;
+    return url.href;
   }
 
-  return false;
+  return null;
 }
 
 function isJSONObject(value) {
