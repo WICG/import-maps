@@ -465,23 +465,21 @@ Although it is drastic and fairly rare, sometimes it is desirable to remove acce
 delete self.WebSocket;
 ```
 
-With import maps, you can restrict access by mapping a built-in module to the special module `@std/blank`:
+With import maps, you can restrict access by mapping a built-in module to the empty array, i.e. saying "there are no URLs or built-in modules that this should map to":
 
 ```json
 {
   "imports": {
-    "@std/async-local-storage": "@std/blank"
+    "@std/async-local-storage": []
   }
 }
 ```
 
-This module has no exports, so any attempts to import from it will fail:
+With this in place, any attempts to resolve `import:@std/async-local-storage` will fail. For example,
 
 ```js
-import { Storage } from "@std/async-local-storage"; // throws, since @std/blank has no exports
+import { Storage } from "@std/async-local-storage"; // throws
 ```
-
-_Question: should we introduce a module, e.g. `@std/thrower`, which just throws an exception? The difference would be in cases like `import "@std/async-local-storage"`, where you wouldn't get an exception with `@std/blank` because you're not asking for any imports. This is pretty edge-casey._
 
 #### Selective denial
 
@@ -490,7 +488,7 @@ You can use the scoping feature to restrict access to a built-in module to only 
 ```json
 {
   "imports": {
-    "@std/async-local-storage": "@std/blank"
+    "@std/async-local-storage": []
   },
   "scopes": {
     "/js/storage-code/": {
@@ -506,7 +504,7 @@ Alternately, you can use similar techniques to prevent only certain parts of you
 {
   "scopes": {
     "/node_modules/untrusted-third-party/": {
-      "@std/async-local-storage": "@std/blank"
+      "@std/async-local-storage": []
     }
   }
 }
