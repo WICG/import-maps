@@ -1,4 +1,11 @@
 'use strict';
+const { URL } = require('url');
+
+// https://fetch.spec.whatwg.org/#fetch-scheme
+const FETCH_SCHEMES = new Set(['http', 'https', 'ftp', 'about', 'blob', 'data', 'file', 'filesystem']);
+
+// Tentative, so better to centralize so we can change in one place as necessary (including tests).
+exports.BUILT_IN_MODULE_PREFIX = '@std/';
 
 exports.parseFromString = input => {
   const parsed = JSON.parse(input);
@@ -37,19 +44,40 @@ exports.parseFromString = input => {
 
 function normalizeSpecifierMap(obj) {
   for (const [key, value] of Object.entries(obj)) {
-    if (Array.isArray(value)) {
-      for (const entryInArray of value) {
-        if (typeof entryInArray !== 'string') {
-          delete obj[key];
-          continue;
-        }
-      }
-    } else if (typeof value === 'string') {
+    if (typeof value === 'string') {
       obj[key] = [value];
-    } else {
+    } else if (!Array.isArray(value)) {
       delete obj[key];
     }
   }
+
+  for (const [key, mapTargetsArray] of Object.entries(obj)) {
+    obj[key] = mapTargetsArray.filter(isValidMapTarget);
+  }
+}
+
+function isValidMapTarget(string) {
+  if (typeof string !== 'string') {
+    return false;
+  }
+
+  if (string.startsWith('./') || string.startsWith('../') || string.startsWith('/') ||
+      string.startsWith(exports.BUILT_IN_MODULE_PREFIX)) {
+    return true;
+  }
+
+  let url;
+  try {
+    url = new URL(string);
+  } catch (e) { // TODO remove useless binding when eslint and Jest support it
+    return false;
+  }
+
+  if (FETCH_SCHEMES.has(url.protocol.slice(0, -1))) {
+    return true;
+  }
+
+  return false;
 }
 
 function isJSONObject(value) {
