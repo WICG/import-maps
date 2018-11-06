@@ -60,9 +60,9 @@ This proposal allows control over what URLs get fetched by JavaScript `import` s
 
 - Enabling polyfilling of, or other control over, [built-in modules](https://github.com/tc39/proposal-javascript-standard-library/)
 
-- Sharing the notion of a "package" between JavaScript importing contexts and traditional URL contexts, such as `fetch()`, `<img src="">` or `<link href="">`
+- Sharing the notion of "import specifiers" between JavaScript importing contexts and traditional URL contexts, such as `fetch()`, `<img src="">` or `<link href="">`
 
-The mechanism for doing this is via a new `import:` URL scheme, plus an _import map_ which can be used to control the resolution of `import:` URLs. As an introductory example, consider the code
+The mechanism for doing this is via a new `import:` URL scheme, plus an _import map_ which can be used to control the resolution of `import:` URLs, `import` statements, and `import()` expressions. As an introductory example, consider the code
 
 ```js
 import moment from "moment";
@@ -598,7 +598,7 @@ Import maps are an application-level thing, somewhat like service workers. (More
 
 This, in addition to general simplicity, is in part what motivates the above restrictions on `<script type="importmap">`.
 
-Since an application's import map changes the resolution algorithm for every module in the module map, they are not impacted by whether a module's source text was originally from a cross-origin URL. If you load a module from a CDN that uses bare import specifiers, you'll need to know ahead of time what bare import specifiers that module adds to your app, and include them in your application's import map. (That is, you need to know what all of your application's transitive dependencies are.) It's important that control of which URLs are use for each package stay in control of the application author, so they can holistically manage versioning and sharing of modules.
+Since an application's import map changes the resolution algorithm for every module in the module map, they are not impacted by whether a module's source text was originally from a cross-origin URL. If you load a module from a CDN that uses bare import specifiers, you'll need to know ahead of time what bare import specifiers that module adds to your app, and include them in your application's import map. (That is, you need to know what all of your application's transitive dependencies are.) It's important that control of which URLs are use for each package stay with the application author, so they can holistically manage versioning and sharing of modules.
 
 ## Alternatives considered
 
