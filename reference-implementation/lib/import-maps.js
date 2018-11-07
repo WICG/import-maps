@@ -43,6 +43,8 @@ exports.parseFromString = (input, baseURL) => {
 };
 
 function normalizeSpecifierMap(obj, baseURL) {
+  delete obj[''];
+
   for (const [key, value] of Object.entries(obj)) {
     if (typeof value === 'string') {
       obj[key] = [value];

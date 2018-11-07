@@ -55,6 +55,16 @@ describe('Mismatching the specifier map schema', () => {
     }
   });
 
+  it('should ignore entries where the specifier key is an empty string', () => {
+    expectSpecifierMap(
+      `{
+        "": ["https://example.com/"]
+      }`,
+      'https://base.example/',
+      {}
+    );
+  });
+
   it('should ignore members of a map target array that are not strings', () => {
     for (const invalid of invalidInsideArrayStrings) {
       expectSpecifierMap(
