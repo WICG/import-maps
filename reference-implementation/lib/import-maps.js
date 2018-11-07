@@ -26,19 +26,33 @@ exports.parseFromString = (input, baseURL) => {
     normalizeSpecifierMap(parsed.imports, baseURL);
   }
 
+  const normalizedScopes = {};
   if ('scopes' in parsed) {
-    for (const [key, specifierMap] of Object.entries(parsed.scopes)) {
+    for (const [scopeKey, specifierMap] of Object.entries(parsed.scopes)) {
       if (!isJSONObject(specifierMap)) {
-        throw new TypeError(`The value for the "${key}" scope must be an object.`);
+        throw new TypeError(`The value for the "${scopeKey}" scope must be an object.`);
       }
+
       normalizeSpecifierMap(specifierMap, baseURL);
+
+      const scopeKeyURL = tryURLParse(scopeKey, baseURL);
+      if (scopeKeyURL === null) {
+        continue;
+      }
+
+      if (!hasFetchScheme(scopeKeyURL)) {
+        continue;
+      }
+
+      const normalizedScopeKey = scopeKeyURL.href;
+      normalizedScopes[normalizedScopeKey] = specifierMap;
     }
   }
 
   // Always have these two keys, and exactly these two keys, in the result.
   return {
     imports: parsed.imports || {},
-    scopes: parsed.scopes || {}
+    scopes: normalizedScopes
   };
 };
 
@@ -74,14 +88,12 @@ function normalizeMapTargetString(string, baseURL) {
     return new URL(string, baseURL);
   }
 
-  let url;
-  try {
-    url = new URL(string);
-  } catch (e) { // TODO remove useless binding when eslint and Jest support it
+  const url = tryURLParse(string);
+  if (url === null) {
     return null;
   }
 
-  if (FETCH_SCHEMES.has(url.protocol.slice(0, -1))) {
+  if (hasFetchScheme(url)) {
     return url;
   }
 
@@ -90,4 +102,16 @@ function normalizeMapTargetString(string, baseURL) {
 
 function isJSONObject(value) {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function hasFetchScheme(url) {
+  return FETCH_SCHEMES.has(url.protocol.slice(0, -1));
+}
+
+function tryURLParse(string, baseURL) {
+  try {
+    return new URL(string, baseURL);
+  } catch (e) { // TODO remove useless binding when ESLint and Jest support that
+    return null;
+  }
 }

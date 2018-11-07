@@ -83,7 +83,7 @@ describe('Mismatching the specifier map schema', () => {
 
   it('should throw if the scope value is not an object', () => {
     for (const invalid of nonObjectStrings) {
-      expectBad(`{ "scopes": { "someScope": ${invalid} } }`, 'https://base.example/');
+      expectBad(`{ "scopes": { "https://scope.example/": ${invalid} } }`, 'https://base.example/');
     }
   });
 });
