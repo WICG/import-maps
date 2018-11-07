@@ -72,13 +72,13 @@ rules:
   no-floating-decimal: error
   no-global-assign: error
   no-implicit-coercion: error
-  no-implicit-globals: off # Userscripts run in their own scope
+  no-implicit-globals: error
   no-implied-eval: error
   no-invalid-this: error
   no-iterator: error
   no-labels: [error, allowLoop: true]
   no-lone-blocks: error
-  no-loop-func: error
+  no-loop-func: off
   no-magic-numbers: [error, { ignore: [0, 1, -1] }]
   no-multi-spaces: error
   no-multi-str: error

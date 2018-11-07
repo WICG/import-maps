@@ -5,25 +5,25 @@ const { expectBad, expectSpecifierMap } = require('./helpers/parsing.js');
 const nonObjectStrings = ['null', 'true', '1', '"foo"', '[]'];
 
 test('Invalid JSON', () => {
-  expect(() => parseFromString('{ imports: {} }')).toThrow(SyntaxError);
+  expect(() => parseFromString('{ imports: {} }', 'https://base.example/')).toThrow(SyntaxError);
 });
 
 describe('Mismatching the top-level schema', () => {
   it('should throw for top-level non-objects', () => {
     for (const nonObject of nonObjectStrings) {
-      expectBad(nonObject);
+      expectBad(nonObject, 'https://base.example/');
     }
   });
 
   it('should throw if imports is a non-object', () => {
     for (const nonObject of nonObjectStrings) {
-      expectBad(`{ "imports": ${nonObject} }`);
+      expectBad(`{ "imports": ${nonObject} }`, 'https://base.example/');
     }
   });
 
   it('should throw if scopes is a non-object', () => {
     for (const nonObject of nonObjectStrings) {
-      expectBad(`{ "scopes": ${nonObject} }`);
+      expectBad(`{ "scopes": ${nonObject} }`, 'https://base.example/');
     }
   });
 
@@ -31,7 +31,7 @@ describe('Mismatching the top-level schema', () => {
     expect(parseFromString(`{
       "imports": {},
       "new-feature": {}
-    }`))
+    }`, 'https://base.example/'))
       .toEqual({ imports: {}, scopes: {} });
   });
 });
@@ -45,10 +45,11 @@ describe('Mismatching the specifier map schema', () => {
       expectSpecifierMap(
         `{
           "foo": ${invalid},
-          "bar": ["./valid"]
+          "bar": ["https://example.com/"]
         }`,
+        'https://base.example/',
         {
-          bar: ['./valid']
+          bar: [expect.toMatchURL('https://example.com/')]
         }
       );
     }
@@ -58,12 +59,13 @@ describe('Mismatching the specifier map schema', () => {
     for (const invalid of invalidInsideArrayStrings) {
       expectSpecifierMap(
         `{
-          "foo": ["./valid", ${invalid}],
-          "bar": ["./valid"]
+          "foo": ["https://example.com/", ${invalid}],
+          "bar": ["https://example.com/"]
         }`,
+        'https://base.example/',
         {
-          foo: ['./valid'],
-          bar: ['./valid']
+          foo: [expect.toMatchURL('https://example.com/')],
+          bar: [expect.toMatchURL('https://example.com/')]
         }
       );
     }
@@ -71,33 +73,37 @@ describe('Mismatching the specifier map schema', () => {
 
   it('should throw if the scope value is not an object', () => {
     for (const invalid of nonObjectStrings) {
-      expectBad(`{ "scopes": { "someScope": ${invalid} } }`);
+      expectBad(`{ "scopes": { "someScope": ${invalid} } }`, 'https://base.example/');
     }
   });
 });
 
 describe('Normalization', () => {
   it('should normalize empty maps to have imports and scopes keys', () => {
-    expect(parseFromString(`{}`)).toEqual({ imports: {}, scopes: {} });
+    expect(parseFromString(`{}`, 'https://base.example/'))
+      .toEqual({ imports: {}, scopes: {} });
   });
 
   it('should normalize a map without imports to have imports', () => {
-    expect(parseFromString(`{ "scopes": {} }`)).toEqual({ imports: {}, scopes: {} });
+    expect(parseFromString(`{ "scopes": {} }`, 'https://base.example/'))
+      .toEqual({ imports: {}, scopes: {} });
   });
 
   it('should normalize a map without scopes to have scopes', () => {
-    expect(parseFromString(`{ "imports": {} }`)).toEqual({ imports: {}, scopes: {} });
+    expect(parseFromString(`{ "imports": {} }`, 'https://base.example/'))
+      .toEqual({ imports: {}, scopes: {} });
   });
 
   it('should normalize map targets to arrays', () => {
     expectSpecifierMap(
       `{
-        "foo": "./valid1",
-        "bar": ["./valid2"]
+        "foo": "https://example.com/1",
+        "bar": ["https://example.com/2"]
       }`,
+      'https://base.example/',
       {
-        foo: ['./valid1'],
-        bar: ['./valid2']
+        foo: [expect.toMatchURL('https://example.com/1')],
+        bar: [expect.toMatchURL('https://example.com/2')]
       }
     );
   });

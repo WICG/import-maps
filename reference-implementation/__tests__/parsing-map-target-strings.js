@@ -10,10 +10,11 @@ describe('Relative URL-like specifiers', () => {
         "dotDotSlash": "../foo",
         "slash": "/foo"
       }`,
+      'https://base.example/path1/path2/path3',
       {
-        dotSlash: ['./foo'],
-        dotDotSlash: ['../foo'],
-        slash: ['/foo']
+        dotSlash: [expect.toMatchURL('https://base.example/path1/path2/foo')],
+        dotDotSlash: [expect.toMatchURL('https://base.example/path1/foo')],
+        slash: [expect.toMatchURL('https://base.example/foo')]
       }
     );
   });
@@ -25,10 +26,11 @@ describe('Relative URL-like specifiers', () => {
         "dotDotSlash": "../",
         "slash": "/"
       }`,
+      'https://base.example/path1/path2/path3',
       {
-        dotSlash: ['./'],
-        dotDotSlash: ['../'],
-        slash: ['/']
+        dotSlash: [expect.toMatchURL('https://base.example/path1/path2/')],
+        dotDotSlash: [expect.toMatchURL('https://base.example/path1/')],
+        slash: [expect.toMatchURL('https://base.example/')]
       }
     );
   });
@@ -44,6 +46,7 @@ describe('Relative URL-like specifiers', () => {
         "dotSlash3": "%2E%2F",
         "dotDotSlash3": "%2E%2E%2F"
       }`,
+      'https://base.example/path1/path2/path3',
       {
         dotSlash1: [],
         dotDotSlash1: [],
@@ -63,8 +66,9 @@ describe('Built-in modules', () => {
       `{
         "foo": "${BUILT_IN_MODULE_PREFIX}foo"
       }`,
+      'https://base.example/path1/path2/path3',
       {
-        foo: [`${BUILT_IN_MODULE_PREFIX}foo`]
+        foo: [expect.toMatchURL(`import:${BUILT_IN_MODULE_PREFIX}foo`)]
       }
     );
   });
@@ -74,6 +78,7 @@ describe('Built-in modules', () => {
       `{
         "foo": "${encodeURIComponent(BUILT_IN_MODULE_PREFIX)}foo"
       }`,
+      'https://base.example/path1/path2/path3',
       {
         foo: []
       }
@@ -86,6 +91,7 @@ describe('Built-in modules', () => {
         `{
           "foo": "${bad}"
         }`,
+        'https://base.example/path1/path2/path3',
         {
           foo: []
         }
@@ -111,15 +117,16 @@ describe('Absolute URLs', () => {
         "javascript": "javascript:bad",
         "wss": "wss:bad"
       }`,
+      'https://base.example/path1/path2/path3',
       {
-        about: ['about:good'],
-        blob: ['blob:good'],
-        data: ['data:good'],
-        file: ['file:///good'],
-        filesystem: ['filesystem:good'],
-        http: ['http://good/'],
-        https: ['https://good/'],
-        ftp: ['ftp://good/'],
+        about: [expect.toMatchURL('about:good')],
+        blob: [expect.toMatchURL('blob:good')],
+        data: [expect.toMatchURL('data:good')],
+        file: [expect.toMatchURL('file:///good')],
+        filesystem: [expect.toMatchURL('filesystem:good')],
+        http: [expect.toMatchURL('http://good/')],
+        https: [expect.toMatchURL('https://good/')],
+        ftp: [expect.toMatchURL('ftp://good/')],
         import: [],
         mailto: [],
         javascript: [],
@@ -131,37 +138,38 @@ describe('Absolute URLs', () => {
   it('should only accept absolute URL-string map targets with fetch schemes inside arrays', () => {
     expectSpecifierMap(
       `{
-        "about": ["./valid1", "about:good", "../valid2"],
-        "blob": ["./valid1", "blob:good", "../valid2"],
-        "data": ["./valid1", "data:good", "../valid2"],
-        "file": ["./valid1", "file:///good", "../valid2"],
-        "filesystem": ["./valid1", "filesystem:good", "../valid2"],
-        "http": ["./valid1", "http://good/", "../valid2"],
-        "https": ["./valid1", "https://good/", "../valid2"],
-        "ftp": ["./valid1", "ftp://good/", "../valid2"],
-        "import": ["./valid1", "import:bad", "../valid2"],
-        "mailto": ["./valid1", "mailto:bad", "../valid2"],
-        "javascript": ["./valid1", "javascript:bad", "../valid2"],
-        "wss": ["./valid1", "wss:bad", "../valid2"]
+        "about": ["about:good"],
+        "blob": ["blob:good"],
+        "data": ["data:good"],
+        "file": ["file:///good"],
+        "filesystem": ["filesystem:good"],
+        "http": ["http://good/"],
+        "https": ["https://good/"],
+        "ftp": ["ftp://good/"],
+        "import": ["import:bad"],
+        "mailto": ["mailto:bad"],
+        "javascript": ["javascript:bad"],
+        "wss": ["wss:bad"]
       }`,
+      'https://base.example/path1/path2/path3',
       {
-        about: ['./valid1', 'about:good', '../valid2'],
-        blob: ['./valid1', 'blob:good', '../valid2'],
-        data: ['./valid1', 'data:good', '../valid2'],
-        file: ['./valid1', 'file:///good', '../valid2'],
-        filesystem: ['./valid1', 'filesystem:good', '../valid2'],
-        http: ['./valid1', 'http://good/', '../valid2'],
-        https: ['./valid1', 'https://good/', '../valid2'],
-        ftp: ['./valid1', 'ftp://good/', '../valid2'],
-        import: ['./valid1', '../valid2'],
-        mailto: ['./valid1', '../valid2'],
-        javascript: ['./valid1', '../valid2'],
-        wss: ['./valid1', '../valid2']
+        about: [expect.toMatchURL('about:good')],
+        blob: [expect.toMatchURL('blob:good')],
+        data: [expect.toMatchURL('data:good')],
+        file: [expect.toMatchURL('file:///good')],
+        filesystem: [expect.toMatchURL('filesystem:good')],
+        http: [expect.toMatchURL('http://good/')],
+        https: [expect.toMatchURL('https://good/')],
+        ftp: [expect.toMatchURL('ftp://good/')],
+        import: [],
+        mailto: [],
+        javascript: [],
+        wss: []
       }
     );
   });
 
-  it('should parse and serialize absolute URLs, ignoring unparseable ones', () => {
+  it('should parse absolute URLs, ignoring unparseable ones', () => {
     expectSpecifierMap(
       `{
         "unparseable1": "https://ex ample.org/",
@@ -173,40 +181,42 @@ describe('Absolute URLs', () => {
         "percentDecoding": "https://ex%41mple.com/",
         "noPercentDecoding": "https://example.com/%41"
       }`,
+      'https://base.example/path1/path2/path3',
       {
         unparseable1: [],
         unparseable2: [],
         unparseable3: [],
-        invalidButParseable1: ['https://example.org/'],
-        invalidButParseable2: ['https://example.com///'],
-        prettyNormal: ['https://example.net/'],
-        percentDecoding: ['https://example.com/'],
-        noPercentDecoding: ['https://example.com/%41']
+        invalidButParseable1: [expect.toMatchURL('https://example.org/')],
+        invalidButParseable2: [expect.toMatchURL('https://example.com///')],
+        prettyNormal: [expect.toMatchURL('https://example.net/')],
+        percentDecoding: [expect.toMatchURL('https://example.com/')],
+        noPercentDecoding: [expect.toMatchURL('https://example.com/%41')]
       }
     );
   });
 
-  it('should parse and serialize absolute URLs, ignoring unparseable ones inside arrays', () => {
+  it('should parse absolute URLs, ignoring unparseable ones inside arrays', () => {
     expectSpecifierMap(
       `{
-        "unparseable1": ["./valid1", "https://ex ample.org/", "../valid2"],
-        "unparseable2": ["./valid1", "https://example.com:demo", "../valid2"],
-        "unparseable3": ["./valid1", "http://[www.example.com]/", "../valid2"],
-        "invalidButParseable1": ["./valid1", "https:example.org", "../valid2"],
-        "invalidButParseable2": ["./valid1", "https://///example.com///", "../valid2"],
-        "prettyNormal": ["./valid1", "https://example.net", "../valid2"],
-        "percentDecoding": ["./valid1", "https://ex%41mple.com/", "../valid2"],
-        "noPercentDecoding": ["./valid1", "https://example.com/%41", "../valid2"]
+        "unparseable1": ["https://ex ample.org/"],
+        "unparseable2": ["https://example.com:demo"],
+        "unparseable3": ["http://[www.example.com]/"],
+        "invalidButParseable1": ["https:example.org"],
+        "invalidButParseable2": ["https://///example.com///"],
+        "prettyNormal": ["https://example.net"],
+        "percentDecoding": ["https://ex%41mple.com/"],
+        "noPercentDecoding": ["https://example.com/%41"]
       }`,
+      'https://base.example/path1/path2/path3',
       {
-        unparseable1: ['./valid1', '../valid2'],
-        unparseable2: ['./valid1', '../valid2'],
-        unparseable3: ['./valid1', '../valid2'],
-        invalidButParseable1: ['./valid1', 'https://example.org/', '../valid2'],
-        invalidButParseable2: ['./valid1', 'https://example.com///', '../valid2'],
-        prettyNormal: ['./valid1', 'https://example.net/', '../valid2'],
-        percentDecoding: ['./valid1', 'https://example.com/', '../valid2'],
-        noPercentDecoding: ['./valid1', 'https://example.com/%41', '../valid2']
+        unparseable1: [],
+        unparseable2: [],
+        unparseable3: [],
+        invalidButParseable1: [expect.toMatchURL('https://example.org/')],
+        invalidButParseable2: [expect.toMatchURL('https://example.com///')],
+        prettyNormal: [expect.toMatchURL('https://example.net/')],
+        percentDecoding: [expect.toMatchURL('https://example.com/')],
+        noPercentDecoding: [expect.toMatchURL('https://example.com/%41')]
       }
     );
   });

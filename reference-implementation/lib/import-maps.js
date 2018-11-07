@@ -7,7 +7,7 @@ const FETCH_SCHEMES = new Set(['http', 'https', 'ftp', 'about', 'blob', 'data', 
 // Tentative, so better to centralize so we can change in one place as necessary (including tests).
 exports.BUILT_IN_MODULE_PREFIX = '@std/';
 
-exports.parseFromString = input => {
+exports.parseFromString = (input, baseURL) => {
   const parsed = JSON.parse(input);
 
   if (!isJSONObject(parsed)) {
@@ -23,7 +23,7 @@ exports.parseFromString = input => {
   }
 
   if ('imports' in parsed) {
-    normalizeSpecifierMap(parsed.imports);
+    normalizeSpecifierMap(parsed.imports, baseURL);
   }
 
   if ('scopes' in parsed) {
@@ -31,7 +31,7 @@ exports.parseFromString = input => {
       if (!isJSONObject(specifierMap)) {
         throw new TypeError(`The value for the "${key}" scope must be an object.`);
       }
-      normalizeSpecifierMap(specifierMap);
+      normalizeSpecifierMap(specifierMap, baseURL);
     }
   }
 
@@ -42,7 +42,7 @@ exports.parseFromString = input => {
   };
 };
 
-function normalizeSpecifierMap(obj) {
+function normalizeSpecifierMap(obj, baseURL) {
   for (const [key, value] of Object.entries(obj)) {
     if (typeof value === 'string') {
       obj[key] = [value];
@@ -52,19 +52,24 @@ function normalizeSpecifierMap(obj) {
   }
 
   for (const [key, mapTargetsArray] of Object.entries(obj)) {
-    obj[key] = mapTargetsArray.map(normalizeMapTargetString).filter(target => target !== null);
+    obj[key] = mapTargetsArray
+      .map(string => normalizeMapTargetString(string, baseURL))
+      .filter(target => target !== null);
   }
 }
 
 // Returns null if the value is not a valid map target; a string otherwise
-function normalizeMapTargetString(string) {
+function normalizeMapTargetString(string, baseURL) {
   if (typeof string !== 'string') {
     return null;
   }
 
-  if (string.startsWith('./') || string.startsWith('../') || string.startsWith('/') ||
-      string.startsWith(exports.BUILT_IN_MODULE_PREFIX)) {
-    return string;
+  if (string.startsWith(exports.BUILT_IN_MODULE_PREFIX)) {
+    return new URL('import:' + string);
+  }
+
+  if (string.startsWith('./') || string.startsWith('../') || string.startsWith('/')) {
+    return new URL(string, baseURL);
   }
 
   let url;
@@ -75,7 +80,7 @@ function normalizeMapTargetString(string) {
   }
 
   if (FETCH_SCHEMES.has(url.protocol.slice(0, -1))) {
-    return url.href;
+    return url;
   }
 
   return null;

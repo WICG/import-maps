@@ -1,14 +1,14 @@
 'use strict';
 const { parseFromString } = require('../..');
 
-exports.expectSpecifierMap = (input, output) => {
-  expect(parseFromString(`{ "imports": ${input} }`))
+exports.expectSpecifierMap = (input, baseURL, output) => {
+  expect(parseFromString(`{ "imports": ${input} }`, baseURL))
     .toEqual({ imports: output, scopes: {} });
 
-  expect(parseFromString(`{ "scopes": { "aScope":  ${input} } }`))
+  expect(parseFromString(`{ "scopes": { "aScope":  ${input} } }`, baseURL))
     .toEqual({ imports: {}, scopes: { aScope: output } });
 };
 
-exports.expectBad = input => {
-  expect(() => parseFromString(input)).toThrow(TypeError);
+exports.expectBad = (input, baseURL) => {
+  expect(() => parseFromString(input, baseURL)).toThrow(TypeError);
 };
