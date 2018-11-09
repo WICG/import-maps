@@ -477,6 +477,18 @@ With import maps, you can restrict access by mapping a built-in module to the em
 }
 ```
 
+Alternately, you can use the form
+
+```json
+{
+  "imports": {
+    "@std/async-local-storage": null
+  }
+}
+```
+
+which means the same thing.
+
 With this in place, any attempts to resolve `import:@std/async-local-storage` will fail. For example,
 
 ```js
@@ -490,7 +502,7 @@ You can use the scoping feature to restrict access to a built-in module to only 
 ```json
 {
   "imports": {
-    "@std/async-local-storage": []
+    "@std/async-local-storage": null
   },
   "scopes": {
     "/js/storage-code/": {
@@ -506,7 +518,7 @@ Alternately, you can use similar techniques to prevent only certain parts of you
 {
   "scopes": {
     "/node_modules/untrusted-third-party/": {
-      "@std/async-local-storage": []
+      "@std/async-local-storage": null
     }
   }
 }

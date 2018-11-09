@@ -37,11 +37,11 @@ describe('Mismatching the top-level schema', () => {
 });
 
 describe('Mismatching the specifier map schema', () => {
-  const invalidMapTargetStrings = ['null', 'true', '1', '{}'];
+  const invalidAddressStrings = ['true', '1', '{}'];
   const invalidInsideArrayStrings = ['null', 'true', '1', '{}', '[]'];
 
-  it('should ignore entries where the address is not a string or array', () => {
-    for (const invalid of invalidMapTargetStrings) {
+  it('should ignore entries where the address is not a string, array, or null', () => {
+    for (const invalid of invalidAddressStrings) {
       expectSpecifierMap(
         `{
           "foo": ${invalid},
@@ -108,12 +108,14 @@ describe('Normalization', () => {
     expectSpecifierMap(
       `{
         "foo": "https://example.com/1",
-        "bar": ["https://example.com/2"]
+        "bar": ["https://example.com/2"],
+        "baz": null
       }`,
       'https://base.example/',
       {
         foo: [expect.toMatchURL('https://example.com/1')],
-        bar: [expect.toMatchURL('https://example.com/2')]
+        bar: [expect.toMatchURL('https://example.com/2')],
+        baz: []
       }
     );
   });

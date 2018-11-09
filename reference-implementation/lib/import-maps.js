@@ -64,6 +64,8 @@ function normalizeSpecifierMap(obj, baseURL) {
   for (const [specifierKey, value] of Object.entries(obj)) {
     if (typeof value === 'string') {
       obj[specifierKey] = [value];
+    } else if (value === null) {
+      obj[specifierKey] = [];
     } else if (!Array.isArray(value)) {
       delete obj[specifierKey];
     }
