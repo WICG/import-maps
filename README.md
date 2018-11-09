@@ -31,6 +31,7 @@ _Or, how to control the behavior of JavaScript imports_
     - [Extending a built-in module](#extending-a-built-in-module)
 - [Import map processing](#import-map-processing)
   - [Installation](#installation)
+  - [Dynamic import map example](#dynamic-import-map-example)
   - [Scope](#scope)
 - [Alternatives considered](#alternatives-considered)
   - [The Node.js module resolution algorithm](#the-nodejs-module-resolution-algorithm)
@@ -603,6 +604,55 @@ const result = {
 See [the proto-spec](./spec.md) for more details on how this all works.
 
 _What do we do in workers? Probably `new Worker(someURL, { type: "module", importMap: ... })`? Or should you set it from inside the worker? Should dedicated workers use their controlling document's map, either by default or always? Discuss in [#2](https://github.com/domenic/package-name-maps/issues/2)._
+
+### Dynamic import map example
+
+The above rules mean that you _can_ dynamically generate import maps, as long as you do so before performing any imports. For example:
+
+```html
+<script>
+const im = document.createElement('script');
+im.type = 'importmap';
+im.textContent = JSON.stringify({
+  imports: {
+    'my-library': Math.random() > 0.5 ? '/my-awesome-library.mjs' : '/my-rad-library.mjs';
+  }
+});
+document.currentScript.after(im);
+</script>
+
+<script type="module">
+import 'my-library'; // will fetch the randomly-chosen URL
+</script>
+```
+
+A more realistic example might use this capability to override a previous import map based on feature detection:
+
+```html
+<script type="importmap">
+{
+  "imports": {
+    "lodash": "/lodash.mjs",
+    "moment": "/moment.mjs"
+  }
+}
+</script>
+
+<script>
+if (!someFeatureDetection()) {
+  const im = document.createElement('script');
+  im.type = 'importmap';
+  im.textContent = '{ "imports": { "lodash": "/lodash-legacy-browsers.js" } }';
+  document.currentScript.after(im);
+}
+</script>
+
+<script type="module">
+import _ from "lodash"; // will fetch the right URL for this browser
+</script>
+```
+
+Note that (like other `<script>` elements) modifying the contents of a `<script type="importmap">` after it's already inserted in the document will not work; this is why we wrote the above example by inserting a second `<script type="importmap">` to overwrite the first one.
 
 ### Scope
 
