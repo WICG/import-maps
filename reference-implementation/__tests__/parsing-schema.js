@@ -40,7 +40,7 @@ describe('Mismatching the specifier map schema', () => {
   const invalidMapTargetStrings = ['null', 'true', '1', '{}'];
   const invalidInsideArrayStrings = ['null', 'true', '1', '{}', '[]'];
 
-  it('should ignore entries where the map target is not a string or array', () => {
+  it('should ignore entries where the address is not a string or array', () => {
     for (const invalid of invalidMapTargetStrings) {
       expectSpecifierMap(
         `{
@@ -65,7 +65,7 @@ describe('Mismatching the specifier map schema', () => {
     );
   });
 
-  it('should ignore members of a map target array that are not strings', () => {
+  it('should ignore members of an address array that are not strings', () => {
     for (const invalid of invalidInsideArrayStrings) {
       expectSpecifierMap(
         `{
@@ -81,7 +81,7 @@ describe('Mismatching the specifier map schema', () => {
     }
   });
 
-  it('should throw if the scope value is not an object', () => {
+  it('should throw if a scope\'s value is not an object', () => {
     for (const invalid of nonObjectStrings) {
       expectBad(`{ "scopes": { "https://scope.example/": ${invalid} } }`, 'https://base.example/');
     }
@@ -89,22 +89,22 @@ describe('Mismatching the specifier map schema', () => {
 });
 
 describe('Normalization', () => {
-  it('should normalize empty maps to have imports and scopes keys', () => {
+  it('should normalize empty import maps to have imports and scopes keys', () => {
     expect(parseFromString(`{}`, 'https://base.example/'))
       .toEqual({ imports: {}, scopes: {} });
   });
 
-  it('should normalize a map without imports to have imports', () => {
+  it('should normalize an import map without imports to have imports', () => {
     expect(parseFromString(`{ "scopes": {} }`, 'https://base.example/'))
       .toEqual({ imports: {}, scopes: {} });
   });
 
-  it('should normalize a map without scopes to have scopes', () => {
+  it('should normalize an import map without scopes to have scopes', () => {
     expect(parseFromString(`{ "imports": {} }`, 'https://base.example/'))
       .toEqual({ imports: {}, scopes: {} });
   });
 
-  it('should normalize map targets to arrays', () => {
+  it('should normalize addresses to arrays', () => {
     expectSpecifierMap(
       `{
         "foo": "https://example.com/1",

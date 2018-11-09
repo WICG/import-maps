@@ -28,24 +28,24 @@ exports.parseFromString = (input, baseURL) => {
 
   const normalizedScopes = {};
   if ('scopes' in parsed) {
-    for (const [scopeKey, specifierMap] of Object.entries(parsed.scopes)) {
+    for (const [scopePrefix, specifierMap] of Object.entries(parsed.scopes)) {
       if (!isJSONObject(specifierMap)) {
-        throw new TypeError(`The value for the "${scopeKey}" scope must be an object.`);
+        throw new TypeError(`The value for the "${scopePrefix}" scope prefix must be an object.`);
       }
 
       normalizeSpecifierMap(specifierMap, baseURL);
 
-      const scopeKeyURL = tryURLParse(scopeKey, baseURL);
-      if (scopeKeyURL === null) {
+      const scopePrefixURL = tryURLParse(scopePrefix, baseURL);
+      if (scopePrefixURL === null) {
         continue;
       }
 
-      if (!hasFetchScheme(scopeKeyURL)) {
+      if (!hasFetchScheme(scopePrefixURL)) {
         continue;
       }
 
-      const normalizedScopeKey = scopeKeyURL.href;
-      normalizedScopes[normalizedScopeKey] = specifierMap;
+      const normalizedScopePrefix = scopePrefixURL.href;
+      normalizedScopes[normalizedScopePrefix] = specifierMap;
     }
   }
 
@@ -57,38 +57,41 @@ exports.parseFromString = (input, baseURL) => {
 };
 
 function normalizeSpecifierMap(obj, baseURL) {
+  // Ignore attempts to use the empty string as a specifier key
   delete obj[''];
 
-  for (const [key, value] of Object.entries(obj)) {
+  // Normalize all entries into arrays
+  for (const [specifierKey, value] of Object.entries(obj)) {
     if (typeof value === 'string') {
-      obj[key] = [value];
+      obj[specifierKey] = [value];
     } else if (!Array.isArray(value)) {
-      delete obj[key];
+      delete obj[specifierKey];
     }
   }
 
-  for (const [key, mapTargetsArray] of Object.entries(obj)) {
-    obj[key] = mapTargetsArray
-      .map(string => normalizeMapTargetString(string, baseURL))
-      .filter(target => target !== null);
+  // Normalize/validate each potential address in the array
+  for (const [key, addressArray] of Object.entries(obj)) {
+    obj[key] = addressArray
+      .map(address => normalizeAddress(address, baseURL))
+      .filter(address => address !== null);
   }
 }
 
-// Returns null if the value is not a valid map target; a string otherwise
-function normalizeMapTargetString(string, baseURL) {
-  if (typeof string !== 'string') {
+// Returns null if `address` is not a valid address, and a `URL` instance if it is.
+function normalizeAddress(address, baseURL) {
+  if (typeof address !== 'string') {
     return null;
   }
 
-  if (string.startsWith(exports.BUILT_IN_MODULE_PREFIX)) {
-    return new URL('import:' + string);
+  if (address.startsWith(exports.BUILT_IN_MODULE_PREFIX)) {
+    return new URL('import:' + address);
   }
 
-  if (string.startsWith('./') || string.startsWith('../') || string.startsWith('/')) {
-    return new URL(string, baseURL);
+  if (address.startsWith('./') || address.startsWith('../') || address.startsWith('/')) {
+    return new URL(address, baseURL);
   }
 
-  const url = tryURLParse(string);
+  const url = tryURLParse(address);
   if (url === null) {
     return null;
   }

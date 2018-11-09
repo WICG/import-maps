@@ -1,7 +1,7 @@
 'use strict';
 const { expectScopes } = require('./helpers/parsing.js');
 
-describe('Relative URLs', () => {
+describe('Relative URL scope prefixes', () => {
   it('should work with no prefix', () => {
     expectScopes(
       ['foo'],
@@ -39,8 +39,8 @@ describe('Relative URLs', () => {
   });
 });
 
-describe('Absolute URLs', () => {
-  it('should only accept absolute URL scope keys with fetch schemes', () => {
+describe('Absolute URL scope prefixes', () => {
+  it('should only accept absolute URL scope prefixes with fetch schemes', () => {
     expectScopes(
       [
         'about:good',
@@ -70,7 +70,7 @@ describe('Absolute URLs', () => {
     );
   });
 
-  it('should parse URLs, ignoring unparseable ones', () => {
+  it('should parse absolute URL scope prefixes, ignoring unparseable ones', () => {
     expectScopes(
       [
         'https://ex ample.org/',

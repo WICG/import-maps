@@ -14,8 +14,8 @@ exports.expectScopes = (inputArray, baseURL, outputArray) => {
   const inputString = `{ "scopes": { ${inputScopesAsStrings.join(', ')} } }`;
 
   const outputScopesObject = {};
-  for (const outputScope of outputArray) {
-    outputScopesObject[outputScope] = {};
+  for (const outputScopePrefix of outputArray) {
+    outputScopesObject[outputScopePrefix] = {};
   }
 
   expect(parseFromString(inputString, baseURL)).toEqual({ imports: {}, scopes: outputScopesObject });

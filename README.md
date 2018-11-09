@@ -184,7 +184,7 @@ and in HTML:
 <link rel="modulepreload" href="import:moment">
 ```
 
-Note that the right-hand side of the mapping must start with `/`, `../`, or `./`, or be parseable as an absolute URL, to identify a URL. (Other cases are explained [later](#for-built-in-modules-in-module-import-map-supporting-browsers).)
+Note that the right-hand side of the mapping (known as the "address") must start with `/`, `../`, or `./`, or be parseable as an absolute URL, to identify a URL. (Other cases are explained [later](#for-built-in-modules-in-module-import-map-supporting-browsers).)
 
 #### Bare specifiers for other resources
 
@@ -217,13 +217,13 @@ or
 
 Things brings the name-coordination benefits of JavaScript's bare import specifiers to all web resources.
 
-(Does this use of separate `widget`, `widget-light`, and `widget-back-button` entries seem weird to you? Does it seem like they'd be better grouped under some sort of "package"? Read on to our next example...)
+(Does this use of separate `widget`, `widget-light`, and `widget-back-button` specifier keys seem weird to you? Does it seem like they'd be better grouped under some sort of "package"? Read on to our next example...)
 
 #### "Packages" via trailing slashes
 
 It's common in the JavaScript ecosystem to have a package (in the sense of [npm](https://www.npmjs.com/)) contain multiple modules, or other files. For such cases, we want to map a prefix in the `import:`-URL space, onto another prefix in the fetchable-URL space.
 
-Import maps do this by giving special meaning to mappings that end with a trailing slash. Thus, a map like
+Import maps do this by giving special meaning to specifier keys that end with a trailing slash. Thus, a map like
 
 ```json
 {
@@ -284,7 +284,7 @@ As usual, since the import map affects `import:` resolution generally, this pack
 
 Consider the case of wanting to use a CDN's copy of a library, but fall back to a local copy if the CDN is unavailable. Today this is often accomplished via [terrible `document.write()`-using sync-script-loading hacks](https://www.hanselman.com/blog/CDNsFailButYourScriptsDontHaveToFallbackFromCDNToLocalJQuery.aspx). With import maps providing a first-class way of controlling module resolution, we can do better.
 
-To provide fallbacks, use an array instead of a string for the right-hand side of your mapping:
+To provide fallbacks, use an address array, instead of a string address, for the right-hand side of your mapping:
 
 ```json
 {
@@ -299,11 +299,13 @@ To provide fallbacks, use an array instead of a string for the right-hand side o
 
 In this case, any references to `import:jquery` will first try to fetch the CDN URL, but if that fails, fall back to the copy in `/node_modules/`. (This fallback process will happen only once, and the choice will be cached for all future `import:` URL resolutions.)
 
+_Side note: you can think of the string address form as just sugar for a single-element arrray address. That is, `"jquery": "/node_modules/jquery/dist/jquery.js"` is sugar for `"jquery": ["/node_modules/jquery/dist/jquery.js"]`._
+
 #### For built-in modules, in module-import-map-supporting browsers
 
 When a browser supports import maps, we can use the same principle as the above example to support fallbacks for built-in modules.
 
-For example, consider the following package name map, which supplies a polyfill fallback for [async local storage](https://domenic.github.io/async-local-storage/):
+For example, consider the following import map, which supplies a polyfill fallback for [async local storage](https://domenic.github.io/async-local-storage/):
 
 ```json
 {
@@ -316,7 +318,7 @@ For example, consider the following package name map, which supplies a polyfill 
 }
 ```
 
-Note here how we see our first example of the right-hand side not starting with `./`, `../`, or `/`. If the right-hand side does not start with those prefixes, then it is interpreted as identifying a built-in module.
+Note here how we see our first example of an address not starting with `./`, `../`, or `/`. If the address does not start with those prefixes, and is not parseable as an absolute URL, then it is interpreted as identifying a built-in module.
 
 Now, statements like
 
@@ -324,7 +326,7 @@ Now, statements like
 import { StorageArea } from "@std/async-local-storage";
 ```
 
-will first try to resolve to `@std/async-local-storage`, i.e. the browser's built-in implementation of async local storage. If fetching that URL fails, because the browser does not implement async local storage, then instead it will fetch the polyfill, at `/node_modules/als-polyfill/index.mjs`.
+will first try to resolve to `@std/async-local-storage`, i.e. the browser's built-in implementation of async local storage. If that fails, e.g. because the browser does not implement async local storage, then instead it will fetch the polyfill, at `/node_modules/als-polyfill/index.mjs`.
 
 #### For built-in modules, in browsers without import maps
 
@@ -414,7 +416,7 @@ _Note: this sensitivity to the current script file in URL parsing is novel, and 
 
 #### Scope inheritance
 
-Scopes "inherit" from each other in an intentionally-simple manner, merging but overriding as they go. For example, the following package name map:
+Scopes "inherit" from each other in an intentionally-simple manner, merging but overriding as they go. For example, the following import map:
 
 ```json
 {
@@ -465,7 +467,7 @@ Although it is drastic and fairly rare, sometimes it is desirable to remove acce
 delete self.WebSocket;
 ```
 
-With import maps, you can restrict access by mapping a built-in module to the empty array, i.e. saying "there are no URLs or built-in modules that this should map to":
+With import maps, you can restrict access by mapping a built-in module to the empty address array, i.e. saying "there are no URLs or built-in modules that this should map to":
 
 ```json
 {
@@ -690,7 +692,7 @@ That said, in terms of implementation staging, it's easy to slice this proposal 
 Speaking of delivering incremental value, it's worth noting that by even before getting to `import:` URLs, implementations can ship subsets of the proposal that solve important use cases. For example, one implementation plan could be:
 
 - Only support map entries of the form `"http(s) URL": ["built-in module", "same http(s) URL"]`. ([See above](#for-built-in-modules-in-module-import-map-supporting-browsers) for a realistic example.) This enables built-in module polyfilling in a backward-compatible way.
-- Support general URL and non-array right-hand sides of the map entries. This enables basic bare import specifier support.
+- Support general URL and non-array addresses in the specifier map. This enables basic bare import specifier support.
 - Support scoping. This enables full "npm parity" bare import specifier support.
 - Support fallbacks from HTTP(S) URLs to HTTP(S) URLs. This allows supplanting the [terrible `document.write()`-using sync-script-loading hacks](https://www.hanselman.com/blog/CDNsFailButYourScriptsDontHaveToFallbackFromCDNToLocalJQuery.aspx).
 

@@ -29,14 +29,7 @@ Any **ongoing fetches of import maps** are noted, while ongoing, so that `import
 
 ### Import map spec structure
 
-A **specifier map** is a map of `import:` URLs to URLs.
-
-An **import map** is a struct with two fields:
-
-- **imports**: a specifier map
-- **scopes**: a map of URLs to specifier maps
-
-Getting from JSON to this structure will involve some URL parsing and type validation.
+For now, see the [reference implementation](https://github.com/domenic/import-maps/tree/master/reference-implementation) to understand how an arbitrary string gets turned into a normalized "import map" structure. This will soon be ported to formal specification text, after a bit more validation that it works correctly.
 
 ### Merging import maps
 
@@ -169,7 +162,3 @@ Trickier parts will be scopes and trailing-slash packages, as both are somewhat 
 ### Resolve a module specifier
 
 I think with all the above in place, the current spec's "resolve a module specifier" can be reduced to just prepending `import:`? Hmm, but the "active script" isn't exactly the same as the _base URL_ passed to that... TODO...
-
-## More TODOs
-
-Should we perform more validation besides URL parsing and type checking? E.g. should we restrict to valid URL characters, at least on the left-hand side?

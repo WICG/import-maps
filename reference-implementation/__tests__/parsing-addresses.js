@@ -1,8 +1,8 @@
 'use strict';
 const { expectSpecifierMap } = require('./helpers/parsing.js');
-const { BUILT_IN_MODULE_PREFIX } = require('..');
+const { BUILT_IN_MODULE_PREFIX } = require('../lib/import-maps');
 
-describe('Relative URL-like specifiers', () => {
+describe('Relative URL-like addresses', () => {
   it('should accept strings prefixed with ./, ../, or /', () => {
     expectSpecifierMap(
       `{
@@ -60,7 +60,7 @@ describe('Relative URL-like specifiers', () => {
   });
 });
 
-describe('Built-in modules', () => {
+describe('Built-in module addresses', () => {
   it('should accept strings prefixed with the built-in module prefix', () => {
     expectSpecifierMap(
       `{
@@ -100,8 +100,8 @@ describe('Built-in modules', () => {
   });
 });
 
-describe('Absolute URLs', () => {
-  it('should only accept absolute URL-string map targets with fetch schemes', () => {
+describe('Absolute URL addresses', () => {
+  it('should only accept absolute URL addresses with fetch schemes', () => {
     expectSpecifierMap(
       `{
         "about": "about:good",
@@ -135,7 +135,7 @@ describe('Absolute URLs', () => {
     );
   });
 
-  it('should only accept absolute URL-string map targets with fetch schemes inside arrays', () => {
+  it('should only accept absolute URL addresses with fetch schemes inside arrays', () => {
     expectSpecifierMap(
       `{
         "about": ["about:good"],
