@@ -300,7 +300,7 @@ To provide fallbacks, use an address array, instead of a string address, for the
 
 In this case, any references to `import:jquery` will first try to fetch the CDN URL, but if that fails, fall back to the copy in `/node_modules/`. (This fallback process will happen only once, and the choice will be cached for all future `import:` URL resolutions.)
 
-_Side note: you can think of the string address form as just sugar for a single-element arrray address. That is, `"jquery": "/node_modules/jquery/dist/jquery.js"` is sugar for `"jquery": ["/node_modules/jquery/dist/jquery.js"]`._
+_Side note: you can think of the string address form as just sugar for a single-element array address. That is, `"jquery": "/node_modules/jquery/dist/jquery.js"` is sugar for `"jquery": ["/node_modules/jquery/dist/jquery.js"]`._
 
 #### For built-in modules, in module-import-map-supporting browsers
 
@@ -711,7 +711,7 @@ then the only information you need is
 
 You could imagine a module import configuration format that only specified these things, or even only some subset (if we baked in assumptions for the others).
 
-This idea does not work for more complex applications which need scoped resolution, so we believe the full import map proposal is necessary. But it remains attractive for simple applications, and we wonder if there's a way to make theproposal also have an easy-mode that does not require listing all modules, but instead relies on conventions and tools to ensure minimal mapping is needed. Discuss in [#7](https://github.com/domenic/package-name-maps/issues/7).
+This idea does not work for more complex applications which need scoped resolution, so we believe the full import map proposal is necessary. But it remains attractive for simple applications, and we wonder if there's a way to make the proposal also have an easy-mode that does not require listing all modules, but instead relies on conventions and tools to ensure minimal mapping is needed. Discuss in [#7](https://github.com/domenic/package-name-maps/issues/7).
 
 ## Adjacent concepts
 
