@@ -1,8 +1,6 @@
 'use strict';
 const { URL } = require('url');
-
-// https://fetch.spec.whatwg.org/#fetch-scheme
-const FETCH_SCHEMES = new Set(['http', 'https', 'ftp', 'about', 'blob', 'data', 'file', 'filesystem']);
+const { tryURLParse, hasFetchScheme, tryURLLikeSpecifierParse } = require('./utils.js');
 
 // Tentative, so better to centralize so we can change in one place as necessary (including tests).
 exports.BUILT_IN_MODULE_PREFIX = '@std/';
@@ -22,8 +20,9 @@ exports.parseFromString = (input, baseURL) => {
     throw new TypeError('Import map\'s scopes value must be an object.');
   }
 
+  let normalizedImports = {};
   if ('imports' in parsed) {
-    normalizeSpecifierMap(parsed.imports, baseURL);
+    normalizedImports = normalizeSpecifierMap(parsed.imports, baseURL);
   }
 
   const normalizedScopes = {};
@@ -32,8 +31,6 @@ exports.parseFromString = (input, baseURL) => {
       if (!isJSONObject(specifierMap)) {
         throw new TypeError(`The value for the "${scopePrefix}" scope prefix must be an object.`);
       }
-
-      normalizeSpecifierMap(specifierMap, baseURL);
 
       const scopePrefixURL = tryURLParse(scopePrefix, baseURL);
       if (scopePrefixURL === null) {
@@ -45,38 +42,57 @@ exports.parseFromString = (input, baseURL) => {
       }
 
       const normalizedScopePrefix = scopePrefixURL.href;
-      normalizedScopes[normalizedScopePrefix] = specifierMap;
+      normalizedScopes[normalizedScopePrefix] = normalizeSpecifierMap(specifierMap, baseURL);
     }
   }
 
   // Always have these two keys, and exactly these two keys, in the result.
   return {
-    imports: parsed.imports || {},
+    imports: normalizedImports,
     scopes: normalizedScopes
   };
 };
 
 function normalizeSpecifierMap(obj, baseURL) {
-  // Ignore attempts to use the empty string as a specifier key
-  delete obj[''];
-
   // Normalize all entries into arrays
+  const result = {};
   for (const [specifierKey, value] of Object.entries(obj)) {
+    const normalizedSpecifierKey = normalizeSpecifierKey(specifierKey, baseURL);
+    if (normalizedSpecifierKey === null) {
+      continue;
+    }
+
     if (typeof value === 'string') {
-      obj[specifierKey] = [value];
+      result[normalizedSpecifierKey] = [value];
     } else if (value === null) {
-      obj[specifierKey] = [];
-    } else if (!Array.isArray(value)) {
-      delete obj[specifierKey];
+      result[normalizedSpecifierKey] = [];
+    } else if (Array.isArray(value)) {
+      result[normalizedSpecifierKey] = obj[specifierKey];
     }
   }
 
   // Normalize/validate each potential address in the array
-  for (const [key, addressArray] of Object.entries(obj)) {
-    obj[key] = addressArray
+  for (const [key, addressArray] of Object.entries(result)) {
+    result[key] = addressArray
       .map(address => normalizeAddress(address, baseURL))
       .filter(address => address !== null);
   }
+
+  return result;
+}
+
+function normalizeSpecifierKey(specifierKey, baseURL) {
+  // Ignore attempts to use the empty string as a specifier key
+  if (specifierKey === '') {
+    return null;
+  }
+
+  const url = tryURLLikeSpecifierParse(specifierKey, baseURL);
+  if (url !== null) {
+    return url.href;
+  }
+
+  return specifierKey;
 }
 
 // Returns null if `address` is not a valid address, and a `URL` instance if it is.
@@ -89,34 +105,9 @@ function normalizeAddress(address, baseURL) {
     return new URL('import:' + address);
   }
 
-  if (address.startsWith('./') || address.startsWith('../') || address.startsWith('/')) {
-    return new URL(address, baseURL);
-  }
-
-  const url = tryURLParse(address);
-  if (url === null) {
-    return null;
-  }
-
-  if (hasFetchScheme(url)) {
-    return url;
-  }
-
-  return null;
+  return tryURLLikeSpecifierParse(address, baseURL);
 }
 
 function isJSONObject(value) {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-function hasFetchScheme(url) {
-  return FETCH_SCHEMES.has(url.protocol.slice(0, -1));
-}
-
-function tryURLParse(string, baseURL) {
-  try {
-    return new URL(string, baseURL);
-  } catch (e) { // TODO remove useless binding when ESLint and Jest support that
-    return null;
-  }
 }

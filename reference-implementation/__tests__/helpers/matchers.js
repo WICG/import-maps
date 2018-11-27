@@ -1,10 +1,11 @@
 'use strict';
 const { URL } = require('url');
+const diff = require('jest-diff');
 
 expect.extend({
   // This largely exists to work around https://github.com/nodejs/node/issues/24211.
   toMatchURL(received, expected) {
-    if (!('href' in received) || typeof received.href !== 'string') {
+    if (!received || !('href' in received) || typeof received.href !== 'string') {
       throw new Error(this.utils.matcherHint('[.not].toMatchURL', 'received', 'href') +
         '\n\n' +
         `Expected value to have a 'href' property that is a string. ` +
@@ -28,7 +29,7 @@ expect.extend({
           `  ${this.utils.printReceived(received)}`;
       } :
       () => {
-        const diffString = this.utils.diff(expected, received, {
+        const diffString = diff(expected, received, {
           expand: this.expand
         });
         return this.utils.matcherHint('.toBe') +

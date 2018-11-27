@@ -65,7 +65,7 @@ Note that we do not introspect the scopes. If there's two conflicting definition
 
 ## Resolution
 
-The new "resolve a module specifier" algorithm will be prototyped in the reference implementation. Stay tuned!
+The new "resolve a module specifier" algorithm is prototyped in the [reference implementation](https://github.com/domenic/import-maps/tree/master/reference-implementation). It takes as input a specifier, a parsed import map, and a script URL that the specifier is being resolved in the context of.
 
 For now we will only handle cases where there is at most one fetch-scheme URL in the address array. Cases involving multiple such URLs (such as the [fallbacks for user-supplied packages](./README.md#for-user-supplied-packages) example) require more thought on how to thread through the spec. This corresponds to working through all but the last bullet in the README's section on [further implementation staging](./README.md#further-implementation-staging)
 
