@@ -1,5 +1,5 @@
 'use strict';
-const { parseFromString } = require('..');
+const { parseFromString } = require('../lib/parser.js');
 const { expectBad, expectSpecifierMap } = require('./helpers/parsing.js');
 
 const nonObjectStrings = ['null', 'true', '1', '"foo"', '[]'];

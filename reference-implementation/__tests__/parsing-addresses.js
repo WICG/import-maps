@@ -1,6 +1,6 @@
 'use strict';
 const { expectSpecifierMap } = require('./helpers/parsing.js');
-const { BUILT_IN_MODULE_PREFIX } = require('../lib/import-maps');
+const { BUILT_IN_MODULE_PREFIX } = require('../lib/parser.js');
 
 describe('Relative URL-like addresses', () => {
   it('should accept strings prefixed with ./, ../, or /', () => {

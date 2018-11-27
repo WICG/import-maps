@@ -1,5 +1,5 @@
 'use strict';
-const { parseFromString } = require('../..');
+const { parseFromString } = require('../../lib/parser.js');
 
 exports.expectSpecifierMap = (input, baseURL, output) => {
   expect(parseFromString(`{ "imports": ${input} }`, baseURL))
