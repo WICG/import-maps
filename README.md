@@ -302,6 +302,28 @@ would not: in all classes of browsers, it would fetch the polyfill unconditional
 
 which will work as desired in all classes of browser.
 
+#### Alternating between different logic based on the existence of a built-in module
+
+_See further discussion of this case in the issue tracker: [#61](https://github.com/domenic/package-name-maps/issues/61)._
+
+Not all fallbacks take the role of running one piece of code. For example, sometimes, one code path is to be taken if a particular platform API exists, and another code path is taken if it doesn't exist. The import maps proposal does not aim to solve all such scenarios in a built-in way; instead, The Stage 2 TC39 proposal [top-level await](https://github.com/tc39/proposal-top-level-await) can be used to meet some of these use cases. Note that top-level await blocks import of the module containing the await.
+
+Imagine IndexedDB were provided by a built-in module `@std/indexed-db` and localStorage were provided by a built-in module `@std/local-storage`. For a particular application, all supported browsers support localStorage, and only some support IndexedDB. Although it's possible to polyfill IndexedDB on top of localStorage, in this scenario, doing so leads to performance overhead vs more specialized usage. Therefore, it's preferrable to use a specialized implementation based on either IndexedDB or localStorage directly.
+
+In this scenario, a module may use top-level await to perform feature testing and fallback as follows:
+
+```js
+export let myStorageFunction;
+
+try {
+  const indexedDB = await import("@std/indexed-db");
+  myStorageFunction = function() { /* in terms of indexedDB */ };
+} catch (e) {
+  const localStorage = await import(@std/local-storage");
+  myStorageFunction = function() { /* in terms of localStorage */ };
+}
+```
+
 ### Scoping examples
 
 #### Multiple versions of the same module
