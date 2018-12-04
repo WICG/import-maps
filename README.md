@@ -19,6 +19,7 @@ _Or, how to control the behavior of JavaScript imports_
     - [For built-in modules, in module-import-map-supporting browsers](#for-built-in-modules-in-module-import-map-supporting-browsers)
     - [For built-in modules, in browsers without import maps](#for-built-in-modules-in-browsers-without-import-maps)
       - [This doesn't work for `<script>`](#this-doesnt-work-for-script)
+    - [Alternating logic based on the presence of a built-in module](#alternating-logic-based-on-the-presence-of-a-built-in-module
   - [Scoping examples](#scoping-examples)
     - [Multiple versions of the same module](#multiple-versions-of-the-same-module)
     - [Scope inheritance](#scope-inheritance)
@@ -302,7 +303,7 @@ would not: in all classes of browsers, it would fetch the polyfill unconditional
 
 which will work as desired in all classes of browser.
 
-#### Alternating between different logic based on the existence of a built-in module
+#### Alternating logic based on the presence of a built-in module
 
 _See further discussion of this case in the issue tracker: [#61](https://github.com/domenic/package-name-maps/issues/61)._
 
