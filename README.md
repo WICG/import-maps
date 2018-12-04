@@ -319,7 +319,7 @@ try {
   const indexedDB = await import("@std/indexed-db");
   myStorageFunction = function() { /* in terms of indexedDB */ };
 } catch (e) {
-  const localStorage = await import(@std/local-storage");
+  const localStorage = await import("@std/local-storage");
   myStorageFunction = function() { /* in terms of localStorage */ };
 }
 ```
