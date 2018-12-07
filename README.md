@@ -490,7 +490,7 @@ Consider a UI widget, distributed under the "package name" `widget`. It contains
 ```json
 {
   "imports": {
-    "widget/": "/node_modules/widget/index.mjs",
+    "widget": "/node_modules/widget/index.mjs",
     "widget/": "/node_modules/widget/"
   }
 }
