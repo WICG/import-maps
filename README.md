@@ -307,9 +307,9 @@ which will work as desired in all classes of browser.
 
 _See further discussion of this case in the issue tracker: [#61](https://github.com/domenic/package-name-maps/issues/61)._
 
-Not all fallbacks take the role of running one piece of code. For example, sometimes, one code path is to be taken if a particular platform API exists, and another code path is taken if it doesn't exist. The import maps proposal does not aim to solve all such scenarios in a built-in way; instead, The Stage 2 TC39 proposal [top-level await](https://github.com/tc39/proposal-top-level-await) can be used to meet some of these use cases. Note that top-level await blocks import of the module containing the await.
+Not all fallbacks take the role of running one piece of code. For example, sometimes, one code path is to be taken if a particular platform API exists, and another code path is taken if it doesn't exist. The import maps proposal does not aim to solve all such scenarios in a built-in way; instead, the stage 2 TC39 proposal [top-level await](https://github.com/tc39/proposal-top-level-await) can be used to meet some of these use cases.
 
-Imagine IndexedDB were provided by a built-in module `@std/indexed-db` and localStorage were provided by a built-in module `@std/local-storage`. For a particular application, all supported browsers support localStorage, and only some support IndexedDB. Although it's possible to polyfill IndexedDB on top of localStorage, in this scenario, doing so leads to performance overhead vs more specialized usage. Therefore, it's preferrable to use a specialized implementation based on either IndexedDB or localStorage directly.
+Imagine if IndexedDB were provided by a built-in module `@std/indexed-db` and localStorage were provided by a built-in module `@std/local-storage`. For a particular application, all supported browsers support localStorage, and only some support IndexedDB. Although it's possible to polyfill IndexedDB on top of localStorage, in this scenario, doing so leads to performance overhead vs more specialized usage. Therefore, it's preferrable to use a specialized implementation based on either IndexedDB or localStorage directly, instead of using import maps to remap `@std/indexed-db`.
 
 In this scenario, a module may use top-level await to perform feature testing and fallback as follows:
 
