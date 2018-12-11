@@ -19,7 +19,6 @@ _Or, how to control the behavior of JavaScript imports_
     - [For built-in modules, in module-import-map-supporting browsers](#for-built-in-modules-in-module-import-map-supporting-browsers)
     - [For built-in modules, in browsers without import maps](#for-built-in-modules-in-browsers-without-import-maps)
       - [This doesn't work for `<script>`](#this-doesnt-work-for-script)
-    - [Alternating logic based on the presence of a built-in module](#alternating-logic-based-on-the-presence-of-a-built-in-module)
   - [Scoping examples](#scoping-examples)
     - [Multiple versions of the same module](#multiple-versions-of-the-same-module)
     - [Scope inheritance](#scope-inheritance)
@@ -44,6 +43,7 @@ _Or, how to control the behavior of JavaScript imports_
   - [A convention-based flat mapping](#a-convention-based-flat-mapping)
 - [Adjacent concepts](#adjacent-concepts)
   - [Supplying out-of-band metadata for each module](#supplying-out-of-band-metadata-for-each-module)
+  - [Alternating logic based on the presence of a built-in module](#alternating-logic-based-on-the-presence-of-a-built-in-module)
 - [Implementation notes](#implementation-notes)
   - [`import:` URL staging](#import-url-staging)
   - [Further implementation staging](#further-implementation-staging)
@@ -302,28 +302,6 @@ would not: in all classes of browsers, it would fetch the polyfill unconditional
 ```
 
 which will work as desired in all classes of browser.
-
-#### Alternating logic based on the presence of a built-in module
-
-_See further discussion of this case in the issue tracker: [#61](https://github.com/domenic/package-name-maps/issues/61)._
-
-Not all fallbacks take the role of running one piece of code. For example, sometimes, one code path is to be taken if a particular platform API exists, and another code path is taken if it doesn't exist. The import maps proposal does not aim to solve all such scenarios in a built-in way; instead, the stage 2 TC39 proposal [top-level await](https://github.com/tc39/proposal-top-level-await) can be used to meet some of these use cases.
-
-Imagine if IndexedDB were provided by a built-in module `@std/indexed-db` and localStorage were provided by a built-in module `@std/local-storage`. For a particular application, all supported browsers support localStorage, and only some support IndexedDB. Although it's possible to polyfill IndexedDB on top of localStorage, in this scenario, doing so leads to performance overhead vs more specialized usage. Therefore, it's preferrable to use a specialized implementation based on either IndexedDB or localStorage directly, instead of using import maps to remap `@std/indexed-db`.
-
-In this scenario, a module may use top-level await to perform feature testing and fallback as follows:
-
-```js
-export let myStorageFunction;
-
-try {
-  const indexedDB = await import("@std/indexed-db");
-  myStorageFunction = function() { /* in terms of indexedDB */ };
-} catch (e) {
-  const localStorage = await import("@std/local-storage");
-  myStorageFunction = function() { /* in terms of localStorage */ };
-}
-```
 
 ### Scoping examples
 
@@ -776,6 +754,28 @@ The import map _could_ be that manifest file. However, it may not be the best fi
 - As currently envisioned, most modules in an application would not have entries in the import map. The main use case is for modules you need to refer to by bare specifiers, or modules where you need to do something tricky like polyfilling or virtualizing. If we envisioned every module being in the map, we would not include convenience features like packages-via-trailing-slashes.
 
 - All proposed metadata so far is applicable to any sort of resource, not just JavaScript modules. A solution should probably work at a more general level.
+
+### Alternating logic based on the presence of a built-in module
+
+_See further discussion of this case in the issue tracker: [#61](https://github.com/domenic/package-name-maps/issues/61)._
+
+Not all fallbacks take the role of running one piece of code. For example, sometimes, one code path is to be taken if a particular platform API exists, and another code path is taken if it doesn't exist. The import maps proposal does not aim to solve all such scenarios in a built-in way; instead, the stage 2 TC39 proposal [top-level await](https://github.com/tc39/proposal-top-level-await) can be used to meet some of these use cases.
+
+Imagine if IndexedDB were provided by a built-in module `@std/indexed-db` and localStorage were provided by a built-in module `@std/local-storage`. For a particular application, all supported browsers support localStorage, and only some support IndexedDB. Although it's possible to polyfill IndexedDB on top of localStorage, in this scenario, doing so leads to performance overhead vs more specialized usage. Therefore, it's preferrable to use a specialized implementation based on either IndexedDB or localStorage directly, instead of using import maps to remap `@std/indexed-db`.
+
+In this scenario, a module may use top-level await to perform feature testing and fallback as follows:
+
+```js
+export let myStorageFunction;
+
+try {
+  const indexedDB = await import("@std/indexed-db");
+  myStorageFunction = function() { /* in terms of indexedDB */ };
+} catch (e) {
+  const localStorage = await import("@std/local-storage");
+  myStorageFunction = function() { /* in terms of localStorage */ };
+}
+```
 
 ## Implementation notes
 
