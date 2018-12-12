@@ -812,6 +812,11 @@ Several implementer questions come up around how `import:` URLs are envisioned t
 
 The high-level summary is that any fetch of an `import:` URL should be thought of as sugar for a series of if-then-else statements that in turn fetch the mapped-to URLs. For example, each fetch will pass through the service worker, until one succeeds.
 
+## Namespaces
+
+This proposal and the reference implementation, use the namespace `@std/` for illustrative purposes only. This proposal is generic and would
+be able to work with a variety of approaches to namespaces.
+
 ## Acknowledgments
 
 This document originated out of a day-long sprint involving [@domenic](https://github.com/domenic), [@hiroshige-g](https://github.com/hiroshige-g), [@justinfagnani](https://github.com/justinfagnani), [@MylesBorins](https://github.com/MylesBorins), and [@nyaxt](https://github.com/nyaxt). Since then, [@guybedford](https://github.com/guybedford) has been instrumental in prototyping and driving forward discussion on this proposal.
