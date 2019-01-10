@@ -1,1 +1,4 @@
 /reference-implementation/node_modules/
+/out/
+/spec.html
+/deploy_key

@@ -7,6 +7,7 @@ before_install:
 script:
   - npm run lint
   - npm test
+  - cd .. && bash ./deploy.sh
 
 branches:
   only:
@@ -16,3 +17,8 @@ notifications:
   email:
     on_success: never
     on_failure: always
+
+env:
+  global:
+    - ENCRYPTION_LABEL: "d49f480b94f1"
+    - COMMIT_AUTHOR_EMAIL: "d@domenic.me"
