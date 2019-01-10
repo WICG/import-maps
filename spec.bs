@@ -1,0 +1,75 @@
+<pre class="metadata">
+Title: Import Maps
+Shortname: import-maps
+Repository: domenic/import-maps
+Inline Github Issues: true
+Status: DREAM
+Boilerplate: omit conformance, omit feedback-header
+Editor: Domenic Denicola, Google https://www.google.com/, d@domenic.me, https://domenic.me/
+Abstract: Import maps allow web pages to control the behavior of JavaScript imports, and introduce a new <code>import:</code> URL scheme to allow using this mapping in other URL-accepting contexts
+!Participate: <a href="https://github.com/domenic/import-maps">GitHub domenic/import-maps</a> (<a href="https://github.com/domenic/import-maps/issues/new">new issue</a>, <a href="https://github.com/domenic/import-maps/issues?state=open">open issues</a>)
+!Commits: <a href="https://github.com/domenic/import-maps/commits/master/spec.bs">GitHub spec.bs commits</a>
+Complain About: accidental-2119 yes, missing-example-ids yes
+Indent: 2
+Default Biblio Status: current
+</pre>
+<pre class="link-defaults">
+spec: infra; type: dfn
+  text: string
+  text: list
+spec: url; type: dfn; for: /; text: url
+</pre>
+
+<style>
+.selected-text-file-an-issue {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.8);
+  font-size: smaller;
+  padding: 4px 10px;
+  z-index: 4;
+}
+
+summary {
+  cursor: pointer;
+}
+
+/* hide ugly stuff that is moved to the acks */
+[data-fill-with="spec-metadata"] .editor {
+  display: none;
+}
+
+[data-fill-with="copyright"] {
+  display: none;
+}
+</style>
+
+<script src="https://resources.whatwg.org/file-issue.js" async></script>
+
+<h2 id="definitions">Definitions</h2>
+
+A <dfn>specifier map</dfn> is an [=ordered map=] from [=strings=] to [=lists=] of [=URLs=].
+
+<!-- TODO: unexport these; only doing that for now to un-break the build in our intermediate state. -->
+
+A <dfn export>import map</dfn> is a [=struct=] with two [=struct/items=]:
+
+* <dfn for="import map" export>imports</dfn>, a [=specifier map=], and
+* <dfn for="import map" export>scopes</dfn>, an [=ordered map=] of [=URLs=] to [=specifier maps=].
+
+<!--
+
+<h2 id="acquiring">Acquiring import maps</h2>
+
+To <dfn lt="parse JSON into maps and lists|parsing JSON into maps and lists">parse JSON into maps and lists</dfn>, TODO. (This should move to Infra.)
+
+To <dfn>parse an import map string</dfn>, given a [=string=] |input|:
+
+1. Let |rawParsed| be the result of [=parsing JSON into maps and lists=] given |input|.
+1. If |rawParsed| is not a [=map=], then return failure.
+1. If |rawParsed|["`imports`"] [=map/exists=],
+  1. If |rawParsed|["`imports`"] is not a [=map=], then return failure.
+1. If |rawParsed|["`scopes`"] [=map/exists=] but is not a [=map=], then return failure.
+
+-->
