@@ -1425,7 +1425,7 @@ pre .property::before, pre .property::after {
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Import Maps</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2019-01-10">10 January 2019</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2019-01-11">11 January 2019</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt class="editor">Editor:
@@ -1439,7 +1439,7 @@ pre .property::before, pre .property::after {
    <div data-fill-with="warning"></div>
    <p class="copyright" data-fill-with="copyright"><a href="http://creativecommons.org/publicdomain/zero/1.0/" rel="license"><img alt="CC0" src="https://licensebuttons.net/p/zero/1.0/80x15.png"></a> To the extent possible under law, the editors have waived all copyright
 and related or neighboring rights to this work.
-In addition, as of 10 January 2019,
+In addition, as of 11 January 2019,
 the editors have made this specification available under the <a href="http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0" rel="license">Open Web Foundation Agreement Version 1.0</a>,
 which is available at http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0.
 Parts of this work may be from another specification document.  If so, those parts are instead covered by the license of that specification document. </p>
@@ -1454,6 +1454,8 @@ Parts of this work may be from another specification document.  If so, those par
    <h2 class="no-num no-toc no-ref" id="contents">Table of Contents</h2>
    <ol class="toc" role="directory">
     <li><a href="#definitions"><span class="secno">1</span> <span class="content">Definitions</span></a>
+    <li><a href="#acquiring"><span class="secno">2</span> <span class="content">Acquiring import maps</span></a>
+    <li><a href="#resolving"><span class="secno">3</span> <span class="content">Resolving module specifiers</span></a>
     <li>
      <a href="#index"><span class="secno"></span> <span class="content">Index</span></a>
      <ol class="toc">
@@ -1471,13 +1473,36 @@ Parts of this work may be from another specification document.  If so, those par
 <script async src="https://resources.whatwg.org/file-issue.js"></script>
    <h2 class="heading settled" data-level="1" id="definitions"><span class="secno">1. </span><span class="content">Definitions</span><a class="self-link" href="#definitions"></a></h2>
    <p>A <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="specifier-map">specifier map</dfn> is an <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-map" id="ref-for-ordered-map">ordered map</a> from <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string">strings</a> to <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list" id="ref-for-list">lists</a> of <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url">URLs</a>.</p>
-   <p>A <dfn data-dfn-type="dfn" data-export id="import-map">import map<a class="self-link" href="#import-map"></a></dfn> is a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#struct" id="ref-for-struct">struct</a> with two <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#struct-item" id="ref-for-struct-item">items</a>:</p>
+   <p>A <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="import-map">import map</dfn> is a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#struct" id="ref-for-struct">struct</a> with two <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#struct-item" id="ref-for-struct-item">items</a>:</p>
    <ul>
     <li data-md>
      <p><dfn data-dfn-for="import map" data-dfn-type="dfn" data-export id="import-map-imports">imports<a class="self-link" href="#import-map-imports"></a></dfn>, a <a data-link-type="dfn" href="#specifier-map" id="ref-for-specifier-map">specifier map</a>, and</p>
     <li data-md>
      <p><dfn data-dfn-for="import map" data-dfn-type="dfn" data-export id="import-map-scopes">scopes<a class="self-link" href="#import-map-scopes"></a></dfn>, an <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-map" id="ref-for-ordered-map①">ordered map</a> of <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url①">URLs</a> to <a data-link-type="dfn" href="#specifier-map" id="ref-for-specifier-map①">specifier maps</a>.</p>
    </ul>
+   <h2 class="heading settled" data-level="2" id="acquiring"><span class="secno">2. </span><span class="content">Acquiring import maps</span><a class="self-link" href="#acquiring"></a></h2>
+   <p>To <dfn data-dfn-type="dfn" data-export id="parse-an-import-map-string">parse an import map string<a class="self-link" href="#parse-an-import-map-string"></a></dfn>, given a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string①">string</a> <var>input</var> and a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url②">URL</a> <var>baseURL</var>:</p>
+   <ol>
+    <li data-md>
+     <p>For now, see <a href="https://github.com/domenic/import-maps/blob/master/reference-implementation/lib/parser.js">the reference implementation</a>, carrying out the algorithm there given <var>input</var> and <var>baseURL</var>.</p>
+    <li data-md>
+     <p>This algorithm returns an <a data-link-type="dfn" href="#import-map" id="ref-for-import-map">import map</a>. The result will be highly normalized (e.g. all URL-like specifier keys will end up resolved against <var>baseURL</var> before being re-serialized as strings). See the <a href="https://github.com/domenic/import-maps/tree/master/reference-implementation/__tests__">parsing tests</a> for more details.</p>
+   </ol>
+   <p>... Other missing steps here. At some point, each <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#environment-settings-object" id="ref-for-environment-settings-object">environment settings object</a> will get an <dfn class="dfn-paneled" data-dfn-for="environment settings object" data-dfn-type="dfn" data-noexport id="environment-settings-object-import-map">import map</dfn> algorithm, which returns an <a data-link-type="dfn" href="#import-map" id="ref-for-import-map①">import map</a> created by parsing and merging all <code>&lt;script type="importmap"></code> elements that are encountered (before the cutoff).</p>
+   <h2 class="heading settled" data-level="3" id="resolving"><span class="secno">3. </span><span class="content">Resolving module specifiers</span><a class="self-link" href="#resolving"></a></h2>
+   <p>HTML already has a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier">resolve a module specifier</a> algorithm. We replace it with the following <dfn data-dfn-type="dfn" data-export id="resolve-a-module-specifier">resolve a module specifier<a class="self-link" href="#resolve-a-module-specifier"></a></dfn> algorithm, given a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-script" id="ref-for-concept-script">script</a> <var>referringScript</var> and a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#javascript-string" id="ref-for-javascript-string">JavaScript string</a> <var>specifier</var>:</p>
+   <ol>
+    <li data-md>
+     <p>Let <var>importMap</var> be <var>referringScript</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#settings-object" id="ref-for-settings-object">settings object</a>'s <a data-link-type="dfn" href="#environment-settings-object-import-map" id="ref-for-environment-settings-object-import-map">import map</a>.</p>
+    <li data-md>
+     <p>Let <var>baseURL</var> be <var>referringScript</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-script-base-url" id="ref-for-concept-script-base-url">base URL</a>.</p>
+    <li data-md>
+     <p>For now, see the <a href="https://github.com/domenic/import-maps/blob/master/reference-implementation/lib/resolver.js">reference implementation</a>, carrying out the algorithm there given <var>specifier</var>, <var>importMap</var>, and <var>baseURL</var>.</p>
+    <li data-md>
+     <p>As before, this algorithm returns a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url③">URL</a> or failure.</p>
+   </ol>
+   <p class="advisement">It seems possible that the return type could end up being a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list" id="ref-for-list①">list</a> of <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url④">URLs</a>, not just a single URL, to support HTTPS → HTTPS fallback. But, we haven’t gotten that far yet; for now let’s assume it stays a single URL.</p>
+   <p>All call sites of HTML’s existing <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier①">resolve a module specifier</a> will need to be updated to pass the appropriate <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-script" id="ref-for-concept-script①">script</a>, not just its <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-script-base-url" id="ref-for-concept-script-base-url①">base URL</a>.</p>
   </main>
 <script>
 (function() {
@@ -1611,21 +1636,65 @@ Parts of this work may be from another specification document.  If so, those par
   <h2 class="no-num no-ref heading settled" id="index"><span class="content">Index</span><a class="self-link" href="#index"></a></h2>
   <h3 class="no-num no-ref heading settled" id="index-defined-here"><span class="content">Terms defined by this specification</span><a class="self-link" href="#index-defined-here"></a></h3>
   <ul class="index">
-   <li><a href="#import-map">import map</a><span>, in §1</span>
+   <li>
+    import map
+    <ul>
+     <li><a href="#import-map">definition of</a><span>, in §1</span>
+     <li><a href="#environment-settings-object-import-map">dfn for environment settings object</a><span>, in §2</span>
+    </ul>
    <li><a href="#import-map-imports">imports</a><span>, in §1</span>
+   <li><a href="#parse-an-import-map-string">parse an import map string</a><span>, in §2</span>
+   <li><a href="#resolve-a-module-specifier">resolve a module specifier</a><span>, in §3</span>
    <li><a href="#import-map-scopes">scopes</a><span>, in §1</span>
    <li><a href="#specifier-map">specifier map</a><span>, in §1</span>
   </ul>
+  <aside class="dfn-panel" data-for="term-for-concept-script-base-url">
+   <a href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-script-base-url">https://html.spec.whatwg.org/multipage/webappapis.html#concept-script-base-url</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-concept-script-base-url">3. Resolving module specifiers</a> <a href="#ref-for-concept-script-base-url①">(2)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-environment-settings-object">
+   <a href="https://html.spec.whatwg.org/multipage/webappapis.html#environment-settings-object">https://html.spec.whatwg.org/multipage/webappapis.html#environment-settings-object</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-environment-settings-object">2. Acquiring import maps</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-resolve-a-module-specifier">
+   <a href="https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier">https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-resolve-a-module-specifier">3. Resolving module specifiers</a> <a href="#ref-for-resolve-a-module-specifier①">(2)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-concept-script">
+   <a href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-script">https://html.spec.whatwg.org/multipage/webappapis.html#concept-script</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-concept-script">3. Resolving module specifiers</a> <a href="#ref-for-concept-script①">(2)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-settings-object">
+   <a href="https://html.spec.whatwg.org/multipage/webappapis.html#settings-object">https://html.spec.whatwg.org/multipage/webappapis.html#settings-object</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-settings-object">3. Resolving module specifiers</a>
+   </ul>
+  </aside>
   <aside class="dfn-panel" data-for="term-for-struct-item">
    <a href="https://infra.spec.whatwg.org/#struct-item">https://infra.spec.whatwg.org/#struct-item</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-struct-item">1. Definitions</a>
    </ul>
   </aside>
+  <aside class="dfn-panel" data-for="term-for-javascript-string">
+   <a href="https://infra.spec.whatwg.org/#javascript-string">https://infra.spec.whatwg.org/#javascript-string</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-javascript-string">3. Resolving module specifiers</a>
+   </ul>
+  </aside>
   <aside class="dfn-panel" data-for="term-for-list">
    <a href="https://infra.spec.whatwg.org/#list">https://infra.spec.whatwg.org/#list</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-list">1. Definitions</a>
+    <li><a href="#ref-for-list①">3. Resolving module specifiers</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-ordered-map">
@@ -1638,6 +1707,7 @@ Parts of this work may be from another specification document.  If so, those par
    <a href="https://infra.spec.whatwg.org/#string">https://infra.spec.whatwg.org/#string</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-string">1. Definitions</a>
+    <li><a href="#ref-for-string①">2. Acquiring import maps</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-struct">
@@ -1650,14 +1720,26 @@ Parts of this work may be from another specification document.  If so, those par
    <a href="https://url.spec.whatwg.org/#concept-url">https://url.spec.whatwg.org/#concept-url</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-concept-url">1. Definitions</a> <a href="#ref-for-concept-url①">(2)</a>
+    <li><a href="#ref-for-concept-url②">2. Acquiring import maps</a>
+    <li><a href="#ref-for-concept-url③">3. Resolving module specifiers</a> <a href="#ref-for-concept-url④">(2)</a>
    </ul>
   </aside>
   <h3 class="no-num no-ref heading settled" id="index-defined-elsewhere"><span class="content">Terms defined by reference</span><a class="self-link" href="#index-defined-elsewhere"></a></h3>
   <ul class="index">
    <li>
+    <a data-link-type="biblio">[HTML]</a> defines the following terms:
+    <ul>
+     <li><span class="dfn-paneled" id="term-for-concept-script-base-url" style="color:initial">base url</span>
+     <li><span class="dfn-paneled" id="term-for-environment-settings-object" style="color:initial">environment settings object</span>
+     <li><span class="dfn-paneled" id="term-for-resolve-a-module-specifier" style="color:initial">resolve a module specifier</span>
+     <li><span class="dfn-paneled" id="term-for-concept-script" style="color:initial">script</span>
+     <li><span class="dfn-paneled" id="term-for-settings-object" style="color:initial">settings object</span>
+    </ul>
+   <li>
     <a data-link-type="biblio">[INFRA]</a> defines the following terms:
     <ul>
      <li><span class="dfn-paneled" id="term-for-struct-item" style="color:initial">item</span>
+     <li><span class="dfn-paneled" id="term-for-javascript-string" style="color:initial">javascript string</span>
      <li><span class="dfn-paneled" id="term-for-list" style="color:initial">list</span>
      <li><span class="dfn-paneled" id="term-for-ordered-map" style="color:initial">ordered map</span>
      <li><span class="dfn-paneled" id="term-for-string" style="color:initial">string</span>
@@ -1672,6 +1754,8 @@ Parts of this work may be from another specification document.  If so, those par
   <h2 class="no-num no-ref heading settled" id="references"><span class="content">References</span><a class="self-link" href="#references"></a></h2>
   <h3 class="no-num no-ref heading settled" id="normative"><span class="content">Normative References</span><a class="self-link" href="#normative"></a></h3>
   <dl>
+   <dt id="biblio-html">[HTML]
+   <dd>Anne van Kesteren; et al. <a href="https://html.spec.whatwg.org/multipage/">HTML Standard</a>. Living Standard. URL: <a href="https://html.spec.whatwg.org/multipage/">https://html.spec.whatwg.org/multipage/</a>
    <dt id="biblio-infra">[INFRA]
    <dd>Anne van Kesteren; Domenic Denicola. <a href="https://infra.spec.whatwg.org/">Infra Standard</a>. Living Standard. URL: <a href="https://infra.spec.whatwg.org/">https://infra.spec.whatwg.org/</a>
    <dt id="biblio-url">[URL]
@@ -1681,6 +1765,18 @@ Parts of this work may be from another specification document.  If so, those par
    <b><a href="#specifier-map">#specifier-map</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-specifier-map">1. Definitions</a> <a href="#ref-for-specifier-map①">(2)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="import-map">
+   <b><a href="#import-map">#import-map</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-import-map">2. Acquiring import maps</a> <a href="#ref-for-import-map①">(2)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="environment-settings-object-import-map">
+   <b><a href="#environment-settings-object-import-map">#environment-settings-object-import-map</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-environment-settings-object-import-map">3. Resolving module specifiers</a>
    </ul>
   </aside>
 <script>/* script-dfn-panel */
