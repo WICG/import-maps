@@ -5,7 +5,7 @@ const { tryURLParse, hasFetchScheme, tryURLLikeSpecifierParse } = require('./uti
 // Tentative, so better to centralize so we can change in one place as necessary (including tests).
 exports.BUILT_IN_MODULE_PREFIX = '@std/';
 
-exports.parseFromString = (input, baseURL, warn = warning => console.warn(warning)) => {
+exports.parseFromString = (input, baseURL) => {
   const parsed = JSON.parse(input);
 
   if (!isJSONObject(parsed)) {
@@ -22,7 +22,7 @@ exports.parseFromString = (input, baseURL, warn = warning => console.warn(warnin
 
   let normalizedImports = {};
   if ('imports' in parsed) {
-    normalizedImports = normalizeSpecifierMap(parsed.imports, baseURL, warn);
+    normalizedImports = normalizeSpecifierMap(parsed.imports, baseURL);
   }
 
   const normalizedScopes = {};
@@ -42,7 +42,7 @@ exports.parseFromString = (input, baseURL, warn = warning => console.warn(warnin
       }
 
       const normalizedScopePrefix = scopePrefixURL.href;
-      normalizedScopes[normalizedScopePrefix] = normalizeSpecifierMap(specifierMap, baseURL, warn);
+      normalizedScopes[normalizedScopePrefix] = normalizeSpecifierMap(specifierMap, baseURL);
     }
   }
 
@@ -53,7 +53,7 @@ exports.parseFromString = (input, baseURL, warn = warning => console.warn(warnin
   };
 };
 
-function normalizeSpecifierMap(obj, baseURL, warn) {
+function normalizeSpecifierMap(obj, baseURL) {
   // Normalize all entries into arrays
   const result = {};
   for (const [specifierKey, value] of Object.entries(obj)) {
@@ -80,7 +80,7 @@ function normalizeSpecifierMap(obj, baseURL, warn) {
           return false;
         }
         if (key[key.length - 1] === '/' && address.href[address.href.length - 1] !== '/') {
-          warn(`Invalid target address ${address} for package specifier '${key}'. ` +
+          console.warn(`Invalid target address ${address} for package specifier '${key}'. ` +
               `Package address targets must end with '/'.`);
           return false;
         }

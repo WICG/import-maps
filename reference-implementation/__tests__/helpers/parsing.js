@@ -3,23 +3,22 @@ const { parseFromString } = require('../../lib/parser.js');
 
 function testWarningHandler(expectedWarnings) {
   const warnings = [];
-  return {
-    warn(warning) {
-      warnings.push(warning);
-    },
-    checkWarnings() {
-      expect(warnings).toEqual(expectedWarnings);
-    }
+  const { warn } = console;
+  console.warn = function (warning) {
+    warnings.push(warning);
+  };
+  return function () {
+    console.warn = warn;
+    expect(warnings).toEqual(expectedWarnings);
   };
 }
 
 exports.expectSpecifierMap = (input, baseURL, output, warnings = []) => {
-  const { warn, checkWarnings } = testWarningHandler(warnings);
+  const checkWarnings = testWarningHandler(warnings.concat(warnings));
 
-  expect(parseFromString(`{ "imports": ${input} }`, baseURL, warn))
+  expect(parseFromString(`{ "imports": ${input} }`, baseURL))
     .toEqual({ imports: output, scopes: {} });
 
-  // warnings should be identical to the above, so skipped here
   expect(parseFromString(`{ "scopes": { "https://scope.example/":  ${input} } }`, baseURL, () => {}))
     .toEqual({ imports: {}, scopes: { 'https://scope.example/': output } });
 
@@ -27,7 +26,7 @@ exports.expectSpecifierMap = (input, baseURL, output, warnings = []) => {
 };
 
 exports.expectScopes = (inputArray, baseURL, outputArray, warnings = []) => {
-  const { warn, checkWarnings } = testWarningHandler(warnings);
+  const checkWarnings = testWarningHandler(warnings);
 
   const inputScopesAsStrings = inputArray.map(scopePrefix => `"${scopePrefix}": {}`);
   const inputString = `{ "scopes": { ${inputScopesAsStrings.join(', ')} } }`;
@@ -37,13 +36,13 @@ exports.expectScopes = (inputArray, baseURL, outputArray, warnings = []) => {
     outputScopesObject[outputScopePrefix] = {};
   }
 
-  expect(parseFromString(inputString, baseURL, warn)).toEqual({ imports: {}, scopes: outputScopesObject });
+  expect(parseFromString(inputString, baseURL)).toEqual({ imports: {}, scopes: outputScopesObject });
 
   checkWarnings();
 };
 
 exports.expectBad = (input, baseURL, warnings = []) => {
-  const { warn, checkWarnings } = testWarningHandler(warnings);
-  expect(() => parseFromString(input, baseURL, warn)).toThrow(TypeError);
+  const checkWarnings = testWarningHandler(warnings);
+  expect(() => parseFromString(input, baseURL)).toThrow(TypeError);
   checkWarnings();
 };
