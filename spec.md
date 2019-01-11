@@ -1,5 +1,7 @@
 # Import maps proto-spec
 
+_Note: we also have a slightly-less-proto spec at https://domenic.github.io/import-maps/. We're sorry that it's confusing to have two spec-like documents; we'll merge the contents of this one into that location soon. At this point in time, that one is more rigorous but covers less behavior._
+
 ## Installation
 
 ### When import maps can be encountered

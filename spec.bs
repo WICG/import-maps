@@ -12,6 +12,7 @@ Abstract: Import maps allow web pages to control the behavior of JavaScript impo
 Complain About: accidental-2119 yes, missing-example-ids yes
 Indent: 2
 Default Biblio Status: current
+Markup Shorthands: markdown yes
 </pre>
 <pre class="link-defaults">
 spec: infra; type: dfn
@@ -53,23 +54,35 @@ A <dfn>specifier map</dfn> is an [=ordered map=] from [=strings=] to [=lists=] o
 
 <!-- TODO: unexport these; only doing that for now to un-break the build in our intermediate state. -->
 
-A <dfn export>import map</dfn> is a [=struct=] with two [=struct/items=]:
+A <dfn>import map</dfn> is a [=struct=] with two [=struct/items=]:
 
 * <dfn for="import map" export>imports</dfn>, a [=specifier map=], and
 * <dfn for="import map" export>scopes</dfn>, an [=ordered map=] of [=URLs=] to [=specifier maps=].
 
-<!--
-
 <h2 id="acquiring">Acquiring import maps</h2>
 
+<!--
 To <dfn lt="parse JSON into maps and lists|parsing JSON into maps and lists">parse JSON into maps and lists</dfn>, TODO. (This should move to Infra.)
-
-To <dfn>parse an import map string</dfn>, given a [=string=] |input|:
-
-1. Let |rawParsed| be the result of [=parsing JSON into maps and lists=] given |input|.
-1. If |rawParsed| is not a [=map=], then return failure.
-1. If |rawParsed|["`imports`"] [=map/exists=],
-  1. If |rawParsed|["`imports`"] is not a [=map=], then return failure.
-1. If |rawParsed|["`scopes`"] [=map/exists=] but is not a [=map=], then return failure.
-
 -->
+
+<!-- TODO unexport -->
+
+To <dfn export>parse an import map string</dfn>, given a [=string=] |input| and a [=URL=] |baseURL|:
+
+1. For now, see <a href="https://github.com/domenic/import-maps/blob/master/reference-implementation/lib/parser.js">the reference implementation</a>, carrying out the algorithm there given |input| and |baseURL|.
+1. This algorithm returns an [=/import map=]. The result will be highly normalized (e.g. all URL-like specifier keys will end up resolved against |baseURL| before being re-serialized as strings). See the <a href="https://github.com/domenic/import-maps/tree/master/reference-implementation/__tests__">parsing tests</a> for more details.
+
+... Other missing steps here. At some point, each [=environment settings object=] will get an <dfn for="environment settings object">import map</dfn> algorithm, which returns an [=/import map=] created by parsing and merging all `<script type="importmap">` elements that are encountered (before the cutoff).
+
+<h2 id="resolving">Resolving module specifiers</h2>
+
+HTML already has a <a spec="html">resolve a module specifier</a> algorithm. We replace it with the following <dfn export>resolve a module specifier</dfn> algorithm, given a [=script=] |referringScript| and a [=JavaScript string=] |specifier|:
+
+1. Let |importMap| be |referringScript|'s [=script/settings object=]'s [=environment settings object/import map=].
+1. Let |baseURL| be |referringScript|'s [=script/base URL=].
+1. For now, see the <a href="https://github.com/domenic/import-maps/blob/master/reference-implementation/lib/resolver.js">reference implementation</a>, carrying out the algorithm there given |specifier|, |importMap|, and |baseURL|.
+1. As before, this algorithm returns a [=URL=] or failure.
+
+<p class="advisement">It seems possible that the return type could end up being a [=list=] of [=URLs=], not just a single URL, to support HTTPS → HTTPS fallback. But, we haven't gotten that far yet; for now let's assume it stays a single URL.</p>
+
+All call sites of HTML's existing <a spec="html">resolve a module specifier</a> will need to be updated to pass the appropriate [=script=], not just its [=script/base URL=].
