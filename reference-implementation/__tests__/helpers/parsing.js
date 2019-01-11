@@ -1,20 +1,14 @@
 'use strict';
 const { parseFromString } = require('../../lib/parser.js');
 
-function testWarningHandler(expectWarnings) {
-  if (typeof expectWarnings === 'string')
-    expectWarnings = [expectWarnings];
+function testWarningHandler(expectedWarnings) {
   const warnings = [];
   return {
-    warn (warning) {
+    warn(warning) {
       warnings.push(warning);
     },
-    checkWarnings () {
-      warnings.forEach((warning, index) => expect(warning).toEqual(expectWarnings[index]));
-      if (warnings.length > expectWarnings.length)
-        expect(warnings[expectWarnings.length]).toEqual(undefined);
-      else if (expectWarnings.length > warnings.length)
-        expect(undefined).toEqual(expectWarnings[warnings.length]);
+    checkWarnings() {
+      expect(warnings).toEqual(expectedWarnings);
     }
   };
 }

@@ -5,7 +5,7 @@ const { tryURLParse, hasFetchScheme, tryURLLikeSpecifierParse } = require('./uti
 // Tentative, so better to centralize so we can change in one place as necessary (including tests).
 exports.BUILT_IN_MODULE_PREFIX = '@std/';
 
-exports.parseFromString = (input, baseURL, warn = console.warn.bind(console)) => {
+exports.parseFromString = (input, baseURL, warn = warning => console.warn(warning)) => {
   const parsed = JSON.parse(input);
 
   if (!isJSONObject(parsed)) {
@@ -76,10 +76,12 @@ function normalizeSpecifierMap(obj, baseURL, warn) {
     result[key] = addressArray
       .map(address => normalizeAddress(address, baseURL))
       .filter(address => {
-        if (address === null)
+        if (address === null) {
           return false;
+        }
         if (key[key.length - 1] === '/' && address.href[address.href.length - 1] !== '/') {
-          warn(`Invalid target address ${address} for package specifier '${key}'. Package address targets must end with '/'.`);
+          warn(`Invalid target address ${address} for package specifier '${key}'. ` +
+              `Package address targets must end with '/'.`);
           return false;
         }
         return true;
