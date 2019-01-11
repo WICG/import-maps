@@ -5,7 +5,7 @@ const { tryURLParse, hasFetchScheme, tryURLLikeSpecifierParse } = require('./uti
 // Tentative, so better to centralize so we can change in one place as necessary (including tests).
 exports.BUILT_IN_MODULE_PREFIX = '@std/';
 
-exports.parseFromString = (input, baseURL) => {
+exports.parseFromString = (input, baseURL, warn = console.warn.bind(console)) => {
   const parsed = JSON.parse(input);
 
   if (!isJSONObject(parsed)) {
@@ -22,7 +22,7 @@ exports.parseFromString = (input, baseURL) => {
 
   let normalizedImports = {};
   if ('imports' in parsed) {
-    normalizedImports = normalizeSpecifierMap(parsed.imports, baseURL);
+    normalizedImports = normalizeSpecifierMap(parsed.imports, baseURL, warn);
   }
 
   const normalizedScopes = {};
@@ -42,7 +42,7 @@ exports.parseFromString = (input, baseURL) => {
       }
 
       const normalizedScopePrefix = scopePrefixURL.href;
-      normalizedScopes[normalizedScopePrefix] = normalizeSpecifierMap(specifierMap, baseURL);
+      normalizedScopes[normalizedScopePrefix] = normalizeSpecifierMap(specifierMap, baseURL, warn);
     }
   }
 
@@ -53,7 +53,7 @@ exports.parseFromString = (input, baseURL) => {
   };
 };
 
-function normalizeSpecifierMap(obj, baseURL) {
+function normalizeSpecifierMap(obj, baseURL, warn) {
   // Normalize all entries into arrays
   const result = {};
   for (const [specifierKey, value] of Object.entries(obj)) {
@@ -75,7 +75,15 @@ function normalizeSpecifierMap(obj, baseURL) {
   for (const [key, addressArray] of Object.entries(result)) {
     result[key] = addressArray
       .map(address => normalizeAddress(address, baseURL))
-      .filter(address => address !== null);
+      .filter(address => {
+        if (address === null)
+          return false;
+        if (key[key.length - 1] === '/' && address.href[address.href.length - 1] !== '/') {
+          warn(`Invalid target address ${address} for package specifier '${key}'. Package address targets must end with '/'.`);
+          return false;
+        }
+        return true;
+      });
   }
 
   return result;

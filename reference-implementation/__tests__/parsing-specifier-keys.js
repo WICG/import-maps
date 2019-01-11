@@ -21,15 +21,15 @@ describe('Relative URL-like specifier keys', () => {
   it('should absolutize the literal strings ./, ../, or / with no suffix', () => {
     expectSpecifierMap(
       `{
-        "./": "/dotslash",
-        "../": "/dotdotslash",
-        "/": "/slash"
+        "./": "/dotslash/",
+        "../": "/dotdotslash/",
+        "/": "/slash/"
       }`,
       'https://base.example/path1/path2/path3',
       {
-        'https://base.example/path1/path2/': [expect.toMatchURL('https://base.example/dotslash')],
-        'https://base.example/path1/': [expect.toMatchURL('https://base.example/dotdotslash')],
-        'https://base.example/': [expect.toMatchURL('https://base.example/slash')]
+        'https://base.example/path1/path2/': [expect.toMatchURL('https://base.example/dotslash/')],
+        'https://base.example/path1/': [expect.toMatchURL('https://base.example/dotdotslash/')],
+        'https://base.example/': [expect.toMatchURL('https://base.example/slash/')]
       }
     );
   });
@@ -37,8 +37,8 @@ describe('Relative URL-like specifier keys', () => {
   it('should treat percent-encoded variants of ./, ../, or / as bare specifiers', () => {
     expectSpecifierMap(
       `{
-        "%2E/": "/dotSlash1",
-        "%2E%2E/": "/dotDotSlash1",
+        "%2E/": "/dotSlash1/",
+        "%2E%2E/": "/dotDotSlash1/",
         ".%2F": "/dotSlash2",
         "..%2F": "/dotDotSlash2",
         "%2F": "/slash2",
@@ -47,8 +47,8 @@ describe('Relative URL-like specifier keys', () => {
       }`,
       'https://base.example/path1/path2/path3',
       {
-        '%2E/': [expect.toMatchURL('https://base.example/dotSlash1')],
-        '%2E%2E/': [expect.toMatchURL('https://base.example/dotDotSlash1')],
+        '%2E/': [expect.toMatchURL('https://base.example/dotSlash1/')],
+        '%2E%2E/': [expect.toMatchURL('https://base.example/dotDotSlash1/')],
         '.%2F': [expect.toMatchURL('https://base.example/dotSlash2')],
         '..%2F': [expect.toMatchURL('https://base.example/dotDotSlash2')],
         '%2F': [expect.toMatchURL('https://base.example/slash2')],
@@ -68,9 +68,9 @@ describe('Absolute URL addresses', () => {
         "data:good": "/data",
         "file:///good": "/file",
         "filesystem:good": "/filesystem",
-        "http://good/": "/http",
-        "https://good/": "/https",
-        "ftp://good/": "/ftp",
+        "http://good/": "/http/",
+        "https://good/": "/https/",
+        "ftp://good/": "/ftp/",
         "import:bad": "/import",
         "mailto:bad": "/mailto",
         "javascript:bad": "/javascript",
@@ -83,9 +83,9 @@ describe('Absolute URL addresses', () => {
         'data:good': [expect.toMatchURL('https://base.example/data')],
         'file:///good': [expect.toMatchURL('https://base.example/file')],
         'filesystem:good': [expect.toMatchURL('https://base.example/filesystem')],
-        'http://good/': [expect.toMatchURL('https://base.example/http')],
-        'https://good/': [expect.toMatchURL('https://base.example/https')],
-        'ftp://good/': [expect.toMatchURL('https://base.example/ftp')],
+        'http://good/': [expect.toMatchURL('https://base.example/http/')],
+        'https://good/': [expect.toMatchURL('https://base.example/https/')],
+        'ftp://good/': [expect.toMatchURL('https://base.example/ftp/')],
         'import:bad': [expect.toMatchURL('https://base.example/import')],
         'mailto:bad': [expect.toMatchURL('https://base.example/mailto')],
         'javascript:bad': [expect.toMatchURL('https://base.example/javascript')],
@@ -97,24 +97,24 @@ describe('Absolute URL addresses', () => {
   it('should parse absolute URLs, treating unparseable ones as bare specifiers', () => {
     expectSpecifierMap(
       `{
-        "https://ex ample.org/": "/unparseable1",
+        "https://ex ample.org/": "/unparseable1/",
         "https://example.com:demo": "/unparseable2",
-        "http://[www.example.com]/": "/unparseable3",
-        "https:example.org": "/invalidButParseable1",
-        "https://///example.com///": "/invalidButParseable2",
-        "https://example.net": "/prettyNormal",
-        "https://ex%41mple.com/": "/percentDecoding",
+        "http://[www.example.com]/": "/unparseable3/",
+        "https:example.org": "/invalidButParseable1/",
+        "https://///example.com///": "/invalidButParseable2/",
+        "https://example.net": "/prettyNormal/",
+        "https://ex%41mple.com/": "/percentDecoding/",
         "https://example.com/%41": "/noPercentDecoding"
       }`,
       'https://base.example/path1/path2/path3',
       {
-        'https://ex ample.org/': [expect.toMatchURL('https://base.example/unparseable1')],
+        'https://ex ample.org/': [expect.toMatchURL('https://base.example/unparseable1/')],
         'https://example.com:demo': [expect.toMatchURL('https://base.example/unparseable2')],
-        'http://[www.example.com]/': [expect.toMatchURL('https://base.example/unparseable3')],
-        'https://example.org/': [expect.toMatchURL('https://base.example/invalidButParseable1')],
-        'https://example.com///': [expect.toMatchURL('https://base.example/invalidButParseable2')],
-        'https://example.net/': [expect.toMatchURL('https://base.example/prettyNormal')],
-        'https://example.com/': [expect.toMatchURL('https://base.example/percentDecoding')],
+        'http://[www.example.com]/': [expect.toMatchURL('https://base.example/unparseable3/')],
+        'https://example.org/': [expect.toMatchURL('https://base.example/invalidButParseable1/')],
+        'https://example.com///': [expect.toMatchURL('https://base.example/invalidButParseable2/')],
+        'https://example.net/': [expect.toMatchURL('https://base.example/prettyNormal/')],
+        'https://example.com/': [expect.toMatchURL('https://base.example/percentDecoding/')],
         'https://example.com/%41': [expect.toMatchURL('https://base.example/noPercentDecoding')]
       }
     );
