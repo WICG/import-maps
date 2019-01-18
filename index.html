@@ -1213,6 +1213,7 @@ Possible extra rowspan handling
 	}
 </style>
   <meta content="Bikeshed version 9c6ae748322940994300e90a77c34437364b40a6" name="generator">
+  <link href="https://wicg.github.io/import-maps/" rel="canonical">
 <style>
 .selected-text-file-an-issue {
   position: fixed;
@@ -1226,15 +1227,6 @@ Possible extra rowspan handling
 
 summary {
   cursor: pointer;
-}
-
-/* hide ugly stuff that is moved to the acks */
-[data-fill-with="spec-metadata"] .editor {
-  display: none;
-}
-
-[data-fill-with="copyright"] {
-  display: none;
 }
 </style>
 <style>/* style-md-lists */
@@ -1425,29 +1417,38 @@ pre .property::before, pre .property::after {
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Import Maps</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2019-01-18">18 January 2019</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2019-01-18">18 January 2019</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
+     <dt>This version:
+     <dd><a class="u-url" href="https://wicg.github.io/import-maps/">https://wicg.github.io/import-maps/</a>
      <dt class="editor">Editor:
      <dd class="editor p-author h-card vcard"><a class="p-name fn u-url url" href="https://domenic.me/">Domenic Denicola</a> (<a class="p-org org" href="https://www.google.com/">Google</a>) <a class="u-email email" href="mailto:d@domenic.me">d@domenic.me</a>
      <dt>Participate:
-     <dd><a href="https://github.com/domenic/import-maps">GitHub domenic/import-maps</a> (<a href="https://github.com/domenic/import-maps/issues/new">new issue</a>, <a href="https://github.com/domenic/import-maps/issues?state=open">open issues</a>)
+     <dd><a href="https://github.com/WICG/import-maps">GitHub WICG/import-maps</a> (<a href="https://github.com/WICG/import-maps/issues/new">new issue</a>, <a href="https://github.com/WICG/import-maps/issues?state=open">open issues</a>)
      <dt>Commits:
-     <dd><a href="https://github.com/domenic/import-maps/commits/master/spec.bs">GitHub spec.bs commits</a>
+     <dd><a href="https://github.com/WICG/import-maps/commits/master/spec.bs">GitHub spec.bs commits</a>
     </dl>
    </div>
    <div data-fill-with="warning"></div>
-   <p class="copyright" data-fill-with="copyright"><a href="http://creativecommons.org/publicdomain/zero/1.0/" rel="license"><img alt="CC0" src="https://licensebuttons.net/p/zero/1.0/80x15.png"></a> To the extent possible under law, the editors have waived all copyright
-and related or neighboring rights to this work.
-In addition, as of 18 January 2019,
-the editors have made this specification available under the <a href="http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0" rel="license">Open Web Foundation Agreement Version 1.0</a>,
-which is available at http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0.
-Parts of this work may be from another specification document.  If so, those parts are instead covered by the license of that specification document. </p>
+   <p class="copyright" data-fill-with="copyright"><a href="http://www.w3.org/Consortium/Legal/ipr-notice#Copyright">Copyright</a> © 2019 the Contributors to the Import Maps Specification, published by the <a href="https://www.w3.org/community/wicg/">Web Platform Incubator Community Group</a> under the <a href="https://www.w3.org/community/about/agreements/cla/">W3C Community Contributor License Agreement (CLA)</a>.
+A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/">summary</a> is available. </p>
    <hr title="Separator for header">
   </div>
   <div class="p-summary" data-fill-with="abstract">
    <h2 class="no-num no-toc no-ref heading settled" id="abstract"><span class="content">Abstract</span></h2>
    <p>Import maps allow web pages to control the behavior of JavaScript imports, and introduce a new <code>import:</code> URL scheme to allow using this mapping in other URL-accepting contexts</p>
+  </div>
+  <div data-fill-with="at-risk"></div>
+  <h2 class="no-num no-toc no-ref heading settled" id="status"><span class="content">Status of this document</span></h2>
+  <div data-fill-with="status">
+   <p> This specification was published by the <a href="https://www.w3.org/community/wicg/">Web Platform Incubator Community Group</a>.
+  It is not a W3C Standard nor is it on the W3C Standards Track.
+
+  Please note that under the <a href="https://www.w3.org/community/about/agreements/cla/">W3C Community Contributor License Agreement (CLA)</a> there is a limited opt-out and other conditions apply.
+
+  Learn more about <a href="http://www.w3.org/community/">W3C Community and Business Groups</a>. </p>
+   <p></p>
   </div>
   <div data-fill-with="at-risk"></div>
   <nav data-fill-with="table-of-contents" id="toc">
@@ -1484,9 +1485,9 @@ Parts of this work may be from another specification document.  If so, those par
    <p>To <dfn data-dfn-type="dfn" data-export id="parse-an-import-map-string">parse an import map string<a class="self-link" href="#parse-an-import-map-string"></a></dfn>, given a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string①">string</a> <var>input</var> and a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url②">URL</a> <var>baseURL</var>:</p>
    <ol>
     <li data-md>
-     <p>For now, see <a href="https://github.com/domenic/import-maps/blob/master/reference-implementation/lib/parser.js">the reference implementation</a>, carrying out the algorithm there given <var>input</var> and <var>baseURL</var>.</p>
+     <p>For now, see <a href="https://github.com/WICG/import-maps/blob/master/reference-implementation/lib/parser.js">the reference implementation</a>, carrying out the algorithm there given <var>input</var> and <var>baseURL</var>.</p>
     <li data-md>
-     <p>This algorithm returns an <a data-link-type="dfn" href="#import-map" id="ref-for-import-map">import map</a>. The result will be highly normalized (e.g. all URL-like specifier keys will end up resolved against <var>baseURL</var> before being re-serialized as strings). See the <a href="https://github.com/domenic/import-maps/tree/master/reference-implementation/__tests__">parsing tests</a> for more details.</p>
+     <p>This algorithm returns an <a data-link-type="dfn" href="#import-map" id="ref-for-import-map">import map</a>. The result will be highly normalized (e.g. all URL-like specifier keys will end up resolved against <var>baseURL</var> before being re-serialized as strings). See the <a href="https://github.com/WICG/import-maps/tree/master/reference-implementation/__tests__">parsing tests</a> for more details.</p>
    </ol>
    <p>... Other missing steps here. At some point, each <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#environment-settings-object" id="ref-for-environment-settings-object">environment settings object</a> will get an <dfn class="dfn-paneled" data-dfn-for="environment settings object" data-dfn-type="dfn" data-noexport id="environment-settings-object-import-map">import map</dfn> algorithm, which returns an <a data-link-type="dfn" href="#import-map" id="ref-for-import-map①">import map</a> created by parsing and merging all <code>&lt;script type="importmap"></code> elements that are encountered (before the cutoff).</p>
    <h2 class="heading settled" data-level="3" id="resolving"><span class="secno">3. </span><span class="content">Resolving module specifiers</span><a class="self-link" href="#resolving"></a></h2>
@@ -1497,7 +1498,7 @@ Parts of this work may be from another specification document.  If so, those par
     <li data-md>
      <p>Let <var>baseURL</var> be <var>referringScript</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-script-base-url" id="ref-for-concept-script-base-url">base URL</a>.</p>
     <li data-md>
-     <p>For now, see the <a href="https://github.com/domenic/import-maps/blob/master/reference-implementation/lib/resolver.js">reference implementation</a>, carrying out the algorithm there given <var>specifier</var>, <var>importMap</var>, and <var>baseURL</var>.</p>
+     <p>For now, see the <a href="https://github.com/WICG/import-maps/blob/master/reference-implementation/lib/resolver.js">reference implementation</a>, carrying out the algorithm there given <var>specifier</var>, <var>importMap</var>, and <var>baseURL</var>.</p>
     <li data-md>
      <p>As before, this algorithm returns a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url③">URL</a> or failure.</p>
    </ol>
