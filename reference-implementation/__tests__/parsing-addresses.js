@@ -220,4 +220,14 @@ describe('Absolute URL addresses', () => {
       }
     );
   });
+
+  describe('Failing addresses', () => {
+    it('should warn on trailing slash specifier keys not mapping to a trailing slash address', () => {
+      expectSpecifierMap(`{
+        "trailer/": ["/notrailer"]
+      }`, 'https://base.example/path1/path2/path3', {
+        'trailer/': []
+      }, [`Invalid target address "https://base.example/notrailer" for package specifier "trailer/". Package address targets must end with "/".`]);
+    });
+  });
 });
