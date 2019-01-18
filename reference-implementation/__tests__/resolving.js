@@ -153,8 +153,8 @@ describe('Mapped using the "imports" key only (no scopes)', () => {
         "/lib/no.mjs": null,
         "./dotrelative/no.mjs": [],
 
-        "/": "/lib/slash-only.mjs/",
-        "./": "/lib/dotslash-only.mjs/",
+        "/": "/lib/slash-only/",
+        "./": "/lib/dotslash-only/",
 
         "/test": "/lib/test1.mjs",
         "../test": "/lib/test2.mjs"
@@ -190,13 +190,13 @@ describe('Mapped using the "imports" key only (no scopes)', () => {
     });
 
     it('should remap URLs that are just composed from / and .', () => {
-      expect(resolveUnderTest('https://example.com/')).toMatchURL('https://example.com/lib/slash-only.mjs/');
-      expect(resolveUnderTest('/')).toMatchURL('https://example.com/lib/slash-only.mjs/');
-      expect(resolveUnderTest('../')).toMatchURL('https://example.com/lib/slash-only.mjs/');
+      expect(resolveUnderTest('https://example.com/')).toMatchURL('https://example.com/lib/slash-only/');
+      expect(resolveUnderTest('/')).toMatchURL('https://example.com/lib/slash-only/');
+      expect(resolveUnderTest('../')).toMatchURL('https://example.com/lib/slash-only/');
 
-      expect(resolveUnderTest('https://example.com/app/')).toMatchURL('https://example.com/lib/dotslash-only.mjs/');
-      expect(resolveUnderTest('/app/')).toMatchURL('https://example.com/lib/dotslash-only.mjs/');
-      expect(resolveUnderTest('../app/')).toMatchURL('https://example.com/lib/dotslash-only.mjs/');
+      expect(resolveUnderTest('https://example.com/app/')).toMatchURL('https://example.com/lib/dotslash-only/');
+      expect(resolveUnderTest('/app/')).toMatchURL('https://example.com/lib/dotslash-only/');
+      expect(resolveUnderTest('../app/')).toMatchURL('https://example.com/lib/dotslash-only/');
     });
 
     it('should use the last entry\'s address when URL-like specifiers parse to the same absolute URL', () => {

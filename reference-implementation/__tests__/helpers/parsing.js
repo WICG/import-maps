@@ -1,28 +1,20 @@
 'use strict';
 const { parseFromString } = require('../../lib/parser.js');
 
-function testWarningHandler(expectedWarnings) {
-  const warnings = [];
-  const { warn } = console;
-  console.warn = function (warning) {
-    warnings.push(warning);
-  };
-  return function () {
-    console.warn = warn;
-    expect(warnings).toEqual(expectedWarnings);
-  };
-}
-
 exports.expectSpecifierMap = (input, baseURL, output, warnings = []) => {
-  const checkWarnings = testWarningHandler(warnings.concat(warnings));
+  const checkWarnings1 = testWarningHandler(warnings);
 
   expect(parseFromString(`{ "imports": ${input} }`, baseURL))
     .toEqual({ imports: output, scopes: {} });
 
-  expect(parseFromString(`{ "scopes": { "https://scope.example/":  ${input} } }`, baseURL, () => {}))
+  checkWarnings1();
+
+  const checkWarnings2 = testWarningHandler(warnings);
+
+  expect(parseFromString(`{ "scopes": { "https://scope.example/":  ${input} } }`, baseURL))
     .toEqual({ imports: {}, scopes: { 'https://scope.example/': output } });
 
-  checkWarnings();
+  checkWarnings2();
 };
 
 exports.expectScopes = (inputArray, baseURL, outputArray, warnings = []) => {
@@ -46,3 +38,15 @@ exports.expectBad = (input, baseURL, warnings = []) => {
   expect(() => parseFromString(input, baseURL)).toThrow(TypeError);
   checkWarnings();
 };
+
+function testWarningHandler(expectedWarnings) {
+  const warnings = [];
+  const { warn } = console;
+  console.warn = warning => {
+    warnings.push(warning);
+  };
+  return () => {
+    console.warn = warn;
+    expect(warnings).toEqual(expectedWarnings);
+  };
+}

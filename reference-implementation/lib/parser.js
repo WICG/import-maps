@@ -80,8 +80,8 @@ function normalizeSpecifierMap(obj, baseURL) {
           return false;
         }
         if (key[key.length - 1] === '/' && address.href[address.href.length - 1] !== '/') {
-          console.warn(`Invalid target address ${address} for package specifier '${key}'. ` +
-              `Package address targets must end with '/'.`);
+          console.warn(`Invalid target address "${address}" for package specifier "${key}". ` +
+              `Package address targets must end with "/".`);
           return false;
         }
         return true;
