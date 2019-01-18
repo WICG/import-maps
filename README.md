@@ -242,6 +242,8 @@ import { StorageArea } from "@std/kv-storage";
 
 will first try to resolve to `@std/kv-storage`, i.e. the browser's built-in implementation of KV storage. If that fails, e.g. because the browser does not implement KV storage, then instead it will fetch the polyfill, at `/node_modules/als-polyfill/index.mjs`.
 
+_Note: the usage of the `@std/` prefix for built-in module examples is for illustrative purposes only. (Indeed, the KV Storage specification currently uses a `std:` prefix.) This proposal is generic, and would be able to work with any built-in module prefix._
+
 #### For built-in modules, in browsers without import maps
 
 The goal of the previous example is to use a polyfill in older browsers, but the built-in module in newer browsers. But it falls down in the case of browsers that are old enough to not support import maps at all. (That is, all of today's currently-shipping browsers.) In such cases, the statement `import { StorageArea } from "@std/kv-storage"` will always fail, with no chance to remap it.
