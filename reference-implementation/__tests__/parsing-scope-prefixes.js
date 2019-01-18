@@ -68,10 +68,10 @@ describe('Absolute URL scope prefixes', () => {
         'ftp://good/'
       ],
       [
-        'Scope import:bad is not using a valid fetch scheme.',
-        'Scope mailto:bad is not using a valid fetch scheme.',
-        'Scope javascript:bad is not using a valid fetch scheme.',
-        'Scope wss://ba/ is not using a valid fetch scheme.'
+        'Invalid scope "import:bad". Scope URLs must have a fetch scheme.',
+        'Invalid scope "mailto:bad". Scope URLs must have a fetch scheme.',
+        'Invalid scope "javascript:bad". Scope URLs must have a fetch scheme.',
+        'Invalid scope "wss://ba/". Scope URLs must have a fetch scheme.'
       ]
     );
   });

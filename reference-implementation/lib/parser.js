@@ -38,7 +38,7 @@ exports.parseFromString = (input, baseURL) => {
       }
 
       if (!hasFetchScheme(scopePrefixURL)) {
-        console.warn(`Scope ${scopePrefixURL} is not using a valid fetch scheme.`);
+        console.warn(`Invalid scope "${scopePrefixURL}". Scope URLs must have a fetch scheme.`);
         continue;
       }
 
