@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "test": "jest"
   },
-  "repository": "domenic/import-maps",
+  "repository": "WICG/import-maps",
   "author": "Domenic Denicola <d@domenic.me> (https://domenic.me/)",
   "license": "MIT",
   "devDependencies": {

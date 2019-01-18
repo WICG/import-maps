@@ -324,7 +324,7 @@ We support this use case in import maps by allowing you to change the meaning of
 }
 ```
 
-(This is example is one of several [in-the-wild examples](https://github.com/domenic/package-name-maps/issues/5#issuecomment-374175653) of multiple versions per application provided by @zkat. Thanks, @zkat!)
+(This is example is one of several [in-the-wild examples](https://github.com/WICG/import-maps/issues/5#issuecomment-374175653) of multiple versions per application provided by @zkat. Thanks, @zkat!)
 
 With this mapping, inside any modules whose URLs start with `/node_modules/socksjs-client/`, the `"querystringify"` specifier will refer to `/node_modules/socksjs-client/querystringify/index.js`. Whereas otherwise, the top-level mapping will ensure that `"querystringify"` refers to `/node_modules/querystringify/index.js`.
 
@@ -592,16 +592,16 @@ link.href = import.meta.resolve('widget/themes/light.css');
 document.head.append(link);
 ```
 
-However, this gets a little complicated due to the [fallbacks for user-supplied packages](#for-user-supplied-packages) feature; see discussion in [#79](https://github.com/domenic/import-maps/issues/79).
+However, this gets a little complicated due to the [fallbacks for user-supplied packages](#for-user-supplied-packages) feature; see discussion in [#79](https://github.com/WICG/import-maps/issues/79).
 
-_Previous versions of this proposal anticipated making `import:` URLs resolve relative to the current active script. However, that has intractible problems, as discussed in [#75](https://github.com/domenic/import-maps/issues/75)._
+_Previous versions of this proposal anticipated making `import:` URLs resolve relative to the current active script. However, that has intractible problems, as discussed in [#75](https://github.com/WICG/import-maps/issues/75)._
 
 
 ## Import map processing
 
 ### Installation
 
-_The below represents a tentative idea. See the issue tracker for more discussion and alternatives: [#1](https://github.com/domenic/package-name-maps/issues/1)._
+_The below represents a tentative idea. See the issue tracker for more discussion and alternatives: [#1](https://github.com/WICG/import-maps/issues/1)._
 
 You can install an import map for your application using a `<script>` element, either inline (for best performance) or with a `src=""` attribute (in which case you'd better be using HTTP/2 push to get that thing to us as soon as possible):
 
@@ -622,7 +622,7 @@ Because they affect all imports, any import maps must be present and successfull
 
 Similarly, attempting to add a new `<script type="importmap">` after any module graph fetching, or fetching of `import:` URLs, has started, is an error. The import map will be ignored, and the `<script>` element will fire an error.
 
-Multiple `<script type="importmap">`s are allowed on the page. (See previous discussion in [#14](https://github.com/domenic/package-name-maps/issues/14).) They are merged by an intentionally-simple procedure, roughly equivalent to the JavaScript code
+Multiple `<script type="importmap">`s are allowed on the page. (See previous discussion in [#14](https://github.com/WICG/import-maps/issues/14).) They are merged by an intentionally-simple procedure, roughly equivalent to the JavaScript code
 
 ```js
 const result = {
@@ -633,7 +633,7 @@ const result = {
 
 See [the proto-spec](./spec.md) for more details on how this all works.
 
-_What do we do in workers? Probably `new Worker(someURL, { type: "module", importMap: ... })`? Or should you set it from inside the worker? Should dedicated workers use their controlling document's map, either by default or always? Discuss in [#2](https://github.com/domenic/package-name-maps/issues/2)._
+_What do we do in workers? Probably `new Worker(someURL, { type: "module", importMap: ... })`? Or should you set it from inside the worker? Should dedicated workers use their controlling document's map, either by default or always? Discuss in [#2](https://github.com/WICG/import-maps/issues/2)._
 
 ### Dynamic import map example
 
@@ -741,7 +741,7 @@ then the only information you need is
 
 You could imagine a module import configuration format that only specified these things, or even only some subset (if we baked in assumptions for the others).
 
-This idea does not work for more complex applications which need scoped resolution, so we believe the full import map proposal is necessary. But it remains attractive for simple applications, and we wonder if there's a way to make the proposal also have an easy-mode that does not require listing all modules, but instead relies on conventions and tools to ensure minimal mapping is needed. Discuss in [#7](https://github.com/domenic/package-name-maps/issues/7).
+This idea does not work for more complex applications which need scoped resolution, so we believe the full import map proposal is necessary. But it remains attractive for simple applications, and we wonder if there's a way to make the proposal also have an easy-mode that does not require listing all modules, but instead relies on conventions and tools to ensure minimal mapping is needed. Discuss in [#7](https://github.com/WICG/import-maps/issues/7).
 
 ## Adjacent concepts
 
@@ -757,7 +757,7 @@ The import map _could_ be that manifest file. However, it may not be the best fi
 
 ### Alternating logic based on the presence of a built-in module
 
-_See further discussion of this case in the issue tracker: [#61](https://github.com/domenic/package-name-maps/issues/61)._
+_See further discussion of this case in the issue tracker: [#61](https://github.com/WICG/import-maps/issues/61)._
 
 Not all fallbacks take the role of running one piece of code. For example, sometimes, one code path is to be taken if a particular platform API exists, and another code path is taken if it doesn't exist. The import maps proposal does not aim to solve all such scenarios in a built-in way; instead, the stage 2 TC39 proposal [top-level await](https://github.com/tc39/proposal-top-level-await) can be used to meet some of these use cases.
 
@@ -783,7 +783,7 @@ try {
 
 The `import:` URL feature is ambitious in that it involves cross-cutting implementation work that goes outside of the usual "module loading" pipeline, and starts affecting network code.
 
-We believe `import:` URLs are valuable, and solve a real developer need. They were a [prominent feature request](https://github.com/domenic/import-maps/issues/23) against earlier versions of this proposal. We believe that having a proposal that incorporates them is better than trying to tack them on later.
+We believe `import:` URLs are valuable, and solve a real developer need. They were a [prominent feature request](https://github.com/WICG/import-maps/issues/23) against earlier versions of this proposal. We believe that having a proposal that incorporates them is better than trying to tack them on later.
 
 That said, in terms of implementation staging, it's easy to slice this proposal into a "without `import:` URLs" implementation that later gets followed by a "with `import:` URLs" implementation. Simply by making import maps only affect `import` statements and `import()` expressions at first, an implementation can deliver much of the value, and later work on the `import:` URL implementation.
 

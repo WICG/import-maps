@@ -1,6 +1,6 @@
 # Import maps proto-spec
 
-_Note: we also have a slightly-less-proto spec at https://domenic.github.io/import-maps/. We're sorry that it's confusing to have two spec-like documents; we'll merge the contents of this one into that location soon. At this point in time, that one is more rigorous but covers less behavior._
+_Note: we also have a slightly-less-proto spec at https://wicg.github.io/import-maps/. We're sorry that it's confusing to have two spec-like documents; we'll merge the contents of this one into that location soon. At this point in time, that one is more rigorous but covers less behavior._
 
 ## Installation
 
@@ -31,7 +31,7 @@ Any **ongoing fetches of import maps** are noted, while ongoing, so that `import
 
 ### Import map spec structure
 
-For now, see the [reference implementation](https://github.com/domenic/import-maps/tree/master/reference-implementation) to understand how an arbitrary string gets turned into a normalized "import map" structure. This will soon be ported to formal specification text, after a bit more validation that it works correctly.
+For now, see the [reference implementation](https://github.com/WICG/import-maps/tree/master/reference-implementation) to understand how an arbitrary string gets turned into a normalized "import map" structure. This will soon be ported to formal specification text, after a bit more validation that it works correctly.
 
 ### Merging import maps
 
@@ -67,7 +67,7 @@ Note that we do not introspect the scopes. If there's two conflicting definition
 
 ## Resolution
 
-The new "resolve a module specifier" algorithm is prototyped in the [reference implementation](https://github.com/domenic/import-maps/tree/master/reference-implementation). It takes as input a specifier, a parsed import map, and a script URL that the specifier is being resolved in the context of.
+The new "resolve a module specifier" algorithm is prototyped in the [reference implementation](https://github.com/WICG/import-maps/tree/master/reference-implementation). It takes as input a specifier, a parsed import map, and a script URL that the specifier is being resolved in the context of.
 
 For now we will only handle cases where there is at most one fetch-scheme URL in the address array. Cases involving multiple such URLs (such as the [fallbacks for user-supplied packages](./README.md#for-user-supplied-packages) example) require more thought on how to thread through the spec. This corresponds to working through all but the last bullet in the README's section on [further implementation staging](./README.md#further-implementation-staging)
 
