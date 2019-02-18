@@ -628,7 +628,7 @@ Multiple `<script type="importmap">`s are allowed on the page. (See previous dis
 
 ```js
 const result = {
-  modules: { ...a.modules, ...b.modules },
+  imports: { ...a.imports, ...b.imports },
   scopes: { ...a.scopes, ...b.scopes }
 };
 ```
