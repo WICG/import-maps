@@ -14,6 +14,7 @@ _Or, how to control the behavior of JavaScript imports_
   - [Bare specifier examples](#bare-specifier-examples)
     - [Bare specifiers for JavaScript modules](#bare-specifiers-for-javascript-modules)
     - ["Packages" via trailing slashes](#packages-via-trailing-slashes)
+    - [Extension-less imports](#extension-less-imports)
   - [Fallback examples](#fallback-examples)
     - [For user-supplied packages](#for-user-supplied-packages)
     - [For built-in modules, in module-import-map-supporting browsers](#for-built-in-modules-in-module-import-map-supporting-browsers)
@@ -192,19 +193,19 @@ import fp from "lodash/fp.js";
 
 #### Extension-less imports
 
-It is also common in the Node.js ecosystem to import files without including the extension. [we do not have the luxury](#the-nodejs-module-resolution-algorithm) of trying multiple file extensions until we find a good match. Fortunately, an import map can also include these cases.
+It is also common in the Node.js ecosystem to import files without including the extension. [We do not have the luxury](#the-nodejs-module-resolution-algorithm) of trying multiple file extensions until we find a good match. However, we can emulate something similar by using an import map. For example,
 
-```diff
+```json
  {
    "imports": {
      "lodash": "/node_modules/lodash-es/lodash.js",
      "lodash/": "/node_modules/lodash-es/",
-+    "lodash/fp": "/node_modules/lodash-es/fp.js",
+     "lodash/fp": "/node_modules/lodash-es/fp.js",
    }
  }
 ```
 
-would allow not only `import fp from "lodash/fp.js"` but also `import fp from "loadsh/fp"`
+would allow not only `import fp from "lodash/fp.js"`, but also allow `import fp from "loadsh/fp"`. Also note that it enable `import fp from "./fp"` from inside the `/node_modules/lodash-es/lodash.js` file or other siblings.
 
 ### Fallback examples
 
