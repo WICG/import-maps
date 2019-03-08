@@ -207,6 +207,12 @@ It is also common in the Node.js ecosystem to import files without including the
 
 would allow not only `import fp from "lodash/fp.js"`, but also allow `import fp from "loadsh/fp"`.
 
+Although this example shows how it is _possible_ to allow extension-less imports with import maps, it's not necessarily _desirable_. Doing so bloats the import map, and makes the package's interface less simple—both for humans and for tooling.
+
+This bloat is especially problematic if you need to allow extension-less imports within a package. In that case you will need an import map entry for every file in the package, not just the top-level entry points. For example, to allow `import "./fp"` from within the `/node_modules/lodash-es/lodash.js` file, you would need an import entry mapping `/node_modules/lodash-es/fp` to `/node_modules/lodash-es/fp.js`. Now imagine repeating this for every file referenced without an extension.
+
+As such, we recommend caution when employing patterns like this in your import maps, or writing modules. It will be simpler for the ecosystem if we don't rely on import maps to patch up file-extension related mismatches.
+
 ### Fallback examples
 
 #### For user-supplied packages
