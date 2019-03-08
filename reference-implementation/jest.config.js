@@ -3,5 +3,5 @@
 module.exports = {
   testEnvironment: 'node',
   testPathIgnorePatterns: ['<rootDir>/__tests__/helpers/'],
-  setupTestFrameworkScriptFile: '<rootDir>/__tests__/helpers/matchers.js'
+  setupFilesAfterEnv: ['<rootDir>/__tests__/helpers/matchers.js']
 };

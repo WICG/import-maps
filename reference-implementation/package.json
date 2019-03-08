@@ -14,8 +14,8 @@
   "author": "Domenic Denicola <d@domenic.me> (https://domenic.me/)",
   "license": "MIT",
   "devDependencies": {
-    "eslint": "^5.8.0",
-    "jest": "^23.6.0",
-    "jest-diff": "^23.6.0"
+    "eslint": "^5.15.1",
+    "jest": "^24.3.1",
+    "jest-diff": "^24.3.1"
   }
 }
