@@ -14,6 +14,7 @@ _Or, how to control the behavior of JavaScript imports_
   - [Bare specifier examples](#bare-specifier-examples)
     - [Bare specifiers for JavaScript modules](#bare-specifiers-for-javascript-modules)
     - ["Packages" via trailing slashes](#packages-via-trailing-slashes)
+    - [Extension-less imports](#extension-less-imports)
   - [Fallback examples](#fallback-examples)
     - [For user-supplied packages](#for-user-supplied-packages)
     - [For built-in modules, in module-import-map-supporting browsers](#for-built-in-modules-in-module-import-map-supporting-browsers)
@@ -190,7 +191,21 @@ import localeData from "moment/locale/zh-cn.js";
 import fp from "lodash/fp.js";
 ```
 
-_Note how unlike some Node.js usages, we include the ending `.js` here. File extensions are required in browsers; unlike in Node, [we do not have the luxury](#the-nodejs-module-resolution-algorithm) of trying multiple file extensions until we find a good match. Fortunately, including file extensions also works in Node.js; that is, if everyone uses file extensions for submodules, their code will work in both environments._
+#### Extension-less imports
+
+It is also common in the Node.js ecosystem to import files without including the extension. [We do not have the luxury](#the-nodejs-module-resolution-algorithm) of trying multiple file extensions until we find a good match. However, we can emulate something similar by using an import map. For example,
+
+```json
+ {
+   "imports": {
+     "lodash": "/node_modules/lodash-es/lodash.js",
+     "lodash/": "/node_modules/lodash-es/",
+     "lodash/fp": "/node_modules/lodash-es/fp.js",
+   }
+ }
+```
+
+would allow not only `import fp from "lodash/fp.js"`, but also allow `import fp from "loadsh/fp"`.
 
 ### Fallback examples
 
