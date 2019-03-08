@@ -11,9 +11,10 @@ _Or, how to control the behavior of JavaScript imports_
   - [Bare specifiers](#bare-specifiers)
   - [Built-in modules](#built-in-modules)
 - [The import map](#the-import-map)
-  - [Bare specifier examples](#bare-specifier-examples)
+  - [Specifier remapping examples](#specifier-remapping-examples)
     - [Bare specifiers for JavaScript modules](#bare-specifiers-for-javascript-modules)
     - ["Packages" via trailing slashes](#packages-via-trailing-slashes)
+    - [General URL-like specifier remapping](#general-url-like-specifier-remapping)
     - [Extension-less imports](#extension-less-imports)
   - [Fallback examples](#fallback-examples)
     - [For user-supplied packages](#for-user-supplied-packages)
@@ -136,7 +137,7 @@ Note that these use cases are complicated by the need to support browsers withou
 
 We explain the features of the import map via a series of examples.
 
-### Bare specifier examples
+### Specifier remapping examples
 
 #### Bare specifiers for JavaScript modules
 
@@ -190,6 +191,30 @@ but also non-main modules, e.g.
 import localeData from "moment/locale/zh-cn.js";
 import fp from "lodash/fp.js";
 ```
+
+#### General URL-like specifier remapping
+
+As part of allowing general remapping of specifiers, import maps specifically allow remapping of URL-like specifiers, such as `"https://example.com/foo.mjs"` or `"./bar.mjs"`. One of the more advanced usages of this is [for fallbacks](#for-built-in-modules-in-browsers-without-import-maps), but here we demonstrate some basic ones to communicate the concept:
+
+```json
+{
+  "imports": {
+    "https://www.unpkg.com/vue/dist/vue.runtime.esm.js": "/node_modules/vue/dist/vue.runtime.esm.js"
+  }
+}
+```
+
+This remapping ensures that any imports of the unpkg.com version of Vue (at least at that URL) instead grab the one from the local server.
+
+```json
+{
+  "imports": {
+    "/app/helpers.mjs": "/app/helpers/index.mjs"
+  }
+}
+```
+
+This remapping ensures that any URL-like imports that resolve to `/app/helpers.mjs`, including e.g. an `import "./helpers.mjs"` from files inside `/app/`, or an `import "../helpers.mjs"` from files inside `/app/models`, will instead resolve to `/app/helpers/index.mjs`. This is probably not a good idea; instead of creating an indirection which obfuscates your code, you should instead just update your source files to import the correct files. But, it is a useful example for demonstrating the capabilities of import maps.
 
 #### Extension-less imports
 
