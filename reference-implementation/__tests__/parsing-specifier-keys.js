@@ -59,8 +59,8 @@ describe('Relative URL-like specifier keys', () => {
   });
 });
 
-describe('Absolute URL addresses', () => {
-  it('should only accept absolute URL addresses with fetch schemes, treating others as bare specifiers', () => {
+describe('Absolute URL specifier keys', () => {
+  it('should only accept absolute URL specifier keys with fetch schemes, treating others as bare specifiers', () => {
     expectSpecifierMap(
       `{
         "about:good": "/about",
