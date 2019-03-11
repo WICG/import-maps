@@ -221,13 +221,44 @@ describe('Absolute URL addresses', () => {
     );
   });
 
-  describe('Failing addresses', () => {
-    it('should warn on trailing slash specifier keys not mapping to a trailing slash address', () => {
-      expectSpecifierMap(`{
-        "trailer/": ["/notrailer"]
-      }`, 'https://base.example/path1/path2/path3', {
-        'trailer/': []
-      }, [`Invalid target address "https://base.example/notrailer" for package specifier "trailer/". Package address targets must end with "/".`]);
+  describe('Failing addresses: mismatched trailing slashes', () => {
+    it('should warn for the simple case', () => {
+      expectSpecifierMap(
+        `{
+          "trailer/": "/notrailer"
+        }`,
+        'https://base.example/path1/path2/path3',
+        {
+          'trailer/': []
+        },
+        [`Invalid target address "https://base.example/notrailer" for package specifier "trailer/". Package address targets must end with "/".`]
+      );
+    });
+
+    it('should warn for a mismatch alone in an array', () => {
+      expectSpecifierMap(
+        `{
+          "trailer/": ["/notrailer"]
+        }`,
+        'https://base.example/path1/path2/path3',
+        {
+          'trailer/': []
+        },
+        [`Invalid target address "https://base.example/notrailer" for package specifier "trailer/". Package address targets must end with "/".`]
+      );
+    });
+
+    it('should warn for a mismatch alongside non-mismatches in an array', () => {
+      expectSpecifierMap(
+        `{
+          "trailer/": ["/atrailer/", "/notrailer"]
+        }`,
+        'https://base.example/path1/path2/path3',
+        {
+          'trailer/': [expect.toMatchURL('https://base.example/atrailer/')]
+        },
+        [`Invalid target address "https://base.example/notrailer" for package specifier "trailer/". Package address targets must end with "/".`]
+      );
     });
   });
 });
