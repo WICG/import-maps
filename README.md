@@ -216,6 +216,8 @@ This remapping ensures that any imports of the unpkg.com version of Vue (at leas
 
 This remapping ensures that any URL-like imports that resolve to `/app/helpers.mjs`, including e.g. an `import "./helpers.mjs"` from files inside `/app/`, or an `import "../helpers.mjs"` from files inside `/app/models`, will instead resolve to `/app/helpers/index.mjs`. This is probably not a good idea; instead of creating an indirection which obfuscates your code, you should instead just update your source files to import the correct files. But, it is a useful example for demonstrating the capabilities of import maps.
 
+The point is that the remapping works the same for URL-like imports as for bare imports. Our previous examples changed the resolution of specifiers like `"lodash"`, and thus changed the meaning of `import "lodash"`. Here we're changing the resolution of specifiers like `"/app/helpers.mjs"`, and thus changing the meaning of `import "/app/helpers.mjs"`.
+
 #### Extension-less imports
 
 It is also common in the Node.js ecosystem to import files without including the extension. [We do not have the luxury](#the-nodejs-module-resolution-algorithm) of trying multiple file extensions until we find a good match. However, we can emulate something similar by using an import map. For example,
@@ -278,15 +280,13 @@ For example, consider the following import map, which supplies a polyfill fallba
 }
 ```
 
-Note here how we see our first example of an address not starting with `./`, `../`, or `/`. If the address does not start with those prefixes, and is not parseable as an absolute URL, then it is interpreted as identifying a built-in module.
-
 Now, statements like
 
 ```js
 import { StorageArea } from "std:kv-storage";
 ```
 
-will first try to resolve to `std:kv-storage`, i.e. the browser's built-in implementation of KV storage. If that fails, e.g. because the browser does not implement KV storage, then instead it will fetch the polyfill, at `/node_modules/als-polyfill/index.mjs`.
+will first try to resolve to the `std:kv-storage` URL, i.e. to the browser's built-in implementation of KV storage. If that fails, e.g. because the browser does not implement KV storage, then instead it will fetch the polyfill, at `/node_modules/kvs-polyfill/index.mjs`.
 
 _Note: the usage of the `std:` prefix for built-in module examples is for illustrative purposes. This proposal is generic, and would be able to work with any built-in module prefix._
 
@@ -297,7 +297,7 @@ The goal of the previous example is to use a polyfill in older browsers, but the
 How can we write code that uses a polyfill in today's browsers, but uses built-in modules in future browsers that support them? We do this by changing our import statement to import the _polyfill_'s URL:
 
 ```js
-import { StorageArea } from "/node_modules/als-polyfill/index.mjs";
+import { StorageArea } from "/node_modules/kvs-polyfill/index.mjs";
 ```
 
 and then remapping the polyfill to the built-in module for module-import-map-supporting browsers:
@@ -305,9 +305,9 @@ and then remapping the polyfill to the built-in module for module-import-map-sup
 ```json
 {
   "imports": {
-    "/node_modules/als-polyfill/index.mjs": [
+    "/node_modules/kvs-polyfill/index.mjs": [
       "std:kv-storage",
-      "/node_modules/als-polyfill/index.mjs"
+      "/node_modules/kvs-polyfill/index.mjs"
     ]
   }
 }
@@ -319,7 +319,7 @@ With this mapping, each class of browser behaves as desired, for our above impor
 - Browsers that support import maps, but do not support KV storage, will end up with a mapping from the polyfill URL to itself, and so will receive the polyfill anyway.
 - Browsers that support both import maps and KV storage will end up with a mapping from the polyfill URL to `std:kv-storage`, and so will receive the built-in module.
 
-Note how we're using a capability here that we haven't explored in previous examples: remapping imports of "URL-like" specifiers, not just bare specifiers. But it works exactly the same. Previous examples changed the resolution of specifiers like `"lodash"`, and thus changed the meaning of `import "lodash"`. Here we're changing the resolution of specifiers like `"/node_modules/als-polyfill/index.mjs"`, and thus changing the meaning of `import "/node_modules/als-polyfill/index.mjs"`.
+Note how we're using a capability here that we briefly explored in [a previous example](#general-url-like-specifier-remapping): remapping imports of "URL-like" specifiers, not just bare specifiers.
 
 (Note that, in general, there is only one level of resolution. The address is not itself treated as a specifier and recursively remapped.)
 
@@ -328,25 +328,25 @@ Note how we're using a capability here that we haven't explored in previous exam
 An important caveat to the above example is that it does _not_ help for `<script src="">` scenarios. That is, while
 
 ```js
-import "/node_modules/als-polyfill/index.mjs";
+import "/node_modules/virtual-scroller-polyfill/index.mjs";
 ```
 
 would have the correct behavior (using the built-in version when appropriate) in all classes of browser,
 
 ```html
-<script type="module" src="/node_modules/als-polyfill/index.mjs"></script>
+<script type="module" src="/node_modules/virtual-scroller-polyfill/index.mjs"></script>
 ```
 
 would not: in all classes of browsers, it would fetch the polyfill unconditionally. What _would_ work, in import-map-supporting browsers, would be
 
 ```html
-<script type="module" src="import:/node_modules/als-polyfill/index.mjs"></script>
+<script type="module" src="import:/node_modules/virtual-scroller-polyfill/index.mjs"></script>
 ```
 
 (See below for more on the subtleties of `import:` URLs.) But alas, in browsers without support for import maps, this will result in a network error. Thus, for side-effecting modules, you'd instead want to use the pattern
 
 ```html
-<script type="module">import "/node_modules/als-polyfill/index.mjs";</script>
+<script type="module">import "/node_modules/virtual-scroller-polyfill/index.mjs";</script>
 ```
 
 which will work as desired in all classes of browser.
