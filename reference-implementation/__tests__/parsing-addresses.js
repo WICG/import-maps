@@ -1,6 +1,6 @@
 'use strict';
 const { expectSpecifierMap } = require('./helpers/parsing.js');
-const { BUILT_IN_MODULE_PREFIX } = require('../lib/parser.js');
+const { BUILT_IN_MODULE_SCHEME } = require('../lib/utils.js');
 
 describe('Relative URL-like addresses', () => {
   it('should accept strings prefixed with ./, ../, or /', () => {
@@ -61,22 +61,22 @@ describe('Relative URL-like addresses', () => {
 });
 
 describe('Built-in module addresses', () => {
-  it('should accept strings prefixed with the built-in module prefix', () => {
+  it('should accept URLs using the built-in module scheme', () => {
     expectSpecifierMap(
       `{
-        "foo": "${BUILT_IN_MODULE_PREFIX}foo"
+        "foo": "${BUILT_IN_MODULE_SCHEME}:foo"
       }`,
       'https://base.example/path1/path2/path3',
       {
-        foo: [expect.toMatchURL(`import:${BUILT_IN_MODULE_PREFIX}foo`)]
+        foo: [expect.toMatchURL(`${BUILT_IN_MODULE_SCHEME}:foo`)]
       }
     );
   });
 
-  it('should ignore percent-encoded variants of the built-in module prefix', () => {
+  it('should ignore percent-encoded variants of the built-in module scheme', () => {
     expectSpecifierMap(
       `{
-        "foo": "${encodeURIComponent(BUILT_IN_MODULE_PREFIX)}foo"
+        "foo": "${encodeURIComponent(BUILT_IN_MODULE_SCHEME + ':')}foo"
       }`,
       'https://base.example/path1/path2/path3',
       {

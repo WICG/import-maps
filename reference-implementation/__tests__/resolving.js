@@ -144,7 +144,7 @@ describe('Mapped using the "imports" key only (no scopes)', () => {
   describe('URL-like specifiers', () => {
     const resolveUnderTest = makeResolveUnderTest(`{
       "imports": {
-        "/node_modules/als-polyfill/index.mjs": "@std/async-local-storage",
+        "/node_modules/als-polyfill/index.mjs": "std:kv-storage",
 
         "/lib/foo.mjs": "./more/bar.mjs",
         "./dotrelative/foo.mjs": "/lib/dot.mjs",
@@ -162,9 +162,9 @@ describe('Mapped using the "imports" key only (no scopes)', () => {
     }`);
 
     it('should remap to built-in modules', () => {
-      expect(resolveUnderTest('/node_modules/als-polyfill/index.mjs')).toMatchURL('import:@std/async-local-storage');
-      expect(resolveUnderTest('https://example.com/node_modules/als-polyfill/index.mjs')).toMatchURL('import:@std/async-local-storage');
-      expect(resolveUnderTest('https://///example.com/node_modules/als-polyfill/index.mjs')).toMatchURL('import:@std/async-local-storage');
+      expect(resolveUnderTest('/node_modules/als-polyfill/index.mjs')).toMatchURL('std:kv-storage');
+      expect(resolveUnderTest('https://example.com/node_modules/als-polyfill/index.mjs')).toMatchURL('std:kv-storage');
+      expect(resolveUnderTest('https://///example.com/node_modules/als-polyfill/index.mjs')).toMatchURL('std:kv-storage');
     });
 
     it('should remap to other URLs', () => {

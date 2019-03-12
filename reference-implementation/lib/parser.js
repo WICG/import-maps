@@ -1,9 +1,5 @@
 'use strict';
-const { URL } = require('url');
 const { tryURLParse, hasFetchScheme, tryURLLikeSpecifierParse } = require('./utils.js');
-
-// Tentative, so better to centralize so we can change in one place as necessary (including tests).
-exports.BUILT_IN_MODULE_PREFIX = '@std/';
 
 exports.parseFromString = (input, baseURL) => {
   const parsed = JSON.parse(input);
@@ -110,10 +106,6 @@ function normalizeSpecifierKey(specifierKey, baseURL) {
 function normalizeAddress(address, baseURL) {
   if (typeof address !== 'string') {
     return null;
-  }
-
-  if (address.startsWith(exports.BUILT_IN_MODULE_PREFIX)) {
-    return new URL('import:' + address);
   }
 
   return tryURLLikeSpecifierParse(address, baseURL);

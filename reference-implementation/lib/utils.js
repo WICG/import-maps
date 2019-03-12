@@ -4,6 +4,9 @@ const { URL } = require('url');
 // https://fetch.spec.whatwg.org/#fetch-scheme
 const FETCH_SCHEMES = new Set(['http', 'https', 'ftp', 'about', 'blob', 'data', 'file', 'filesystem']);
 
+// Tentative, so better to centralize so we can change in one place as necessary (including tests).
+exports.BUILT_IN_MODULE_SCHEME = 'std';
+
 exports.tryURLParse = (string, baseURL) => {
   try {
     return new URL(string, baseURL);
@@ -18,7 +21,7 @@ exports.tryURLLikeSpecifierParse = (specifier, baseURL) => {
   }
 
   const url = exports.tryURLParse(specifier);
-  if (url !== null && exports.hasFetchScheme(url)) {
+  if (url !== null && (exports.hasFetchScheme(url) || getScheme(url) === exports.BUILT_IN_MODULE_SCHEME)) {
     return url;
   }
 
@@ -26,5 +29,9 @@ exports.tryURLLikeSpecifierParse = (specifier, baseURL) => {
 };
 
 exports.hasFetchScheme = url => {
-  return FETCH_SCHEMES.has(url.protocol.slice(0, -1));
+  return FETCH_SCHEMES.has(getScheme(url));
 };
+
+function getScheme(url) {
+  return url.protocol.slice(0, -1);
+}

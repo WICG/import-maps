@@ -270,8 +270,8 @@ For example, consider the following import map, which supplies a polyfill fallba
 ```json
 {
   "imports": {
-    "@std/kv-storage": [
-      "@std/kv-storage",
+    "std:kv-storage": [
+      "std:kv-storage",
       "/node_modules/kvs-polyfill/index.mjs"
     ]
   }
@@ -283,16 +283,16 @@ Note here how we see our first example of an address not starting with `./`, `..
 Now, statements like
 
 ```js
-import { StorageArea } from "@std/kv-storage";
+import { StorageArea } from "std:kv-storage";
 ```
 
-will first try to resolve to `@std/kv-storage`, i.e. the browser's built-in implementation of KV storage. If that fails, e.g. because the browser does not implement KV storage, then instead it will fetch the polyfill, at `/node_modules/als-polyfill/index.mjs`.
+will first try to resolve to `std:kv-storage`, i.e. the browser's built-in implementation of KV storage. If that fails, e.g. because the browser does not implement KV storage, then instead it will fetch the polyfill, at `/node_modules/als-polyfill/index.mjs`.
 
-_Note: the usage of the `@std/` prefix for built-in module examples is for illustrative purposes only. (Indeed, the KV Storage specification currently uses a `std:` prefix.) This proposal is generic, and would be able to work with any built-in module prefix._
+_Note: the usage of the `std:` prefix for built-in module examples is for illustrative purposes. This proposal is generic, and would be able to work with any built-in module prefix._
 
 #### For built-in modules, in browsers without import maps
 
-The goal of the previous example is to use a polyfill in older browsers, but the built-in module in newer browsers. But it falls down in the case of browsers that are old enough to not support import maps at all. (That is, all of today's currently-shipping browsers.) In such cases, the statement `import { StorageArea } from "@std/kv-storage"` will always fail, with no chance to remap it.
+The goal of the previous example is to use a polyfill in older browsers, but the built-in module in newer browsers. But it falls down in the case of browsers that are old enough to not support import maps at all. (That is, all of today's currently-shipping browsers.) In such cases, the statement `import { StorageArea } from "std:kv-storage"` will always fail, with no chance to remap it.
 
 How can we write code that uses a polyfill in today's browsers, but uses built-in modules in future browsers that support them? We do this by changing our import statement to import the _polyfill_'s URL:
 
@@ -306,7 +306,7 @@ and then remapping the polyfill to the built-in module for module-import-map-sup
 {
   "imports": {
     "/node_modules/als-polyfill/index.mjs": [
-      "@std/kv-storage",
+      "std:kv-storage",
       "/node_modules/als-polyfill/index.mjs"
     ]
   }
@@ -317,7 +317,7 @@ With this mapping, each class of browser behaves as desired, for our above impor
 
 - Browsers that do not support import maps will receive the polyfill.
 - Browsers that support import maps, but do not support KV storage, will end up with a mapping from the polyfill URL to itself, and so will receive the polyfill anyway.
-- Browsers that support both import maps and KV storage will end up with a mapping from the polyfill URL to `@std/kv-storage`, and so will receive the built-in module.
+- Browsers that support both import maps and KV storage will end up with a mapping from the polyfill URL to `std:kv-storage`, and so will receive the built-in module.
 
 Note how we're using a capability here that we haven't explored in previous examples: remapping imports of "URL-like" specifiers, not just bare specifiers. But it works exactly the same. Previous examples changed the resolution of specifiers like `"lodash"`, and thus changed the meaning of `import "lodash"`. Here we're changing the resolution of specifiers like `"/node_modules/als-polyfill/index.mjs"`, and thus changing the meaning of `import "/node_modules/als-polyfill/index.mjs"`.
 
@@ -434,7 +434,7 @@ With import maps, you can restrict access by mapping a built-in module to the em
 ```json
 {
   "imports": {
-    "@std/kv-storage": []
+    "std:kv-storage": []
   }
 }
 ```
@@ -444,17 +444,17 @@ Alternately, you can use the form
 ```json
 {
   "imports": {
-    "@std/kv-storage": null
+    "std:kv-storage": null
   }
 }
 ```
 
 which means the same thing.
 
-With this in place, any attempts to resolve the `"@std/kv-storage" specifier` will fail. For example,
+With this in place, any attempts to resolve the `"std:kv-storage"` specifier will fail. For example,
 
 ```js
-import { Storage } from "@std/kv-storage"; // throws
+import { Storage } from "std:kv-storage"; // throws
 ```
 
 #### Selective denial
@@ -464,15 +464,17 @@ You can use the scoping feature to restrict access to a built-in module to only 
 ```json
 {
   "imports": {
-    "@std/kv-storage": null
+    "std:kv-storage": null
   },
   "scopes": {
     "/js/storage-code/": {
-      "@std/kv-storage": "@std/kv-storage"
+      "std:kv-storage": "std:kv-storage"
     }
   }
 }
 ```
+
+(The way in which this map operates within the scope, "mapping `std:kv-storage` to itself", may appear a bit confusing. The key is to remember that the left hand side is a module specifier, and the right hand side is a URL. So you can read this as saying that, whenever the `"std:kv-storage"` specifier gets imported within that scope, it resolves to the `std:kv-storage` URL.)
 
 Alternately, you can use similar techniques to prevent only certain parts of your app from accessing a built-in module:
 
@@ -480,7 +482,7 @@ Alternately, you can use similar techniques to prevent only certain parts of you
 {
   "scopes": {
     "/node_modules/untrusted-third-party/": {
-      "@std/kv-storage": null
+      "std:kv-storage": null
     }
   }
 }
@@ -493,34 +495,34 @@ It may be desirable to wrap a built-in module, e.g. to instrument it, and then e
 ```json
 {
   "imports": {
-    "@std/kv-storage": "/js/als-wrapper.mjs"
+    "std:kv-storage": "/js/als-wrapper.mjs"
   },
   "scopes": {
     "/js/als-wrapper.mjs": {
-      "@std/kv-storage": "@std/kv-storage"
+      "std:kv-storage": "std:kv-storage"
     }
   }
 }
 ```
 
-This first ensures that in general, `"@std/kv-storage"` resolves to `/js/als-wrapper.mjs`, but that for the particular scope of the `/js/als-wrapper.mjs` file itself, the resolution behaves as normal. This allows us to write the wrapper file like so:
+This first ensures that in general, `"std:kv-storage"` resolves to `/js/als-wrapper.mjs`, but that for the particular scope of the `/js/als-wrapper.mjs` file itself, the resolution behaves as normal. This allows us to write the wrapper file like so:
 
 ```js
 import instrument from "/js/utils/instrumenter.mjs";
-import { storage as orginalStorage, StorageArea as OriginalStorageArea } from "@std/kv-storage";
+import { storage as orginalStorage, StorageArea as OriginalStorageArea } from "std:kv-storage";
 
 export const storage = instrument(originalStorage);
 export const StorageArea = instrument(OriginalStorageArea);
 ```
 
-Now, whenever any part of our app (except the wrapper module itself) imports `"@std/kv-storage"`, it will resolve to the wrapper module, giving the wrapped and instrumented exports.
+Now, whenever any part of our app (except the wrapper module itself) imports `"std:kv-storage"`, it will resolve to the wrapper module, giving the wrapped and instrumented exports.
 
 #### Extending a built-in module
 
 The story for extending a built-in module is very similar as for wrapping. For example, let's say that KV storage gained a new export, `SuperAwesomeStorageArea`. We would use the same import map as in the previous example, and just change our wrapper like so:
 
 ```js
-export { storage, StorageArea } from "@std/kv-storage";
+export { storage, StorageArea } from "std:kv-storage";
 export class SuperAwesomeStorageArea { ... };
 ```
 
@@ -809,7 +811,7 @@ _See further discussion of this case in the issue tracker: [#61](https://github.
 
 Not all fallbacks take the role of running one piece of code. For example, sometimes, one code path is to be taken if a particular platform API exists, and another code path is taken if it doesn't exist. The import maps proposal does not aim to solve all such scenarios in a built-in way; instead, the stage 2 TC39 proposal [top-level await](https://github.com/tc39/proposal-top-level-await) can be used to meet some of these use cases.
 
-Imagine if IndexedDB were provided by a built-in module `@std/indexed-db` and localStorage were provided by a built-in module `@std/local-storage`. For a particular application, all supported browsers support localStorage, and only some support IndexedDB. Although it's possible to polyfill IndexedDB on top of localStorage, in this scenario, doing so leads to performance overhead vs more specialized usage. Therefore, it's preferrable to use a specialized implementation based on either IndexedDB or localStorage directly, instead of using import maps to remap `@std/indexed-db`.
+Imagine if IndexedDB were provided by a built-in module `std:indexed-db` and localStorage were provided by a built-in module `std:local-storage`. For a particular application, all supported browsers support localStorage, and only some support IndexedDB. Although it's possible to polyfill IndexedDB on top of localStorage, in this scenario, doing so leads to performance overhead vs more specialized usage. Therefore, it's preferrable to use a specialized implementation based on either IndexedDB or localStorage directly, instead of using import maps to remap `std:indexed-db`.
 
 In this scenario, a module may use top-level await to perform feature testing and fallback as follows:
 
@@ -817,10 +819,10 @@ In this scenario, a module may use top-level await to perform feature testing an
 export let myStorageFunction;
 
 try {
-  const indexedDB = await import("@std/indexed-db");
+  const indexedDB = await import("std:indexed-db");
   myStorageFunction = function() { /* in terms of indexedDB */ };
 } catch (e) {
-  const localStorage = await import("@std/local-storage");
+  const localStorage = await import("std:local-storage");
   myStorageFunction = function() { /* in terms of localStorage */ };
 }
 ```
