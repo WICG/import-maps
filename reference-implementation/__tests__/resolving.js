@@ -203,4 +203,23 @@ describe('Mapped using the "imports" key only (no scopes)', () => {
       expect(resolveUnderTest('/test')).toMatchURL('https://example.com/lib/test2.mjs');
     });
   });
+
+  describe('Overlapping entries with trailing slashes', () => {
+    const resolveUnderTest = makeResolveUnderTest(`{
+      "imports": {
+        "a": "/1",
+        "a/": "/2/",
+        "a/b": "/3",
+        "a/b/": "/4/"
+      }
+    }`);
+
+    it('should favor the most-specific key', () => {
+      expect(resolveUnderTest('a')).toMatchURL('https://example.com/1');
+      expect(resolveUnderTest('a/')).toMatchURL('https://example.com/2/');
+      expect(resolveUnderTest('a/b')).toMatchURL('https://example.com/3');
+      expect(resolveUnderTest('a/b/')).toMatchURL('https://example.com/4/');
+      expect(resolveUnderTest('a/b/c')).toMatchURL('https://example.com/4/c');
+    });
+  });
 });

@@ -21,6 +21,12 @@ exports.parseFromString = (input, baseURL) => {
     normalizedImports = normalizeSpecifierMap(parsed.imports, baseURL);
   }
 
+  const sortedAndNormalizedImports = {};
+  const sortedImportsKeys = Object.keys(normalizedImports).sort(longerLengthThenCodeUnitOrder);
+  for (const key of sortedImportsKeys) {
+    sortedAndNormalizedImports[key] = normalizedImports[key];
+  }
+
   const normalizedScopes = {};
   if ('scopes' in parsed) {
     for (const [scopePrefix, specifierMap] of Object.entries(parsed.scopes)) {
@@ -45,7 +51,7 @@ exports.parseFromString = (input, baseURL) => {
 
   // Always have these two keys, and exactly these two keys, in the result.
   return {
-    imports: normalizedImports,
+    imports: sortedAndNormalizedImports,
     scopes: normalizedScopes
   };
 };
@@ -113,4 +119,18 @@ function normalizeAddress(address, baseURL) {
 
 function isJSONObject(value) {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function longerLengthThenCodeUnitOrder(a, b) {
+  return compare(b.length, a.length) || compare(a, b);
+}
+
+function compare(a, b) {
+  if (a > b) {
+    return 1;
+  }
+  if (b > a) {
+    return -1;
+  }
+  return 0;
 }
