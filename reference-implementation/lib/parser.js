@@ -16,15 +16,9 @@ exports.parseFromString = (input, baseURL) => {
     throw new TypeError('Import map\'s scopes value must be an object.');
   }
 
-  let normalizedImports = {};
+  let sortedAndNormalizedImports = {};
   if ('imports' in parsed) {
-    normalizedImports = normalizeSpecifierMap(parsed.imports, baseURL);
-  }
-
-  const sortedAndNormalizedImports = {};
-  const sortedImportsKeys = Object.keys(normalizedImports).sort(longerLengthThenCodeUnitOrder);
-  for (const key of sortedImportsKeys) {
-    sortedAndNormalizedImports[key] = normalizedImports[key];
+    sortedAndNormalizedImports = normalizeSpecifierMap(parsed.imports, baseURL);
   }
 
   const normalizedScopes = {};
@@ -49,10 +43,16 @@ exports.parseFromString = (input, baseURL) => {
     }
   }
 
+  const sortedAndNormalizedScopes = {};
+  const sortedScopeKeys = Object.keys(normalizedScopes).sort(longerLengthThenCodeUnitOrder);
+  for (const key of sortedScopeKeys) {
+    sortedAndNormalizedScopes[key] = normalizedScopes[key];
+  }
+
   // Always have these two keys, and exactly these two keys, in the result.
   return {
     imports: sortedAndNormalizedImports,
-    scopes: normalizedScopes
+    scopes: sortedAndNormalizedScopes
   };
 };
 
@@ -91,7 +91,13 @@ function normalizeSpecifierMap(obj, baseURL) {
       });
   }
 
-  return result;
+  const sortedAndNormalized = {};
+  const sortedKeys = Object.keys(result).sort(longerLengthThenCodeUnitOrder);
+  for (const key of sortedKeys) {
+    sortedAndNormalized[key] = result[key];
+  }
+
+  return sortedAndNormalized;
 }
 
 function normalizeSpecifierKey(specifierKey, baseURL) {
