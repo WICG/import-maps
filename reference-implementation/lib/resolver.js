@@ -6,13 +6,9 @@ exports.resolve = (specifier, parsedImportMap, scriptURL) => {
   const asURL = tryURLLikeSpecifierParse(specifier, scriptURL);
   const normalizedSpecifier = asURL ? asURL.href : specifier;
 
-  for (const [normalizedScopePrefix, scopeImports] of Object.entries(parsedImportMap.scopes)) {
-    // an alternative to the double '/' check could be to normalize scopes to
-    // never contain a trailing '/' in the parsing phase
-    if (scriptURL.href.startsWith(normalizedScopePrefix) &&
-        (scriptURL.href.length === normalizedScopePrefix.length ||
-         scriptURL.href[normalizedScopePrefix.length] === '/' ||
-         scriptURL.href[normalizedScopePrefix.length - 1] === '/')) {
+  for (const [normalizedScopeKey, scopeImports] of Object.entries(parsedImportMap.scopes)) {
+    if (scriptURL.href === normalizedScopeKey ||
+        (normalizedScopeKey.endsWith('/') && scriptURL.href.startsWith(normalizedScopeKey))) {
       const scopeImportsMatch = resolveImportsMatch(normalizedSpecifier, asURL, scopeImports);
       if (scopeImportsMatch) {
         return scopeImportsMatch;
