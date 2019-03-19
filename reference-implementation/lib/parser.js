@@ -8,45 +8,20 @@ exports.parseFromString = (input, baseURL) => {
     throw new TypeError('Import map JSON must be an object.');
   }
 
-  if ('imports' in parsed && !isJSONObject(parsed.imports)) {
-    throw new TypeError('Import map\'s imports value must be an object.');
-  }
-
-  if ('scopes' in parsed && !isJSONObject(parsed.scopes)) {
-    throw new TypeError('Import map\'s scopes value must be an object.');
-  }
-
   let sortedAndNormalizedImports = {};
   if ('imports' in parsed) {
-    sortedAndNormalizedImports = normalizeSpecifierMap(parsed.imports, baseURL);
-  }
-
-  const normalizedScopes = {};
-  if ('scopes' in parsed) {
-    for (const [scopePrefix, specifierMap] of Object.entries(parsed.scopes)) {
-      if (!isJSONObject(specifierMap)) {
-        throw new TypeError(`The value for the "${scopePrefix}" scope prefix must be an object.`);
-      }
-
-      const scopePrefixURL = tryURLParse(scopePrefix, baseURL);
-      if (scopePrefixURL === null) {
-        continue;
-      }
-
-      if (!hasFetchScheme(scopePrefixURL)) {
-        console.warn(`Invalid scope "${scopePrefixURL}". Scope URLs must have a fetch scheme.`);
-        continue;
-      }
-
-      const normalizedScopePrefix = scopePrefixURL.href;
-      normalizedScopes[normalizedScopePrefix] = normalizeSpecifierMap(specifierMap, baseURL);
+    if (!isJSONObject(parsed.imports)) {
+      throw new TypeError('Import map\'s imports value must be an object.');
     }
+    sortedAndNormalizedImports = sortAndNormalizeSpecifierMap(parsed.imports, baseURL);
   }
 
-  const sortedAndNormalizedScopes = {};
-  const sortedScopeKeys = Object.keys(normalizedScopes).sort(longerLengthThenCodeUnitOrder);
-  for (const key of sortedScopeKeys) {
-    sortedAndNormalizedScopes[key] = normalizedScopes[key];
+  let sortedAndNormalizedScopes = {};
+  if ('scopes' in parsed) {
+    if (!isJSONObject(parsed.scopes)) {
+      throw new TypeError('Import map\'s scopes value must be an object.');
+    }
+    sortedAndNormalizedScopes = sortAndNormalizeScopes(parsed.scopes, baseURL);
   }
 
   // Always have these two keys, and exactly these two keys, in the result.
@@ -56,9 +31,9 @@ exports.parseFromString = (input, baseURL) => {
   };
 };
 
-function normalizeSpecifierMap(obj, baseURL) {
+function sortAndNormalizeSpecifierMap(obj, baseURL) {
   // Normalize all entries into arrays
-  const result = {};
+  const normalized = {};
   for (const [specifierKey, value] of Object.entries(obj)) {
     const normalizedSpecifierKey = normalizeSpecifierKey(specifierKey, baseURL);
     if (normalizedSpecifierKey === null) {
@@ -66,17 +41,17 @@ function normalizeSpecifierMap(obj, baseURL) {
     }
 
     if (typeof value === 'string') {
-      result[normalizedSpecifierKey] = [value];
+      normalized[normalizedSpecifierKey] = [value];
     } else if (value === null) {
-      result[normalizedSpecifierKey] = [];
+      normalized[normalizedSpecifierKey] = [];
     } else if (Array.isArray(value)) {
-      result[normalizedSpecifierKey] = obj[specifierKey];
+      normalized[normalizedSpecifierKey] = obj[specifierKey];
     }
   }
 
   // Normalize/validate each potential address in the array
-  for (const [key, addressArray] of Object.entries(result)) {
-    result[key] = addressArray
+  for (const [key, addressArray] of Object.entries(normalized)) {
+    normalized[key] = addressArray
       .map(address => normalizeAddress(address, baseURL))
       .filter(address => {
         if (address === null) {
@@ -92,9 +67,39 @@ function normalizeSpecifierMap(obj, baseURL) {
   }
 
   const sortedAndNormalized = {};
-  const sortedKeys = Object.keys(result).sort(longerLengthThenCodeUnitOrder);
+  const sortedKeys = Object.keys(normalized).sort(longerLengthThenCodeUnitOrder);
   for (const key of sortedKeys) {
-    sortedAndNormalized[key] = result[key];
+    sortedAndNormalized[key] = normalized[key];
+  }
+
+  return sortedAndNormalized;
+}
+
+function sortAndNormalizeScopes(obj, baseURL) {
+  const normalized = {};
+  for (const [scopePrefix, specifierMap] of Object.entries(obj)) {
+    if (!isJSONObject(specifierMap)) {
+      throw new TypeError(`The value for the "${scopePrefix}" scope prefix must be an object.`);
+    }
+
+    const scopePrefixURL = tryURLParse(scopePrefix, baseURL);
+    if (scopePrefixURL === null) {
+      continue;
+    }
+
+    if (!hasFetchScheme(scopePrefixURL)) {
+      console.warn(`Invalid scope "${scopePrefixURL}". Scope URLs must have a fetch scheme.`);
+      continue;
+    }
+
+    const normalizedScopePrefix = scopePrefixURL.href;
+    normalized[normalizedScopePrefix] = sortAndNormalizeSpecifierMap(specifierMap, baseURL);
+  }
+
+  const sortedAndNormalized = {};
+  const sortedKeys = Object.keys(normalized).sort(longerLengthThenCodeUnitOrder);
+  for (const key of sortedKeys) {
+    sortedAndNormalized[key] = normalized[key];
   }
 
   return sortedAndNormalized;

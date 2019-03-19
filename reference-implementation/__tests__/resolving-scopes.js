@@ -4,14 +4,16 @@ const { parseFromString } = require('../lib/parser.js');
 const { resolve } = require('../lib/resolver.js');
 
 const mapBaseURL = new URL('https://example.com/app/index.html');
-const scriptURL = new URL('https://example.com/js/app.mjs');
 
 function makeResolveUnderTest(mapString) {
   const map = parseFromString(mapString, mapBaseURL);
-  return (specifier, baseURL = scriptURL) => resolve(specifier, map, baseURL);
+  return (specifier, baseURL) => resolve(specifier, map, baseURL);
 }
 
 describe('Mapped using scope instead of "imports"', () => {
+  const inTwoScopesURL = new URL('https://example.com/js/app.mjs');
+  const inOneScopeURL = new URL('https://example.com/app.mjs');
+
   it('should fail when the mapping is to an empty array', () => {
     const resolveUnderTest = makeResolveUnderTest(`{
       "scopes": {
@@ -49,30 +51,28 @@ describe('Mapped using scope instead of "imports"', () => {
       }
     }`);
 
-    const subScriptURL = new URL('https://example.com/app.mjs');
-
     it('should resolve scoped and not cascade', () => {
-      expect(resolveUnderTest('lodash-dot')).toMatchURL('https://example.com/app/node_modules_2/lodash-es/lodash.js');
-      expect(resolveUnderTest('lodash-dotdot')).toMatchURL('https://example.com/node_modules_2/lodash-es/lodash.js');
-      expect(resolveUnderTest('lodash-dot/foo')).toMatchURL('https://example.com/app/node_modules_2/lodash-es/foo');
-      expect(resolveUnderTest('lodash-dotdot/foo')).toMatchURL('https://example.com/node_modules_2/lodash-es/foo');
+      expect(resolveUnderTest('lodash-dot', inTwoScopesURL)).toMatchURL('https://example.com/app/node_modules_2/lodash-es/lodash.js');
+      expect(resolveUnderTest('lodash-dotdot', inTwoScopesURL)).toMatchURL('https://example.com/node_modules_2/lodash-es/lodash.js');
+      expect(resolveUnderTest('lodash-dot/foo', inTwoScopesURL)).toMatchURL('https://example.com/app/node_modules_2/lodash-es/foo');
+      expect(resolveUnderTest('lodash-dotdot/foo', inTwoScopesURL)).toMatchURL('https://example.com/node_modules_2/lodash-es/foo');
     });
 
     it('should apply best scope match', () => {
-      expect(resolveUnderTest('moment', subScriptURL)).toMatchURL('https://example.com/node_modules_3/moment/src/moment.js');
+      expect(resolveUnderTest('moment', inOneScopeURL)).toMatchURL('https://example.com/node_modules_3/moment/src/moment.js');
     });
 
     it('should fallback to imports', () => {
-      expect(resolveUnderTest('moment/foo', subScriptURL)).toMatchURL('https://example.com/node_modules/moment/src/foo');
-      expect(resolveUnderTest('lodash-dot', subScriptURL)).toMatchURL('https://example.com/app/node_modules/lodash-es/lodash.js');
-      expect(resolveUnderTest('lodash-dotdot', subScriptURL)).toMatchURL('https://example.com/node_modules/lodash-es/lodash.js');
-      expect(resolveUnderTest('lodash-dot/foo', subScriptURL)).toMatchURL('https://example.com/app/node_modules/lodash-es/foo');
-      expect(resolveUnderTest('lodash-dotdot/foo', subScriptURL)).toMatchURL('https://example.com/node_modules/lodash-es/foo');
+      expect(resolveUnderTest('moment/foo', inOneScopeURL)).toMatchURL('https://example.com/node_modules/moment/src/foo');
+      expect(resolveUnderTest('lodash-dot', inOneScopeURL)).toMatchURL('https://example.com/app/node_modules/lodash-es/lodash.js');
+      expect(resolveUnderTest('lodash-dotdot', inOneScopeURL)).toMatchURL('https://example.com/node_modules/lodash-es/lodash.js');
+      expect(resolveUnderTest('lodash-dot/foo', inOneScopeURL)).toMatchURL('https://example.com/app/node_modules/lodash-es/foo');
+      expect(resolveUnderTest('lodash-dotdot/foo', inOneScopeURL)).toMatchURL('https://example.com/node_modules/lodash-es/foo');
     });
 
-    it('should still fail for package modules that are not declared', () => {
-      expect(() => resolveUnderTest('underscore/')).toThrow(TypeError);
-      expect(() => resolveUnderTest('underscore/foo')).toThrow(TypeError);
+    it('should still fail for package-like specifiers that are not declared', () => {
+      expect(() => resolveUnderTest('underscore/', inTwoScopesURL)).toThrow(TypeError);
+      expect(() => resolveUnderTest('underscore/foo', inTwoScopesURL)).toThrow(TypeError);
     });
   });
 });
