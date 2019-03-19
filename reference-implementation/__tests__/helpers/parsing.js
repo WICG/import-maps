@@ -20,7 +20,7 @@ exports.expectSpecifierMap = (input, baseURL, output, warnings = []) => {
 exports.expectScopes = (inputArray, baseURL, outputArray, warnings = []) => {
   const checkWarnings = testWarningHandler(warnings);
 
-  const inputScopesAsStrings = inputArray.map(scopePrefix => `"${scopePrefix}": {}`);
+  const inputScopesAsStrings = inputArray.map(scopePrefix => `${JSON.stringify(scopePrefix)}: {}`);
   const inputString = `{ "scopes": { ${inputScopesAsStrings.join(', ')} } }`;
 
   const outputScopesObject = {};

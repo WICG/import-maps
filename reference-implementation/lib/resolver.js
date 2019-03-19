@@ -6,9 +6,31 @@ exports.resolve = (specifier, parsedImportMap, scriptURL) => {
   const asURL = tryURLLikeSpecifierParse(specifier, scriptURL);
   const normalizedSpecifier = asURL ? asURL.href : specifier;
 
-  // TODO: support scopes!
+  for (const [normalizedScopeKey, scopeImports] of Object.entries(parsedImportMap.scopes)) {
+    if (scriptURL.href === normalizedScopeKey ||
+        (normalizedScopeKey.endsWith('/') && scriptURL.href.startsWith(normalizedScopeKey))) {
+      const scopeImportsMatch = resolveImportsMatch(normalizedSpecifier, asURL, scopeImports);
+      if (scopeImportsMatch) {
+        return scopeImportsMatch;
+      }
+    }
+  }
 
-  for (const [specifierKey, addressArray] of Object.entries(parsedImportMap.imports)) {
+  const importsMatch = resolveImportsMatch(normalizedSpecifier, asURL, parsedImportMap.imports);
+  if (importsMatch) {
+    return importsMatch;
+  }
+
+  // The specifier was able to be turned into a URL, but wasn't remapped into anything.
+  if (asURL) {
+    return asURL;
+  }
+
+  throw new TypeError(`Unmapped bare specifier ${specifier}`);
+};
+
+function resolveImportsMatch(normalizedSpecifier, asURL, importMap) {
+  for (const [specifierKey, addressArray] of Object.entries(importMap)) {
     if (addressArray.length > 1) {
       throw new Error('Not yet implemented');
     }
@@ -26,11 +48,5 @@ exports.resolve = (specifier, parsedImportMap, scriptURL) => {
       return new URL(afterPrefix, address);
     }
   }
-
-  // The specifier was able to be turned into a URL, but wasn't remapped into anything.
-  if (asURL) {
-    return asURL;
-  }
-
-  throw new TypeError(`Unmapped bare specifier ${specifier}`);
-};
+  return undefined;
+}
