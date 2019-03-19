@@ -392,7 +392,6 @@ Scopes "inherit" from each other in an intentionally-simple manner, merging but 
       "a": "/a-2.mjs"
     },
     "/scope2/scope3/": {
-      "a": "/a-3.mjs",
       "b": "/b-3.mjs"
     }
   }
@@ -411,7 +410,7 @@ would give the following resolutions:
 |b        |/scope2/foo.mjs        |/b-1.mjs      |
 |c        |/scope2/foo.mjs        |/c-1.mjs      |
 |         |                       |              |
-|a        |/scope2/scope3/foo.mjs |/a-3.mjs      |
+|a        |/scope2/scope3/foo.mjs |/a-2.mjs      |
 |b        |/scope2/scope3/foo.mjs |/b-3.mjs      |
 |c        |/scope2/scope3/foo.mjs |/c-1.mjs      |
 

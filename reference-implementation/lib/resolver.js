@@ -13,8 +13,6 @@ exports.resolve = (specifier, parsedImportMap, scriptURL) => {
       if (scopeImportsMatch) {
         return scopeImportsMatch;
       }
-      // scope match does not cascade
-      break;
     }
   }
 
