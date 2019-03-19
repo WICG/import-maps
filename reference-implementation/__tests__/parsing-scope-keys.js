@@ -1,7 +1,7 @@
 'use strict';
 const { expectScopes } = require('./helpers/parsing.js');
 
-describe('Relative URL scope prefixes', () => {
+describe('Relative URL scope keys', () => {
   it('should work with no prefix', () => {
     expectScopes(
       ['foo'],
@@ -30,17 +30,39 @@ describe('Relative URL scope prefixes', () => {
     );
   });
 
-  it('should work with an empty string scope prefix', () => {
+  it('should work with an empty string scope key', () => {
     expectScopes(
       [''],
       'https://base.example/path1/path2/path3',
       ['https://base.example/path1/path2/path3']
     );
   });
+
+  it('should work with / suffixes', () => {
+    expectScopes(
+      ['foo/', './foo/', '../foo/', '/foo/', '/foo//'],
+      'https://base.example/path1/path2/path3',
+      [
+        'https://base.example/path1/path2/foo/',
+        'https://base.example/path1/path2/foo/',
+        'https://base.example/path1/foo/',
+        'https://base.example/foo/',
+        'https://base.example/foo//'
+      ]
+    );
+  });
+
+  it('should deduplicate based on URL parsing rules', () => {
+    expectScopes(
+      ['foo/\\', 'foo//', 'foo\\\\'],
+      'https://base.example/path1/path2/path3',
+      ['https://base.example/path1/path2/foo//']
+    );
+  });
 });
 
-describe('Absolute URL scope prefixes', () => {
-  it('should only accept absolute URL scope prefixes with fetch schemes', () => {
+describe('Absolute URL scope keys', () => {
+  it('should only accept absolute URL scope keys with fetch schemes', () => {
     expectScopes(
       [
         'about:good',
@@ -76,7 +98,7 @@ describe('Absolute URL scope prefixes', () => {
     );
   });
 
-  it('should parse absolute URL scope prefixes, ignoring unparseable ones', () => {
+  it('should parse absolute URL scope keys, ignoring unparseable ones', () => {
     expectScopes(
       [
         'https://ex ample.org/',
@@ -85,7 +107,7 @@ describe('Absolute URL scope prefixes', () => {
         'https:example.org',
         'https://///example.com///',
         'https://example.net',
-        'https://ex%41mple.com/',
+        'https://ex%41mple.com/foo/',
         'https://example.com/%41'
       ],
       'https://base.example/path1/path2/path3',
@@ -93,7 +115,7 @@ describe('Absolute URL scope prefixes', () => {
         'https://base.example/path1/path2/example.org', // tricky case! remember we have a base URL
         'https://example.com///',
         'https://example.net/',
-        'https://example.com/',
+        'https://example.com/foo/',
         'https://example.com/%41'
       ]
     );
