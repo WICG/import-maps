@@ -216,7 +216,19 @@ This remapping ensures that any imports of the unpkg.com version of Vue (at leas
 
 This remapping ensures that any URL-like imports that resolve to `/app/helpers.mjs`, including e.g. an `import "./helpers.mjs"` from files inside `/app/`, or an `import "../helpers.mjs"` from files inside `/app/models`, will instead resolve to `/app/helpers/index.mjs`. This is probably not a good idea; instead of creating an indirection which obfuscates your code, you should instead just update your source files to import the correct files. But, it is a useful example for demonstrating the capabilities of import maps.
 
-The point is that the remapping works the same for URL-like imports as for bare imports. Our previous examples changed the resolution of specifiers like `"lodash"`, and thus changed the meaning of `import "lodash"`. Here we're changing the resolution of specifiers like `"/app/helpers.mjs"`, and thus changing the meaning of `import "/app/helpers.mjs"`.
+Such remapping can also be done on a prefix-matched basis, by ending the specifier key with a trailing slash:
+
+```json
+{
+  "imports": {
+    "https://www.unpkg.com/vue/": "/node_modules/vue/"
+  }
+}
+```
+
+This version ensures that import statements for specifiers that start with the substring `"https://www.unpkg.com/vue/"` will be mapped to the corresponding URL underneath `/node_modules/vue/`.
+
+In general, the point is that the remapping works the same for URL-like imports as for bare imports. Our previous examples changed the resolution of specifiers like `"lodash"`, and thus changed the meaning of `import "lodash"`. Here we're changing the resolution of specifiers like `"/app/helpers.mjs"`, and thus changing the meaning of `import "/app/helpers.mjs"`.
 
 #### Extension-less imports
 
