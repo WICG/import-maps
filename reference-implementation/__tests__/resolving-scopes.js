@@ -187,5 +187,44 @@ describe('Mapped using scope instead of "imports"', () => {
       expect(resolveUnderTest('c', scope3URL)).toMatchURL('https://example.com/c-1.mjs');
     });
   });
+
+  describe('Relative URL scope keys', () => {
+    const resolveUnderTest = makeResolveUnderTest(`{
+      "imports": {
+        "a": "/a-1.mjs",
+        "b": "/b-1.mjs",
+        "c": "/c-1.mjs"
+      },
+      "scopes": {
+        "": {
+          "a": "/a-empty-string.mjs"
+        },
+        "./": {
+          "b": "/b-dot-slash.mjs"
+        },
+        "../": {
+          "c": "/c-dot-dot-slash.mjs"
+        }
+      }
+    }`);
+    const inSameDirAsMap = new URL('./foo.mjs', mapBaseURL);
+    const inDirAboveMap = new URL('../foo.mjs', mapBaseURL);
+
+    it('should resolve an empty string scope using the import map URL', () => {
+      expect(resolveUnderTest('a', mapBaseURL)).toMatchURL('https://example.com/a-empty-string.mjs');
+      expect(resolveUnderTest('a', inSameDirAsMap)).toMatchURL('https://example.com/a-1.mjs');
+    });
+
+    it('should resolve a ./ scope using the import map URL\'s directory', () => {
+      expect(resolveUnderTest('b', mapBaseURL)).toMatchURL('https://example.com/b-dot-slash.mjs');
+      expect(resolveUnderTest('b', inSameDirAsMap)).toMatchURL('https://example.com/b-dot-slash.mjs');
+    });
+
+    it('should resolve a ../ scope using the import map URL\'s directory', () => {
+      expect(resolveUnderTest('c', mapBaseURL)).toMatchURL('https://example.com/c-dot-dot-slash.mjs');
+      expect(resolveUnderTest('c', inSameDirAsMap)).toMatchURL('https://example.com/c-dot-dot-slash.mjs');
+      expect(resolveUnderTest('c', inDirAboveMap)).toMatchURL('https://example.com/c-dot-dot-slash.mjs');
+    });
+  });
 });
 
