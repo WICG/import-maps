@@ -156,6 +156,9 @@ describe('Mapped using the "imports" key only (no scopes)', () => {
         "/": "/lib/slash-only/",
         "./": "/lib/dotslash-only/",
 
+        "/test/": "/lib/url-trailing-slash/",
+        "./test/": "/lib/url-trailing-slash-dot/",
+
         "/test": "/lib/test1.mjs",
         "../test": "/lib/test2.mjs"
       }
@@ -197,6 +200,11 @@ describe('Mapped using the "imports" key only (no scopes)', () => {
       expect(resolveUnderTest('https://example.com/app/')).toMatchURL('https://example.com/lib/dotslash-only/');
       expect(resolveUnderTest('/app/')).toMatchURL('https://example.com/lib/dotslash-only/');
       expect(resolveUnderTest('../app/')).toMatchURL('https://example.com/lib/dotslash-only/');
+    });
+
+    it('should remap URLs that are prefix-matched by keys with trailing slashes', () => {
+      expect(resolveUnderTest('/test/foo.mjs')).toMatchURL('https://example.com/lib/url-trailing-slash/foo.mjs');
+      expect(resolveUnderTest('https://example.com/app/test/foo.mjs')).toMatchURL('https://example.com/lib/url-trailing-slash-dot/foo.mjs');
     });
 
     it('should use the last entry\'s address when URL-like specifiers parse to the same absolute URL', () => {

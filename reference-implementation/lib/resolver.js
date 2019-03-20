@@ -9,14 +9,14 @@ exports.resolve = (specifier, parsedImportMap, scriptURL) => {
   for (const [normalizedScopeKey, scopeImports] of Object.entries(parsedImportMap.scopes)) {
     if (scriptURL.href === normalizedScopeKey ||
         (normalizedScopeKey.endsWith('/') && scriptURL.href.startsWith(normalizedScopeKey))) {
-      const scopeImportsMatch = resolveImportsMatch(normalizedSpecifier, asURL, scopeImports);
+      const scopeImportsMatch = resolveImportsMatch(normalizedSpecifier, scopeImports);
       if (scopeImportsMatch) {
         return scopeImportsMatch;
       }
     }
   }
 
-  const importsMatch = resolveImportsMatch(normalizedSpecifier, asURL, parsedImportMap.imports);
+  const importsMatch = resolveImportsMatch(normalizedSpecifier, parsedImportMap.imports);
   if (importsMatch) {
     return importsMatch;
   }
@@ -29,7 +29,7 @@ exports.resolve = (specifier, parsedImportMap, scriptURL) => {
   throw new TypeError(`Unmapped bare specifier ${specifier}`);
 };
 
-function resolveImportsMatch(normalizedSpecifier, asURL, importMap) {
+function resolveImportsMatch(normalizedSpecifier, importMap) {
   for (const [specifierKey, addressArray] of Object.entries(importMap)) {
     if (addressArray.length > 1) {
       throw new Error('Not yet implemented');
@@ -43,7 +43,7 @@ function resolveImportsMatch(normalizedSpecifier, asURL, importMap) {
       return address;
     }
 
-    if (asURL === null && specifierKey.endsWith('/') && normalizedSpecifier.startsWith(specifierKey)) {
+    if (specifierKey.endsWith('/') && normalizedSpecifier.startsWith(specifierKey)) {
       const afterPrefix = normalizedSpecifier.substring(specifierKey.length);
       return new URL(afterPrefix, address);
     }
