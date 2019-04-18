@@ -1,6 +1,8 @@
 'use strict';
 const { URL } = require('url');
-const { tryURLLikeSpecifierParse } = require('./utils.js');
+const { tryURLLikeSpecifierParse, BUILT_IN_MODULE_SCHEME, BUILT_IN_MODULE_PROTOCOL } = require('./utils.js');
+
+const supportedBuiltInModules = new Set([`${BUILT_IN_MODULE_SCHEME}:blank`]);
 
 exports.resolve = (specifier, parsedImportMap, scriptURL) => {
   const asURL = tryURLLikeSpecifierParse(specifier, scriptURL);
@@ -23,6 +25,11 @@ exports.resolve = (specifier, parsedImportMap, scriptURL) => {
 
   // The specifier was able to be turned into a URL, but wasn't remapped into anything.
   if (asURL) {
+    if (asURL.protocol === BUILT_IN_MODULE_PROTOCOL) {
+      if (!supportedBuiltInModules.has(asURL.href)) {
+        throw new TypeError(`The "${asURL.href}" built-in module is not implemented.`);
+      }
+    }
     return asURL;
   }
 
@@ -37,8 +44,13 @@ function resolveImportsMatch(normalizedSpecifier, importMap) {
         throw new TypeError(`Specifier "${normalizedSpecifier}" was mapped to no addresses.`);
       } else if (addressArray.length === 1) {
         return addressArray[0];
+      } else if (addressArray.length === 2 &&
+                 addressArray[0].protocol === BUILT_IN_MODULE_PROTOCOL &&
+                 addressArray[1].protocol !== BUILT_IN_MODULE_PROTOCOL) {
+        return supportedBuiltInModules.has(addressArray[0].href) ? addressArray[0] : addressArray[1];
       } else {
-        throw new Error('Not yet implemented.');
+        throw new Error('The reference implementation for multi-address fallbacks that are not ' +
+                        '[built-in module, fetch-scheme URL] is not yet implemented.');
       }
     }
 
@@ -50,8 +62,21 @@ function resolveImportsMatch(normalizedSpecifier, importMap) {
       } else if (addressArray.length === 1) {
         const afterPrefix = normalizedSpecifier.substring(specifierKey.length);
         return new URL(afterPrefix, addressArray[0]);
+      } else if (addressArray.length === 2 &&
+                 addressArray[0].protocol === BUILT_IN_MODULE_PROTOCOL &&
+                 addressArray[1].protocol !== BUILT_IN_MODULE_PROTOCOL) {
+        // Per the parser phase, the address must end with "/".
+        const builtInModule = addressArray[0].href.substring(0, addressArray[0].href.length - 1);
+        const baseURL = supportedBuiltInModules.has(builtInModule) ? addressArray[0] : addressArray[1];
+        const afterPrefix = normalizedSpecifier.substring(specifierKey.length);
+
+        // TODO using string concatenation instead of URL resolution seems kind of bad?
+        // But apparently "std:blank" as a base URL does not resolve "foo". Only
+        // "std://blank" will. Is this a deeper problem?
+        return new URL(baseURL + afterPrefix);
       } else {
-        throw new Error('Not yet implemented.');
+        throw new Error('The reference implementation for multi-address fallbacks that are not ' +
+                        '[built-in module, fetch-scheme URL] is not yet implemented.');
       }
     }
   }

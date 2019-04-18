@@ -84,20 +84,6 @@ describe('Built-in module addresses', () => {
       }
     );
   });
-
-  it('should ignore other unprefixed strings', () => {
-    for (const bad of ['bar', '\\bar', '~bar', '#bar', '?bar']) {
-      expectSpecifierMap(
-        `{
-          "foo": "${bad}"
-        }`,
-        'https://base.example/path1/path2/path3',
-        {
-          foo: []
-        }
-      );
-    }
-  });
 });
 
 describe('Absolute URL addresses', () => {
@@ -260,5 +246,21 @@ describe('Absolute URL addresses', () => {
         [`Invalid target address "https://base.example/notrailer" for package specifier "trailer/". Package address targets must end with "/".`]
       );
     });
+  });
+});
+
+describe('Other invalid addresses', () => {
+  it('should ignore unprefixed strings that are not absolute URLs', () => {
+    for (const bad of ['bar', '\\bar', '~bar', '#bar', '?bar']) {
+      expectSpecifierMap(
+        `{
+          "foo": "${bad}"
+        }`,
+        'https://base.example/path1/path2/path3',
+        {
+          foo: []
+        }
+      );
+    }
   });
 });

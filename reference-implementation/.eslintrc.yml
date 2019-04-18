@@ -79,7 +79,7 @@ rules:
   no-labels: [error, allowLoop: true]
   no-lone-blocks: error
   no-loop-func: off
-  no-magic-numbers: [error, { ignore: [0, 1, -1] }]
+  no-magic-numbers: off
   no-multi-spaces: error
   no-multi-str: error
   no-new: error

@@ -7,6 +7,9 @@ const FETCH_SCHEMES = new Set(['http', 'https', 'ftp', 'about', 'blob', 'data', 
 // Tentative, so better to centralize so we can change in one place as necessary (including tests).
 exports.BUILT_IN_MODULE_SCHEME = 'std';
 
+// Useful for comparing to .protocol
+exports.BUILT_IN_MODULE_PROTOCOL = `${exports.BUILT_IN_MODULE_SCHEME}:`;
+
 exports.tryURLParse = (string, baseURL) => {
   try {
     return new URL(string, baseURL);
@@ -21,7 +24,7 @@ exports.tryURLLikeSpecifierParse = (specifier, baseURL) => {
   }
 
   const url = exports.tryURLParse(specifier);
-  if (url !== null && (exports.hasFetchScheme(url) || getScheme(url) === exports.BUILT_IN_MODULE_SCHEME)) {
+  if (url !== null && (exports.hasFetchScheme(url) || url.protocol === exports.BUILT_IN_MODULE_PROTOCOL)) {
     return url;
   }
 
@@ -29,9 +32,5 @@ exports.tryURLLikeSpecifierParse = (specifier, baseURL) => {
 };
 
 exports.hasFetchScheme = url => {
-  return FETCH_SCHEMES.has(getScheme(url));
+  return FETCH_SCHEMES.has(url.protocol.slice(0, -1));
 };
-
-function getScheme(url) {
-  return url.protocol.slice(0, -1);
-}
