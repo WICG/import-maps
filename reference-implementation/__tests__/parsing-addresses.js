@@ -84,6 +84,26 @@ describe('Built-in module addresses', () => {
       }
     );
   });
+
+  it('should ignore and warn on built-in module URLs that contain "/"', () => {
+    expectSpecifierMap(
+      `{
+        "bad1": "${BUILT_IN_MODULE_SCHEME}:foo/",
+        "bad2": "${BUILT_IN_MODULE_SCHEME}:foo/bar",
+        "good": "${BUILT_IN_MODULE_SCHEME}:foo\\\\baz"
+      }`,
+      'https://base.example/path1/path2/path3',
+      {
+        bad1: [],
+        bad2: [],
+        good: [expect.toMatchURL(`${BUILT_IN_MODULE_SCHEME}:foo\\baz`)]
+      },
+      [
+        `Invalid target address "${BUILT_IN_MODULE_SCHEME}:foo/". Built-in module URLs must not contain "/".`,
+        `Invalid target address "${BUILT_IN_MODULE_SCHEME}:foo/bar". Built-in module URLs must not contain "/".`
+      ]
+    );
+  });
 });
 
 describe('Absolute URL addresses', () => {

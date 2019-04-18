@@ -21,25 +21,8 @@ describe('Fallbacks that are not [built-in, fetch scheme]', () => {
         "${BLANK}",
         "${BLANK}"
       ],
-      "bad1-sub1": [
-        "${BLANK}/foo",
-        "${BLANK}"
-      ],
-      "bad1-sub2": [
-        "${BLANK}",
-        "${BLANK}/foo"
-      ],
-      "bad1-sub3": [
-        "${BLANK}/foo",
-        "${BLANK}/foo"
-      ],
       "bad2": [
         "${BLANK}",
-        "/bad2-1.mjs",
-        "/bad2-2.mjs"
-      ],
-      "bad2-sub": [
-        "${BLANK}/foo",
         "/bad2-1.mjs",
         "/bad2-2.mjs"
       ],
@@ -60,15 +43,5 @@ describe('Fallbacks that are not [built-in, fetch scheme]', () => {
 
   it('should fail for [fetch scheme, fetch scheme]', () => {
     expect(() => resolveUnderTest('bad3')).toThrow(/not yet implemented/);
-  });
-
-  it('should fail for two built-ins including submodules', () => {
-    expect(() => resolveUnderTest('bad1-sub1')).toThrow(/not yet implemented/);
-    expect(() => resolveUnderTest('bad1-sub2')).toThrow(/not yet implemented/);
-    expect(() => resolveUnderTest('bad1-sub3')).toThrow(/not yet implemented/);
-  });
-
-  it('should fail for [built-in sub-module, fetch scheme, fetch scheme]', () => {
-    expect(() => resolveUnderTest('bad2-sub')).toThrow(/not yet implemented/);
   });
 });

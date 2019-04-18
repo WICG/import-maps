@@ -1,5 +1,5 @@
 'use strict';
-const { tryURLParse, hasFetchScheme, tryURLLikeSpecifierParse } = require('./utils.js');
+const { tryURLParse, hasFetchScheme, tryURLLikeSpecifierParse, BUILT_IN_MODULE_PROTOCOL } = require('./utils.js');
 
 exports.parseFromString = (input, baseURL) => {
   const parsed = JSON.parse(input);
@@ -62,6 +62,10 @@ function sortAndNormalizeSpecifierMap(obj, baseURL) {
               `Package address targets must end with "/".`);
           return false;
         }
+        if (address.protocol === BUILT_IN_MODULE_PROTOCOL && address.href.includes('/')) {
+          console.warn(`Invalid target address "${address.href}". Built-in module URLs must not contain "/".`);
+          return false;
+        }
         return true;
       });
   }
@@ -113,6 +117,10 @@ function normalizeSpecifierKey(specifierKey, baseURL) {
 
   const url = tryURLLikeSpecifierParse(specifierKey, baseURL);
   if (url !== null) {
+    if (url.protocol === BUILT_IN_MODULE_PROTOCOL && url.href.includes('/')) {
+      console.warn(`Invalid specifier key "${url.href}". Built-in module URLs must not contain "/".`);
+      return null;
+    }
     return url.href;
   }
 

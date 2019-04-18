@@ -28,44 +28,55 @@ describe('Unmapped built-in module specifiers', () => {
 });
 
 describe('Remapping built-in module specifiers', () => {
-  const resolveUnderTest = makeResolveUnderTest(`{
-    "imports": {
-      "${BLANK}": "./blank.mjs",
-      "${BLANK}/": "./blank/",
-      "${NONE}": "./none.mjs",
-      "${NONE}/": "./none/"
-    }
-  }`);
+  it('should remap built-in modules', () => {
+    const resolveUnderTest = makeResolveUnderTest(`{
+      "imports": {
+        "${BLANK}": "./blank.mjs",
+        "${NONE}": "./none.mjs"
+      }
+    }`);
 
-  it('should remap individual built-in modules', () => {
     expect(resolveUnderTest(BLANK)).toMatchURL('https://example.com/app/blank.mjs');
     expect(resolveUnderTest(NONE)).toMatchURL('https://example.com/app/none.mjs');
   });
 
-  it('should remap built-in module packages', () => {
-    expect(resolveUnderTest(`${BLANK}/foo`)).toMatchURL('https://example.com/app/blank/foo');
-    expect(resolveUnderTest(`${NONE}/foo`)).toMatchURL('https://example.com/app/none/foo');
-  });
-});
+  it('should remap built-in modules with fallbacks', () => {
+    const resolveUnderTest = makeResolveUnderTest(`{
+      "imports": {
+        "${BLANK}": ["${BLANK}", "./blank.mjs"],
+        "${NONE}": ["${NONE}", "./none.mjs"]
+      }
+    }`);
 
-describe('Remapping built-in module specifiers with fallbacks', () => {
-  const resolveUnderTest = makeResolveUnderTest(`{
-    "imports": {
-      "${BLANK}": ["${BLANK}", "./blank.mjs"],
-      "${BLANK}/": ["${BLANK}/", "./blank/"],
-      "${NONE}": ["${NONE}", "./none.mjs"],
-      "${NONE}/": ["${NONE}/", "./none/"]
-    }
-  }`);
-
-  it('should remap individual built-in modules', () => {
     expect(resolveUnderTest(BLANK)).toMatchURL(BLANK);
     expect(resolveUnderTest(NONE)).toMatchURL('https://example.com/app/none.mjs');
   });
+});
 
-  it('should remap built-in module packages', () => {
-    expect(resolveUnderTest(`${BLANK}/foo`)).toMatchURL(`${BLANK}/foo`);
-    expect(resolveUnderTest(`${NONE}/foo`)).toMatchURL('https://example.com/app/none/foo');
+describe('Remapping to built-in modules', () => {
+  const resolveUnderTest = makeResolveUnderTest(`{
+    "imports": {
+      "blank": "${BLANK}",
+      "/blank": "${BLANK}",
+      "none": "${NONE}",
+      "/none": "${NONE}"
+    }
+  }`);
+
+  it(`should remap to "${BLANK}"`, () => {
+    expect(resolveUnderTest('blank')).toMatchURL(BLANK);
+    expect(resolveUnderTest('/blank')).toMatchURL(BLANK);
+  });
+
+  it(`should remap to "${BLANK}" for URL-like specifiers`, () => {
+    expect(resolveUnderTest('/blank')).toMatchURL(BLANK);
+    expect(resolveUnderTest('https://example.com/blank')).toMatchURL(BLANK);
+    expect(resolveUnderTest('https://///example.com/blank')).toMatchURL(BLANK);
+  });
+
+  it(`should fail when remapping to "${NONE}"`, () => {
+    expect(() => resolveUnderTest('none')).toThrow(TypeError);
+    expect(() => resolveUnderTest('/none')).toThrow(TypeError);
   });
 });
 
@@ -76,21 +87,9 @@ describe('Fallbacks with built-in module addresses', () => {
         "${BLANK}",
         "./blank-fallback.mjs"
       ],
-      "blank/": [
-        "${BLANK}/",
-        "./blank-fallback/"
-      ],
       "none": [
         "${NONE}",
         "./none-fallback.mjs"
-      ],
-      "none/": [
-        "${NONE}/",
-        "./none-fallback/"
-      ],
-      "blank-sub": [
-        "${BLANK}/sub",
-        "./blank-sub.mjs"
       ]
     }
   }`);
@@ -99,20 +98,7 @@ describe('Fallbacks with built-in module addresses', () => {
     expect(resolveUnderTest('blank')).toMatchURL(BLANK);
   });
 
-  it(`should resolve to "${BLANK}" as a package`, () => {
-    // TODO is this correct? Seems incongruous with the blank-sub test case.
-    expect(resolveUnderTest('blank/foo')).toMatchURL(`${BLANK}/foo`);
-  });
-
   it(`should fall back past "${NONE}"`, () => {
     expect(resolveUnderTest('none')).toMatchURL('https://example.com/app/none-fallback.mjs');
-  });
-
-  it(`should fall back past "${NONE}" as a package`, () => {
-    expect(resolveUnderTest('none/foo')).toMatchURL('https://example.com/app/none-fallback/foo');
-  });
-
-  it(`should fall back past "${BLANK}" submodules`, () => {
-    expect(resolveUnderTest('blank-sub')).toMatchURL('https://example.com/app/blank-sub.mjs');
   });
 });
