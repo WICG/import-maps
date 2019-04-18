@@ -84,7 +84,8 @@ describe('Mapped using the "imports" key only (no scopes)', () => {
         "lodash-dot": "./node_modules/lodash-es/lodash.js",
         "lodash-dot/": "./node_modules/lodash-es/",
         "lodash-dotdot": "../node_modules/lodash-es/lodash.js",
-        "lodash-dotdot/": "../node_modules/lodash-es/"
+        "lodash-dotdot/": "../node_modules/lodash-es/",
+        "nowhere/": []
       }
     }`);
 
@@ -108,6 +109,10 @@ describe('Mapped using the "imports" key only (no scopes)', () => {
     it('should still fail for package modules that are not declared', () => {
       expect(() => resolveUnderTest('underscore/')).toThrow(TypeError);
       expect(() => resolveUnderTest('underscore/foo')).toThrow(TypeError);
+    });
+
+    it('should fail for package submodules that map to nowhere', () => {
+      expect(() => resolveUnderTest('nowhere/foo')).toThrow(TypeError);
     });
   });
 
@@ -213,21 +218,59 @@ describe('Mapped using the "imports" key only (no scopes)', () => {
   });
 
   describe('Overlapping entries with trailing slashes', () => {
-    const resolveUnderTest = makeResolveUnderTest(`{
-      "imports": {
-        "a": "/1",
-        "a/": "/2/",
-        "a/b": "/3",
-        "a/b/": "/4/"
-      }
-    }`);
+    it('should favor the most-specific key (no empty arrays)', () => {
+      const resolveUnderTest = makeResolveUnderTest(`{
+        "imports": {
+          "a": "/1",
+          "a/": "/2/",
+          "a/b": "/3",
+          "a/b/": "/4/"
+        }
+      }`);
 
-    it('should favor the most-specific key', () => {
       expect(resolveUnderTest('a')).toMatchURL('https://example.com/1');
       expect(resolveUnderTest('a/')).toMatchURL('https://example.com/2/');
       expect(resolveUnderTest('a/b')).toMatchURL('https://example.com/3');
       expect(resolveUnderTest('a/b/')).toMatchURL('https://example.com/4/');
       expect(resolveUnderTest('a/b/c')).toMatchURL('https://example.com/4/c');
+    });
+
+    it('should favor the most-specific key when empty arrays are involved for less-specific keys', () => {
+      const resolveUnderTest = makeResolveUnderTest(`{
+        "imports": {
+          "a": [],
+          "a/": [],
+          "a/b": "/3",
+          "a/b/": "/4/"
+        }
+      }`);
+
+      expect(() => resolveUnderTest('a')).toThrow(TypeError);
+      expect(() => resolveUnderTest('a/')).toThrow(TypeError);
+      expect(() => resolveUnderTest('a/x')).toThrow(TypeError);
+      expect(resolveUnderTest('a/b')).toMatchURL('https://example.com/3');
+      expect(resolveUnderTest('a/b/')).toMatchURL('https://example.com/4/');
+      expect(resolveUnderTest('a/b/c')).toMatchURL('https://example.com/4/c');
+      expect(() => resolveUnderTest('a/x/c')).toThrow(TypeError);
+    });
+
+    it('should favor the most-specific key when empty arrays are involved for more-specific keys', () => {
+      const resolveUnderTest = makeResolveUnderTest(`{
+        "imports": {
+          "a": "/1",
+          "a/": "/2/",
+          "a/b": [],
+          "a/b/": []
+        }
+      }`);
+
+      expect(resolveUnderTest('a')).toMatchURL('https://example.com/1');
+      expect(resolveUnderTest('a/')).toMatchURL('https://example.com/2/');
+      expect(resolveUnderTest('a/x')).toMatchURL('https://example.com/2/x');
+      expect(() => resolveUnderTest('a/b')).toThrow(TypeError);
+      expect(() => resolveUnderTest('a/b/')).toThrow(TypeError);
+      expect(() => resolveUnderTest('a/b/c')).toThrow(TypeError);
+      expect(resolveUnderTest('a/x/c')).toMatchURL('https://example.com/2/x/c');
     });
   });
 });

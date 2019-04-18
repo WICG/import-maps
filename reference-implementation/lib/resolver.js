@@ -26,7 +26,7 @@ exports.resolve = (specifier, parsedImportMap, scriptURL) => {
     return asURL;
   }
 
-  throw new TypeError(`Unmapped bare specifier ${specifier}`);
+  throw new TypeError(`Unmapped bare specifier "${specifier}"`);
 };
 
 function resolveImportsMatch(normalizedSpecifier, importMap) {
@@ -34,23 +34,24 @@ function resolveImportsMatch(normalizedSpecifier, importMap) {
     // Exact-match case
     if (specifierKey === normalizedSpecifier) {
       if (addressArray.length === 0) {
-        throw new TypeError(`Specifier key ${normalizedSpecifier} was mapped to no addresses.`);
+        throw new TypeError(`Specifier "${normalizedSpecifier}" was mapped to no addresses.`);
       } else if (addressArray.length === 1) {
         return addressArray[0];
       } else {
-        throw new Error('Not yet implemented');
+        throw new Error('Not yet implemented.');
       }
     }
 
     // Package prefix-match case
     if (specifierKey.endsWith('/') && normalizedSpecifier.startsWith(specifierKey)) {
       if (addressArray.length === 0) {
-        // TODO!!
+        throw new TypeError(`Specifier "${normalizedSpecifier}" was mapped to no addresses ` +
+                            `(via prefix specifier key "${specifierKey}").`);
       } else if (addressArray.length === 1) {
         const afterPrefix = normalizedSpecifier.substring(specifierKey.length);
         return new URL(afterPrefix, addressArray[0]);
       } else {
-        throw new Error('Not yet implemented');
+        throw new Error('Not yet implemented.');
       }
     }
   }
