@@ -169,12 +169,6 @@ describe('Mapped using the "imports" key only (no scopes)', () => {
       }
     }`);
 
-    it('should remap to built-in modules', () => {
-      expect(resolveUnderTest('/node_modules/als-polyfill/index.mjs')).toMatchURL('std:kv-storage');
-      expect(resolveUnderTest('https://example.com/node_modules/als-polyfill/index.mjs')).toMatchURL('std:kv-storage');
-      expect(resolveUnderTest('https://///example.com/node_modules/als-polyfill/index.mjs')).toMatchURL('std:kv-storage');
-    });
-
     it('should remap to other URLs', () => {
       expect(resolveUnderTest('https://example.com/lib/foo.mjs')).toMatchURL('https://example.com/app/more/bar.mjs');
       expect(resolveUnderTest('https://///example.com/lib/foo.mjs')).toMatchURL('https://example.com/app/more/bar.mjs');
