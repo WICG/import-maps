@@ -31,21 +31,27 @@ exports.resolve = (specifier, parsedImportMap, scriptURL) => {
 
 function resolveImportsMatch(normalizedSpecifier, importMap) {
   for (const [specifierKey, addressArray] of Object.entries(importMap)) {
-    if (addressArray.length > 1) {
-      throw new Error('Not yet implemented');
-    }
-    if (addressArray.length === 0 && specifierKey === normalizedSpecifier) {
-      throw new TypeError(`Specifier key ${normalizedSpecifier} was mapped to no addresses.`);
-    }
-
-    const address = addressArray[0]; // Per the above addressArray.length === 1
+    // Exact-match case
     if (specifierKey === normalizedSpecifier) {
-      return address;
+      if (addressArray.length === 0) {
+        throw new TypeError(`Specifier key ${normalizedSpecifier} was mapped to no addresses.`);
+      } else if (addressArray.length === 1) {
+        return addressArray[0];
+      } else {
+        throw new Error('Not yet implemented');
+      }
     }
 
+    // Package prefix-match case
     if (specifierKey.endsWith('/') && normalizedSpecifier.startsWith(specifierKey)) {
-      const afterPrefix = normalizedSpecifier.substring(specifierKey.length);
-      return new URL(afterPrefix, address);
+      if (addressArray.length === 0) {
+        // TODO!!
+      } else if (addressArray.length === 1) {
+        const afterPrefix = normalizedSpecifier.substring(specifierKey.length);
+        return new URL(afterPrefix, addressArray[0]);
+      } else {
+        throw new Error('Not yet implemented');
+      }
     }
   }
   return undefined;
