@@ -1,5 +1,8 @@
 'use strict';
 const { expectSpecifierMap } = require('./helpers/parsing.js');
+const { BUILT_IN_MODULE_SCHEME } = require('../lib/utils.js');
+
+const BLANK = `${BUILT_IN_MODULE_SCHEME}:blank`;
 
 describe('Relative URL-like specifier keys', () => {
   it('should absolutize strings prefixed with ./, ../, or / into the corresponding URLs', () => {
@@ -117,6 +120,26 @@ describe('Absolute URL specifier keys', () => {
         'https://example.com/': [expect.toMatchURL('https://base.example/percentDecoding/')],
         'https://example.com/%41': [expect.toMatchURL('https://base.example/noPercentDecoding')]
       }
+    );
+  });
+
+  it('should only parse built-in module specifier keys without a /', () => {
+    expectSpecifierMap(
+      `{
+        "${BLANK}": "/blank",
+        "${BLANK}/": "/blank/",
+        "${BLANK}/foo": "/blank/foo",
+        "${BLANK}\\\\foo": "/blank/backslashfoo"
+      }`,
+      'https://base.example/path1/path2/path3',
+      {
+        [BLANK]: [expect.toMatchURL('https://base.example/blank')],
+        [`${BLANK}\\foo`]: [expect.toMatchURL('https://base.example/blank/backslashfoo')]
+      },
+      [
+        `Invalid specifier key "${BLANK}/". Built-in module URLs must not contain "/".`,
+        `Invalid specifier key "${BLANK}/foo". Built-in module URLs must not contain "/".`
+      ]
     );
   });
 });
