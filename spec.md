@@ -23,7 +23,7 @@ If a `<script type="importmap">` is encountered when _acquiring import maps_ is 
 Encountering a `<script type="importmap">` while _acquiring import maps_ is true will kick off a procedure roughly like this:
 
 1. If it's an external script (i.e. has a `src=""`), fetch it, using the usual "good defaults" of `<script type="module">`. (E.g., always UTF-8, "cors" mode, MIME type must match, ...)
-   - What should be the MIME type? Let's say `application/json+importmap`.
+   - What should be the MIME type? Let's say `application/importmap+json`.
      The required mime type should be distinct so that pre-existing services that assume `application/json`
      for uploaded content, and web services that might unintentionally produce something that looks like an
      importmap do not [enable CSP bypasses](https://github.com/WICG/import-maps/issues/105).
