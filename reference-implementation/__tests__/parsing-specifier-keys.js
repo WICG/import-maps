@@ -137,8 +137,8 @@ describe('Absolute URL specifier keys', () => {
         [`${BLANK}\\foo`]: [expect.toMatchURL('https://base.example/blank/backslashfoo')]
       },
       [
-        `Invalid specifier key "${BLANK}/". Built-in module URLs must not contain "/".`,
-        `Invalid specifier key "${BLANK}/foo". Built-in module URLs must not contain "/".`
+        `Invalid specifier key "${BLANK}/". Built-in module specifiers must not contain "/".`,
+        `Invalid specifier key "${BLANK}/foo". Built-in module specifiers must not contain "/".`
       ]
     );
   });

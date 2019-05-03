@@ -1,4 +1,5 @@
 'use strict';
+const assert = require('assert');
 const { tryURLParse, hasFetchScheme, tryURLLikeSpecifierParse, BUILT_IN_MODULE_PROTOCOL } = require('./utils.js');
 
 exports.parseFromString = (input, baseURL) => {
@@ -32,6 +33,8 @@ exports.parseFromString = (input, baseURL) => {
 };
 
 function sortAndNormalizeSpecifierMap(obj, baseURL) {
+  assert(isJSONObject(obj));
+
   // Normalize all entries into arrays
   const normalized = {};
   for (const [specifierKey, value] of Object.entries(obj)) {
@@ -50,24 +53,34 @@ function sortAndNormalizeSpecifierMap(obj, baseURL) {
   }
 
   // Normalize/validate each potential address in the array
-  for (const [key, addressArray] of Object.entries(normalized)) {
-    normalized[key] = addressArray
-      .map(address => normalizeAddress(address, baseURL))
-      .filter(address => {
-        if (address === null) {
-          return false;
-        }
-        if (key[key.length - 1] === '/' && address.href[address.href.length - 1] !== '/') {
-          console.warn(`Invalid target address "${address}" for package specifier "${key}". ` +
-              `Package address targets must end with "/".`);
-          return false;
-        }
-        if (address.protocol === BUILT_IN_MODULE_PROTOCOL && address.href.includes('/')) {
-          console.warn(`Invalid target address "${address.href}". Built-in module URLs must not contain "/".`);
-          return false;
-        }
-        return true;
-      });
+  for (const [specifierKey, potentialAddresses] of Object.entries(normalized)) {
+    assert(Array.isArray(potentialAddresses));
+
+    const validNormalizedAddresses = [];
+    for (const potentialAddress of potentialAddresses) {
+      if (typeof potentialAddress !== 'string') {
+        continue;
+      }
+
+      const addressURL = tryURLLikeSpecifierParse(potentialAddress, baseURL);
+      if (addressURL === null) {
+        continue;
+      }
+
+      if (specifierKey.endsWith('/') && !addressURL.href.endsWith('/')) {
+        console.warn(`Invalid target address "${addressURL.href}" for package specifier "${specifierKey}". ` +
+            `Package address targets must end with "/".`);
+        continue;
+      }
+
+      if (addressURL.protocol === BUILT_IN_MODULE_PROTOCOL && addressURL.href.includes('/')) {
+        console.warn(`Invalid target address "${potentialAddress}". Built-in module URLs must not contain "/".`);
+        continue;
+      }
+
+      validNormalizedAddresses.push(addressURL);
+    }
+    normalized[specifierKey] = validNormalizedAddresses;
   }
 
   const sortedAndNormalized = {};
@@ -81,8 +94,8 @@ function sortAndNormalizeSpecifierMap(obj, baseURL) {
 
 function sortAndNormalizeScopes(obj, baseURL) {
   const normalized = {};
-  for (const [scopePrefix, specifierMap] of Object.entries(obj)) {
-    if (!isJSONObject(specifierMap)) {
+  for (const [scopePrefix, potentialSpecifierMap] of Object.entries(obj)) {
+    if (!isJSONObject(potentialSpecifierMap)) {
       throw new TypeError(`The value for the "${scopePrefix}" scope prefix must be an object.`);
     }
 
@@ -97,7 +110,7 @@ function sortAndNormalizeScopes(obj, baseURL) {
     }
 
     const normalizedScopePrefix = scopePrefixURL.href;
-    normalized[normalizedScopePrefix] = sortAndNormalizeSpecifierMap(specifierMap, baseURL);
+    normalized[normalizedScopePrefix] = sortAndNormalizeSpecifierMap(potentialSpecifierMap, baseURL);
   }
 
   const sortedAndNormalized = {};
@@ -117,23 +130,15 @@ function normalizeSpecifierKey(specifierKey, baseURL) {
 
   const url = tryURLLikeSpecifierParse(specifierKey, baseURL);
   if (url !== null) {
-    if (url.protocol === BUILT_IN_MODULE_PROTOCOL && url.href.includes('/')) {
-      console.warn(`Invalid specifier key "${url.href}". Built-in module URLs must not contain "/".`);
+    const urlString = url.href;
+    if (url.protocol === BUILT_IN_MODULE_PROTOCOL && urlString.includes('/')) {
+      console.warn(`Invalid specifier key "${urlString}". Built-in module specifiers must not contain "/".`);
       return null;
     }
-    return url.href;
+    return urlString;
   }
 
   return specifierKey;
-}
-
-// Returns null if `address` is not a valid address, and a `URL` instance if it is.
-function normalizeAddress(address, baseURL) {
-  if (typeof address !== 'string') {
-    return null;
-  }
-
-  return tryURLLikeSpecifierParse(address, baseURL);
 }
 
 function isJSONObject(value) {

@@ -24,7 +24,12 @@ exports.tryURLLikeSpecifierParse = (specifier, baseURL) => {
   }
 
   const url = exports.tryURLParse(specifier);
-  if (url !== null && (exports.hasFetchScheme(url) || url.protocol === exports.BUILT_IN_MODULE_PROTOCOL)) {
+
+  if (url === null) {
+    return null;
+  }
+
+  if (exports.hasFetchScheme(url) || url.protocol === exports.BUILT_IN_MODULE_PROTOCOL) {
     return url;
   }
 

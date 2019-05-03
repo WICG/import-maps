@@ -55,18 +55,141 @@ A <dfn>import map</dfn> is a [=struct=] with two [=struct/items=]:
 
 <h2 id="acquiring">Acquiring import maps</h2>
 
-<!--
-To <dfn lt="parse JSON into maps and lists|parsing JSON into maps and lists">parse JSON into maps and lists</dfn>, TODO. (This should move to Infra.)
--->
+TODO...
+
+At some point, each [=environment settings object=] will get an <dfn for="environment settings object">import map</dfn> algorithm, which returns an [=/import map=] created by parsing and merging all `<script type="importmap">` elements that are encountered (before the cutoff).
+
+<h2 id="parsing">Parsing import maps</h2>
 
 <!-- TODO unexport -->
 
-To <dfn export>parse an import map string</dfn>, given a [=string=] |input| and a [=URL=] |baseURL|:
+<div algorithm>
+  To <dfn export>parse an import map string</dfn>, given a [=string=] |input| and a [=URL=] |baseURL|:
 
-1. For now, see <a href="https://github.com/WICG/import-maps/blob/master/reference-implementation/lib/parser.js">the reference implementation</a>, carrying out the algorithm there given |input| and |baseURL|.
-1. This algorithm returns an [=/import map=]. The result will be highly normalized (e.g. all URL-like specifier keys will end up resolved against |baseURL| before being re-serialized as strings). See the <a href="https://github.com/WICG/import-maps/tree/master/reference-implementation/__tests__">parsing tests</a> for more details.
+  1. Let |parsed| be the result of [=parsing JSON into maps and lists=] given |input|.
+  1. If |parsed| is not a [=map=], then throw a {{TypeError}} indicating that the top-level value must be a JSON object.
+  1. Let |sortedAndNormalizedImports| be an empty [=map=].
+  1. If |parsed|["`imports`"] [=map/exists=], then:
+    1. If |parsed|["`imports`"] is not a [=map=], then throw a {{TypeError}} indicating that the "`imports`" top-level key must be a JSON object.
+    1. Set |sortedAndNormalizedImports| to the result of [=sorting and normalizing a specifier map=] given |parsed|["`imports`"] and |baseURL|.
+  1. Let |sortedAndNormalizedScopes| be an empty [=map=].
+  1. If |parsed|["`scopes`"] [=map/exists=], then:
+    1. If |parsed|["`scopes`"] is not a [=map=], then throw a {{TypeError}} indicating that the "`scopes`" top-level key must be a JSON object.
+    1. Set |sortedAndNormalizedScopes| to the result of [=sorting and normalizing scopes=] given |parsed|["`scopes`"] and |baseURL|.
+  1. Return the [=/import map=] whose [=import map/imports=] are |sortedAndNormalizedImports| and whose [=import map/scopes=] scopes are |sortedAndNormalizedScopes|.
+</div>
 
-... Other missing steps here. At some point, each [=environment settings object=] will get an <dfn for="environment settings object">import map</dfn> algorithm, which returns an [=/import map=] created by parsing and merging all `<script type="importmap">` elements that are encountered (before the cutoff).
+<div class="example" id="parsing-example">
+  The [=/import map=] is a highly normalized structure. For example, given a base URL of `<https://example.com/base/page.html>`, the input
+
+  <xmp highlight="json">
+    {
+      "imports": {
+        "/app/helper": "node_modules/helper/index.mjs",
+        "std:kv-storage": [
+          "std:kv-storage",
+          "node_modules/kv-storage-polyfill/index.mjs",
+        ]
+      }
+    }
+  </xmp>
+
+  will generate an [=/import map=] with [=import map/imports=] of
+
+  <xmp>
+  «[
+    "https://example.com/app/helper" → «
+      <https://example.com/base/node_modules/helper/index.mjs>
+    »,
+    "std:kv-storage" → «
+      <std:kv-storage>,
+      <https://example.com/base/node_modules/kv-storage-polyfill/index.mjs>
+    »
+  ]»
+  </xmp>
+
+  and (despite nothing being present in the input) an empty [=map=] for its [=import map/scopes=].
+</div>
+
+<div algorithm>
+  To <dfn lt="sort and normalize a specifier map|sorting and normalizing a specifier map">sort and normalize a specifier map</dfn>, given a [=map=] |originalMap| and a [=URL=] |baseURL|:
+
+  1. Let |normalized| be an empty [=map=].
+  1. First, normalize all [=map/entries=] so that their [=map/values=] are [=lists=]. [=map/For each=] |specifierKey| → |value| of |originalMap|,
+    1. Let |normalizedSpecifierKey| be the result of [=normalizing a specifier key=] given |specifierKey| and |baseURL|.
+    1. If |normalizedSpecifierKey| is null, then [=continue=].
+    1. If |value| is a [=string=], then set |normalized|[|normalizedSpecifierKey|] to «|value|».
+    1. Otherwise, if |value| is null, then set |normalized|[|normalizedSpecifierKey|] to a new empty list.
+    1. Otherwise, if |value| is a [=list=], then set |normalized|[|normalizedSpecifierKey|] to |value|.
+  1. Next, normalize and validate each potential address in the value [=lists=]. [=map/For each=] |specifierKey| → |potentialAddresses| of |normalized|,
+    1. Assert: |potentialAddresses| is a [=list=], because of the previous normalization pass.
+    1. Let |validNormalizedAddresses| be an empty [=list=].
+    1. [=list/For each=] |potentialAddress| of |potentialAddresses|,
+      1. If |potentialAddress| is not a [=string=], then [=continue=].
+      1. Let |addressURL| be the result of [=parsing a URL-like import specifier=] given |potentialAddress| and |baseURL|.
+      1. If |addressURL| is null, then [=continue=].
+      1. If |specifierKey| ends with U+002F (/), and the [=URL serializer|serialization=] of |addressURL| does not end with U+002F (/), then:
+        1. [=Report a warning to the console=] that an invalid target address was given for the specifier key |specifierKey|; since |specifierKey| ended in a slash, so must the address.
+        1. [=Continue=].
+      1. If |specifierKey|'s [=url/scheme=] is "`std`" and the [=URL serializer|serialization=] of |addressURL| contains U+002F (/), then:
+        1. [=Report a warning to the console=] that built-in module URLs must not contain slashes.
+        1. [=Continue=].
+      1. [=list/Append=] |addressURL| to |validNormalizedAddresses|.
+    1. Set |normalized|[|specifierKey|] to |validNormalizedAddresses|.
+  1. Return the result of sorting |normalized|, with an entry |a| being less than an entry |b| if |a|'s [=map/key=] is [=longer or code unit less than=] |b|'s [=map/key=]. <!-- TODO xref infra when patch lands -->
+</div>
+
+<div algorithm>
+  To <dfn lt="sort and normalize scopes|sorting and normalizing scopes">sort and normalize scopes</dfn>, given a [=map=] |originalMap| and a [=URL=] |baseURL|:
+
+  1. Let |normalized| be an empty [=map=].
+  1. [=map/For each=] |scopePrefix| → |potentialSpecifierMap| of |originalMap|,
+    1. If |potentialSpecifierMap| is not a [=map=], then throw a {{TypeError}} indicating that the value of the scope with prefix |scopePrefix| must be a JSON object.
+    1. Let |scopePrefixURL| be the result of [=URL parser|parsing=] |scopePrefix| with |baseURL| as the base URL.
+    1. If |scopePrefixURL| is failure, then [=continue=].
+    1. If |scopePrefixURL|'s [=url/scheme=] is not a [=fetch scheme=], then:
+      1. [=Report a warning to the console=] that scope prefix URLs must have a fetch scheme.
+      1. [=Continue=].
+    1. Let |normalizedScopePrefix| be the [=URL serializer|serialization=] of |scopePrefixURL|.
+    1. Set |normalized|[|normalizedScopePrefix|] to the result of [=sorting and normalizing a specifier map=] given |potentialSpecifierMap| and |baseURL|.
+  1. Return the result of sorting |normalized|, with an entry |a| being less than an entry |b| if |a|'s [=map/key=] is [=longer or code unit less than=] |b|'s [=map/key=]. <!-- TODO xref infra when patch lands -->
+</div>
+
+<div algorithm>
+  To <dfn lt="normalize a specifier key|normalizing a specifier key">normalize a specifier key</dfn>, given a [=string=] |specifierKey| and a [=URL=] |baseURL|:
+
+  1. If |specifierKey| is the empty string, then return null.
+  1. Let |url| be the result of [=parsing a URL-like import specifier=], given |specifierKey| and |baseURL|.
+  1. If |url| is not null, then:
+    1. Let |urlString| be the [=URL serializer|serialization=] of |url|.
+    1. If |url|'s [=url/scheme=] is "`std`" and |urlString| contains U+002F (/), then:
+      1. [=Report a warning to the console=] that built-in module specifiers must not contain slashes.
+      1. Return null.
+    1. Return |urlString|.
+  1. Return |specifierKey|.
+</div>
+
+<div algorithm>
+  To <dfn lt="parse a URL-like import specifier|parsing a URL-like import specifier">parse a URL-like import specifier</dfn>, given a [=string=] |specifier| and a [=URL=] |baseURL|:
+
+  1. If |specifier| starts with "`/`", "`./`", or "`../`", then return the result of [=URL parser|parsing=] |specifier| with |baseURL| as the base URL.
+  1. Let |url| be the result of [=URL parser|parsing=] |specifier| (with no base URL).
+  1. If |url| is failure, then return null.
+  1. If |url|'s [=url/scheme=] is either a [=fetch scheme=] or "`std`", then return |url|.
+  1. Return null.
+</div>
+
+<div algorithm>
+  A [=string=] |a| is <dfn>longer or code unit less than</dfn> |b| if |a|'s [=string/length=] is greater than |b|'s [=string/length=], or if |a| is [=code unit less than=] |b|.
+</div>
+
+<div algorithm>
+  A [=string=] |a| is <dfn>code unit less than</dfn> a [=string=] |b| if ... TODO delete this once the <a href="https://github.com/whatwg/infra/pull/248">Infra patch</a> lands. |a|, |b|.
+</div>
+
+<div algorithm>
+  To <dfn lt="parse JSON into maps and lists|parsing JSON into maps and lists">parse JSON into maps and lists</dfn>, TODO. (This should be done in Infra.)
+</div>
 
 <h2 id="resolving">Resolving module specifiers</h2>
 
