@@ -66,7 +66,7 @@ At some point, each [=environment settings object=] will get an <dfn for="enviro
 <div algorithm>
   To <dfn export>parse an import map string</dfn>, given a [=string=] |input| and a [=URL=] |baseURL|:
 
-  1. Let |parsed| be the result of [=parsing JSON into maps and lists=] given |input|.
+  1. Let |parsed| be the result of [=parse JSON into Infra values|parsing JSON into Infra values=] given |input|.
   1. If |parsed| is not a [=map=], then throw a {{TypeError}} indicating that the top-level value must be a JSON object.
   1. Let |sortedAndNormalizedImports| be an empty [=map=].
   1. If |parsed|["`imports`"] [=map/exists=], then:
@@ -136,7 +136,7 @@ At some point, each [=environment settings object=] will get an <dfn for="enviro
         1. [=Continue=].
       1. [=list/Append=] |addressURL| to |validNormalizedAddresses|.
     1. Set |normalized|[|specifierKey|] to |validNormalizedAddresses|.
-  1. Return the result of sorting |normalized|, with an entry |a| being less than an entry |b| if |a|'s [=map/key=] is [=longer or code unit less than=] |b|'s [=map/key=]. <!-- TODO xref infra when patch lands -->
+  1. Return the result of [=map/sorting=] |normalized|, with an entry |a| being less than an entry |b| if |a|'s [=map/key=] is [=longer or code unit less than=] |b|'s [=map/key=].
 </div>
 
 <div algorithm>
@@ -152,7 +152,7 @@ At some point, each [=environment settings object=] will get an <dfn for="enviro
       1. [=Continue=].
     1. Let |normalizedScopePrefix| be the [=URL serializer|serialization=] of |scopePrefixURL|.
     1. Set |normalized|[|normalizedScopePrefix|] to the result of [=sorting and normalizing a specifier map=] given |potentialSpecifierMap| and |baseURL|.
-  1. Return the result of sorting |normalized|, with an entry |a| being less than an entry |b| if |a|'s [=map/key=] is [=longer or code unit less than=] |b|'s [=map/key=]. <!-- TODO xref infra when patch lands -->
+  1. Return the result of [=map/sorting=] |normalized|, with an entry |a| being less than an entry |b| if |a|'s [=map/key=] is [=longer or code unit less than=] |b|'s [=map/key=].
 </div>
 
 <div algorithm>
@@ -181,14 +181,6 @@ At some point, each [=environment settings object=] will get an <dfn for="enviro
 
 <div algorithm>
   A [=string=] |a| is <dfn>longer or code unit less than</dfn> |b| if |a|'s [=string/length=] is greater than |b|'s [=string/length=], or if |a| is [=code unit less than=] |b|.
-</div>
-
-<div algorithm>
-  A [=string=] |a| is <dfn>code unit less than</dfn> a [=string=] |b| if ... TODO delete this once the <a href="https://github.com/whatwg/infra/pull/248">Infra patch</a> lands. |a|, |b|.
-</div>
-
-<div algorithm>
-  To <dfn lt="parse JSON into maps and lists|parsing JSON into maps and lists">parse JSON into maps and lists</dfn>, TODO. (This should be done in Infra.)
 </div>
 
 <h2 id="resolving">Resolving module specifiers</h2>

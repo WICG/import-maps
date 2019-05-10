@@ -29,10 +29,6 @@ Encountering a `<script type="importmap">` while _acquiring import maps_ is true
 
 Any **ongoing fetches of import maps** are noted, while ongoing, so that `import:` URL fetching can block on them (see below).
 
-### Import map spec structure
-
-For now, see the [reference implementation](https://github.com/WICG/import-maps/tree/master/reference-implementation) to understand how an arbitrary string gets turned into a normalized "import map" structure. This will soon be ported to formal specification text, after a bit more validation that it works correctly.
-
 ### Merging import maps
 
 We're looking to do the minimal thing that could work here. As such, I propose the following:
