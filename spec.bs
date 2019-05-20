@@ -23,6 +23,10 @@ spec: infra; type: dfn
   text: list
 spec: url; type: dfn; for: /; text: url
 </pre>
+<pre class="anchors">
+spec: html; type: dfn; urlPrefix: https://html.spec.whatwg.org/multipage/
+  text: module map; for: /; url: webappapis.html#module-map
+</pre>
 
 <style>
 .selected-text-file-an-issue {
@@ -185,13 +189,53 @@ At some point, each [=environment settings object=] will get an <dfn for="enviro
 
 <h2 id="resolving">Resolving module specifiers</h2>
 
-HTML already has a <a spec="html">resolve a module specifier</a> algorithm. We replace it with the following <dfn export>resolve a module specifier</dfn> algorithm, given a [=script=] |referringScript| and a [=JavaScript string=] |specifier|:
+<div algorithm>
+  HTML already has a <a spec="html">resolve a module specifier</a> algorithm. We replace it with the following <dfn export>resolve a module specifier</dfn> algorithm, given a [=script=] |referringScript| and a [=JavaScript string=] |specifier|:
 
-1. Let |importMap| be |referringScript|'s [=script/settings object=]'s [=environment settings object/import map=].
-1. Let |baseURL| be |referringScript|'s [=script/base URL=].
-1. For now, see the <a href="https://github.com/WICG/import-maps/blob/master/reference-implementation/lib/resolver.js">reference implementation</a>, carrying out the algorithm there given |specifier|, |importMap|, and |baseURL|.
-1. As before, this algorithm returns a [=URL=] or failure.
+  1. Let |importMap| be |referringScript|'s [=script/settings object=]'s [=environment settings object/import map=].
+  1. Let |moduleMap| be |referringScript|'s [=script/settings object=]'s [=environment settings object/module map=].
+  1. Let |scriptURL| be |referringScript|'s [=script/base URL=].
+  1. Let |scriptURLString| be |scriptURL|, [=URL serializer|serialized=].
+  1. Let |asURL| be the result of [=parsing a URL-like import specifier=] given |specifier| and |scriptURL|.
+  1. Let |normalizedSpecifier| be the [=URL serializer|serialization=] of |asURL|, if |asURL| is non-null; otherwise, |specifier|.
+  1. [=map/For each=] |scopePrefix| → |scopeImports| of |importMap|'s [=import map/scopes=],
+    1. If |scopePrefix| is |scriptURLString|, or if |scopePrefix| ends with U+002F (/) and |scriptURLString| [=starts with=] |scopePrefix|, then:
+      1. Let |scopeImportsMatch| be the result of [=resolving an imports match=] given |normalizedSpecifier|, |scopeImports|, and |moduleMap|.
+      1. If |scopeImportsMatch| is not null, then return |scopeImportsMatch|.
+  1. Let |topLevelImportsMatch| be the reuslt of [=resolving an imports match=] given |normalizedSpecifier|, |importMap|'s [=import map/imports=], and |moduleMap|.
+  1. If |topLevelImportsMatch| is not null, then return |topLevelImportsMatch|.
+  1. <p class="note">At this point, the specifier was able to be turned in to a URL, but it wasn't remapped to anything by |importMap|.</p>
+    If |asURL| is not null, then:
+    1. If |asURL|'s [=url/scheme=] is "`std`", and |moduleMap|[|asURL|] does not [=map/exist=], then throw a {{TypeError}} indicating that the requested built-in module is not implemented.
+    1. Return |asURL|.
+  1. Throw a {{TypeError}} indicating that |specifier| was a bare specifier, but was not remapped to anything by |importMap|.
+</div>
 
 <p class="advisement">It seems possible that the return type could end up being a [=list=] of [=URLs=], not just a single URL, to support HTTPS → HTTPS fallback. But, we haven't gotten that far yet; for now let's assume it stays a single URL.</p>
 
 All call sites of HTML's existing <a spec="html">resolve a module specifier</a> will need to be updated to pass the appropriate [=script=], not just its [=script/base URL=].
+
+They will also need to be updated to account for it now throwing exceptions, instead of returning failure. (Previously they just turned failures into {{TypeError}}s manually, so this is straightforward.)
+
+<div algorithm>
+  To <dfn lt="resolve an imports match|resolving an imports match">resolve an imports match</dfn>, given a [=string=] |normalizedSpecifier|, a [=specifier map=] |specifierMap|, and a [=module map=] |moduleMap|:
+
+  1. For each |specifierKey| → |addresses| of |specifierMap|,
+    1. If |specifierKey| is |normalizedSpecifier|, then:
+      1. If |addresses|'s [=list/size=] is 0, then throw a {{TypeError}} indicating that |normalizedSpecifier| was mapped to no addresses.
+      1. If |addresses|'s [=list/size=] is 1, then:
+        1. Let |singleAddress| be |addresses|[0].
+        1. If |singleAddress|'s [=url/scheme=] is "`std`", and |moduleMap|[|singleAddress|] does not [=map/exist=], then throw a {{TypeError}} indicating that the requested built-in module is not implemented.
+        1. Return |singleAddress|.
+      1. If |addresses|'s [=list/size=] is 2, and |addresses|[0]'s [=url/scheme=] is "`std`", and |addresses|[1]'s [=url/scheme=] is <em>not</em> "`std`", then:
+        1. Return |addresses|[0], if |moduleMap|[|addresses|[0]] [=map/exists=]; otherwise, return |addresses|[1].
+      1. Otherwise, <span class="advisement">we have no specification for more complicated fallbacks yet; throw a {{TypeError}} indicating this is not yet supported</span>.
+    1. If |specifierKey| ends with U+002F (/) and |normalizedSpecifier| [=starts with=] |specifierKey|, then:
+      1. If |addresses|'s [=list/size=] is 0, then throw a {{TypeError}} indicating that |normalizedSpecifier| was mapped to no addresses.
+      1. If |addresses|'s [=list/size=] is 1, then:
+        1. Let |afterPrefix| be the portion of |normalizedSpecifier| after the initial |specifierKey| prefix.
+        1. Let |url| be the result of [=URL parser|parsing=] |afterPrefix| relative to |addresses|[0].
+        1. If |url| is failure, throw a {{TypeError}}, implicating |normalizedSpecifier| (and in particular the |afterPrefix| portion).
+        1. Return |url|.
+      1. Otherwise, <span class="advisement">we have no specification for more complicated fallbacks yet; throw a {{TypeError}} indicating this is not yet supported</span>.
+</div>
