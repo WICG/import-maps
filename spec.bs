@@ -185,26 +185,35 @@ To <dfn export>fetch an import map</dfn> given <var ignore>url</var>,
 To <dfn export>wait for import maps</dfn> given |settings object|,
 run these steps.
 
+1. If |settings object|'s
+   [=environment settings object/acquiring import maps flag=] is false, then
+   asynchronously complete the algorithm with a failure.
 1. Block while |settings object|'s
    [=environment settings object/pending import maps count=] is not 0.
 1. Set |settings object|'s
    [=environment settings object/acquiring import maps flag=] to false.
+1. Asynchronously complete the algorithm with a success.
 
 </div>
 
-Insert a call to [=wait for import maps=] at the beginning of
-the following HTML spec concepts:
+Insert a call to [=wait for import maps=] at the beginning of the following HTML spec concepts,
+and complete the algorithms with a failure when [=wait for import maps=] completes with a failure.
 
-- fetch a top-level module script (using |module map settings object|)
+- <a spec="html">fetch a module script graph</a>
 - fetch a dynamic module script graph
-- fetch an inline module script graph.
+- fetch an inline module script graph
+- <a spec="html">fetch a module worker script graph</a> using
+  <var ignore>module map settings object</var>
 
-<p class="issue">These concepts are introduced by
-<a href="https://github.com/hiroshige-g/html/tree/IMSGFtoplevel">HTML-spec-side refactoring</a>.</p>
+Insert a call to [=wait for import maps=] before Step 11
+(a call to <a spec="html">fetch a single module script</a>) of
+<a spec="html">fetch and process the linked resource</a> algorithm for modulepreload links, and
+skip Step 11 and set <var ignore>result</var> to null
+when [=wait for import maps=] completes with a failure.
 
 <p class="advisement">
 In the current HTML-based spec,
-the settings object used here is module map settings object,
+the settings object used here is |module map settings object|,
 not fetch client settings object, because
 [=resolve a module specifier=] uses
 the import map of |module map settings object|.
