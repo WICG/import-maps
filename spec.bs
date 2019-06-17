@@ -137,14 +137,8 @@ before the first module loading is started.
     - If <a spec="html">the script's type</a> is "importmap", then:
         1. Increment |settings object|'s
            [=environment settings object/pending import maps count=].
-        1. Fetch an import map given url, |settings object|, and options.
-           <p class="note">To be specced. This returns a string or a failure.</p>
-           <p class="note">CSP is to be applied in the Fetch spec.</p>
+        1. <a>Fetch an import map</a> given <var ignore>url</var>, |settings object|, and <var ignore>options</var>.
         1. When the previous step asynchronously completes:
-            1. If the result if a failure, queue a task to fire
-               an event named error at the element, and return.
-            1. <a>Register an import map</a> given the result,
-               |settings object|, |base URL|, and the element.
             1. Decrement |settings object|'s
                [=environment settings object/pending import maps count=].
                This should unblock [=wait for import maps=] algorithms
@@ -152,10 +146,14 @@ before the first module loading is started.
                [=environment settings object/pending import maps count=]
                becomes 0.
                <p class="issue">Spec this more formally.</p>
+            1. If the result if a failure, queue a task to fire
+               an event named error at the element, and return.
+            1. <a>Register an import map</a> given the result,
+               |settings object|, |base URL|, and the element.
         1. Return.
 - Insert the following before <a spec="html">prepare a script</a> Step 25.2:
     - If <a spec="html">the script's type</a> is "importmap", then:
-        1. <a spec="html">Immediately</a> <a>register an import map</a>
+        1. <a>Register an import map</a>
            given <var ignore>source text</var>, |settings object|,
            |base URL|, and the element.
            <p class="note">CSP is already applied in Step 13 of
@@ -170,8 +168,20 @@ Is it sufficient?
 <a spec="html" lt="the script is ready">ready</a> and
 <a spec="html">the script's script</a> remains null.</p>
 
+<div algorithm>
+To <dfn export>fetch an import map</dfn> given <var ignore>url</var>,
+<var ignore>settings object</var>, and <var ignore>options</var>:
+
+1. <p class="note">TODO: Implement external import map fetching.
+   This asynchronously returns a string or a failure.</p>
+
+<p class="note">CSP is to be applied in the Fetch spec.</p>
+
+</div>
+
 <h3 id="integration-wait-for-import-maps">Wait for import maps</h3>
 
+<div algorithm>
 To <dfn export>wait for import maps</dfn> given |settings object|,
 run these steps.
 
@@ -179,6 +189,8 @@ run these steps.
    [=environment settings object/pending import maps count=] is not 0.
 1. Set |settings object|'s
    [=environment settings object/acquiring import maps flag=] to false.
+
+</div>
 
 Insert a call to [=wait for import maps=] at the beginning of
 the following HTML spec concepts:
@@ -222,6 +234,7 @@ be cleared for http://:invalid, because we early-exit module loading.
 
 <h3 id="integration-register-an-import-map">Registering an import map</h3>
 
+<div algorithm>
 To <dfn>register an import map</dfn> given a [=string=] |source text|,
 |settings object|, a [=URL=] |base URL|, and an [=/Element=] |element|,
 run the following steps.
@@ -243,12 +256,17 @@ run the following steps.
        given |settings object|'s [=environment settings object/import map=]
        and |import map|.
 
+</div>
+
+<div algorithm>
 To <dfn>merge import maps</dfn>, given an [=/import map=] |import map| and
 an [=/import map=] |new import map|:
 
 1. Assert: |import map| is not null.
 1. Assert: |new import map| is not null.
 1. <p class="note">TODO: Implement merging. This modifies |import map| in-place.</p>
+
+</div>
 
 <h2 id="parsing">Parsing import maps</h2>
 
