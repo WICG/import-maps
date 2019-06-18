@@ -141,11 +141,10 @@ before the first module loading is started.
         1. When the previous step asynchronously completes:
             1. Decrement |settings object|'s
                [=environment settings object/pending import maps count=].
-               This should unblock [=wait for import maps=] algorithms
+               <p class="note">This unblocks [=wait for import maps=] algorithms
                asynchronously when
                [=environment settings object/pending import maps count=]
-               becomes 0.
-               <p class="issue">Spec this more formally.</p>
+               becomes 0.</p>
             1. If the result if a failure, queue a task to fire
                an event named error at the element, and return.
             1. <a>Register an import map</a> given the result,
@@ -188,8 +187,8 @@ run these steps.
 1. If |settings object|'s
    [=environment settings object/acquiring import maps flag=] is false, then
    asynchronously complete the algorithm with a failure.
-1. Block while |settings object|'s
-   [=environment settings object/pending import maps count=] is not 0.
+1. <a spec="html">Spin the event loop</a> until |settings object|'s
+   [=environment settings object/pending import maps count=] is 0.
 1. Set |settings object|'s
    [=environment settings object/acquiring import maps flag=] to false.
 1. Asynchronously complete the algorithm with a success.
