@@ -244,6 +244,9 @@ be cleared for http://:invalid, because we early-exit module loading.
 To <dfn>register an import map</dfn> given a [=string=] or a failure |source text|,
 |settings object|, a [=URL=] |base URL|, and an [=/Element=] |element|,
 run the following steps.
+1. If |source text| is a failure:
+    1. <a spec="html">queue a task</a> to <a spec="html">fire an event</a> named `error` at
+       |element|, and return.
 1. If the element's <a spec="html">node document</a>'s
    <a spec="html">relevant settings object</a>
    is not equal to |settings object|, then return.
@@ -253,9 +256,6 @@ run the following steps.
    If we change the decision at
    <a href="https://github.com/whatwg/html/pull/2673">#2673</a> to fire `error`
    events, then we should change this step accordingly.</p>
-1. If |source text| is a failure:
-    1. <a spec="html">queue a task</a> to <a spec="html">fire an event</a> named `error` at
-       |element|, and return.
 1. Let |import map| be the result of <a>parse an import map string</a>,
    given |source text| and |base URL|.
 1. If |import map| is null:
