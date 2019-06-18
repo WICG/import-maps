@@ -115,8 +115,8 @@ before the first module loading is started.
     - If <a spec="html">the script's type</a> is "importmap" and
       |settings object|'s
       [=environment settings object/acquiring import maps flag=] is false,
-      then queue a task to fire an event named error at the element,
-      and return.
+      then <a spec="html">queue a task</a> to <a spec="html">fire an event</a> named `error`
+      at the element, and return.
       <p class="note">
       Alternative considered:
       We can proceed to import map loading if
@@ -138,16 +138,14 @@ before the first module loading is started.
         1. Increment |settings object|'s
            [=environment settings object/pending import maps count=].
         1. <a>Fetch an import map</a> given <var ignore>url</var>, |settings object|, and <var ignore>options</var>.
-        1. When the previous step asynchronously completes:
+        1. When the previous step asynchronously completes with |result|:
             1. Decrement |settings object|'s
                [=environment settings object/pending import maps count=].
                <p class="note">This unblocks [=wait for import maps=] algorithms
                asynchronously when
                [=environment settings object/pending import maps count=]
                becomes 0.</p>
-            1. If the result if a failure, queue a task to fire
-               an event named error at the element, and return.
-            1. <a>Register an import map</a> given the result,
+            1. <a>Register an import map</a> given |result|,
                |settings object|, |base URL|, and the element.
         1. Return.
 - Insert the following before <a spec="html">prepare a script</a> Step 25.2:
@@ -243,23 +241,31 @@ be cleared for http://:invalid, because we early-exit module loading.
 <h3 id="integration-register-an-import-map">Registering an import map</h3>
 
 <div algorithm>
-To <dfn>register an import map</dfn> given a [=string=] |source text|,
+To <dfn>register an import map</dfn> given a [=string=] or a failure |source text|,
 |settings object|, a [=URL=] |base URL|, and an [=/Element=] |element|,
 run the following steps.
-
-1. <p class="issue">Should we check whether the script element is moved
-   across documents?
-   Currently, we don't check that and the import maps are always registered
-   to the settings object at the time of prepare-a-script.</p>
+1. If the element's <a spec="html">node document</a>'s
+   <a spec="html">relevant settings object</a>
+   is not equal to |settings object|, then return.
+   <p class="note">This is spec'ed consistently with
+   <a href="https://github.com/whatwg/html/pull/2673">#2673</a>.</p>
+   <p class="advisement">Currently we don't fire `error` events in this case.
+   If we change the decision at
+   <a href="https://github.com/whatwg/html/pull/2673">#2673</a> to fire `error`
+   events, then we should change this step accordingly.</p>
+1. If |source text| is a failure:
+    1. <a spec="html">queue a task</a> to <a spec="html">fire an event</a> named `error` at
+       |element|, and return.
 1. Let |import map| be the result of <a>parse an import map string</a>,
    given |source text| and |base URL|.
 1. If |import map| is null:
-    1. Queue a task to fire an event named `error` at |element|.
-1. Else if |settings object|'s
+    1. <a spec="html">queue a task</a> to <a spec="html">fire an event</a> named `error` at
+       |element|, and return.
+1. If |settings object|'s
    [=environment settings object/import map=] is null, then:
     1. Set |settings object|'s
        [=environment settings object/import map=] to |import map|.
-1. Else:
+1. Otherwise:
     1. <a>Merge import maps</a>,
        given |settings object|'s [=environment settings object/import map=]
        and |import map|.
