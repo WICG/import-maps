@@ -62,16 +62,37 @@ A <dfn>import map</dfn> is a [=struct=] with two [=struct/items=]:
 
 <h3 id="integration-environment-settings-object">New members of environment settings object</h3>
 
-Each environment settings object has an [=/import map=] <dfn for="environment settings object">import map</dfn>.
+Each [=environment settings object=] will get an <dfn for="environment settings object">import map</dfn> algorithm, which returns an [=/import map=] created by parsing and merging all `<script type="importmap">` elements that are encountered (before the cutoff).
+
+A <a spec="html">Document</a> has an [=/import map=] <dfn for="Document">import map</dfn>.
 It is initially null.
 
-<p class="note">This returns an [=/import map=] created by parsing and merging all
-`<script type="importmap">` elements that are encountered (before the cutoff).
+In <a spec="html">set up a window environment settings object</a>,
+<var ignore>settings object</var>'s [=environment settings object/import map=] returns
+the [=Document/import map=] of <var ignore>window</var>'s <a spec="html">associated Document</a>.
+
+A <dfn>WorkerGlobalScope</dfn> has an [=/import map=] <dfn for="WorkerGlobalScope">import map</dfn>.
+It is initially null.
+
+<p class="issue">
+Spec ways to set <a>WorkerGlobalScope</a>'s [=WorkerGlobalScope/import map=].
+We might want to inherit parent context's import maps, or provide APIs on
+<a>WorkerGlobalScope</a>, but we are not sure.
+Currently it is always null.
 </p>
 
-<p class="note">Alternatives: We might want to associate import maps with e.g.
-[=environment settings object/module map=], realm, etc.
-So far I don't have any specific pros/cons for these options.</p>
+<p class="issue">
+<a>WorkerGlobalScope</a> is not linked to the HTML spec because I couldn't figure out
+how to link that.
+</p>
+
+In <a spec="html">set up a worker environment settings object</a>,
+<var ignore>settings object</var>'s [=environment settings object/import map=] returns
+<var ignore>worker global scope</var>'s [=WorkerGlobalScope/import map=].
+
+<p class="note">
+The import maps are spec'ed similarly to the module maps.
+</p>
 
 Each environment settings object has an integer,
 <dfn for="environment settings object">pending import maps count</dfn>.
@@ -247,7 +268,7 @@ run the following steps.
 1. If |source text| is a failure:
     1. <a spec="html">queue a task</a> to <a spec="html">fire an event</a> named `error` at
        |element|, and return.
-1. If the element's <a spec="html">node document</a>'s
+1. If |element|'s <a spec="html">node document</a>'s
    <a spec="html">relevant settings object</a>
    is not equal to |settings object|, then return.
    <p class="note">This is spec'ed consistently with
@@ -261,14 +282,11 @@ run the following steps.
 1. If |import map| is null:
     1. <a spec="html">queue a task</a> to <a spec="html">fire an event</a> named `error` at
        |element|, and return.
-1. If |settings object|'s
-   [=environment settings object/import map=] is null, then:
-    1. Set |settings object|'s
-       [=environment settings object/import map=] to |import map|.
+1. If |element|'s <a spec="html">node document</a>'s [=Document/import map=] is null, then:
+    1. Set |element|'s <a spec="html">node document</a>'s [=Document/import map=] to |import map|.
 1. Otherwise:
     1. <a>Merge import maps</a>,
-       given |settings object|'s [=environment settings object/import map=]
-       and |import map|.
+       given |element|'s <a spec="html">node document</a>'s [=Document/import map=] and |import map|.
 
 </div>
 
