@@ -142,21 +142,19 @@ To <dfn export>fetch an import map</dfn> given <var ignore>url</var>, <var ignor
 <div algorithm>
 To <dfn export>wait for import maps</dfn> given |settings object|, run these steps.
 
-1. If |settings object|'s [=environment settings object/acquiring import maps flag=] is false, then asynchronously complete the algorithm with a failure.
-1. <a spec="html">Spin the event loop</a> until |settings object|'s [=environment settings object/pending import maps count=] is 0.
 1. Set |settings object|'s [=environment settings object/acquiring import maps flag=] to false.
-1. Asynchronously complete the algorithm with a success.
+1. <a spec="html">Spin the event loop</a> until |settings object|'s [=environment settings object/pending import maps count=] is 0.
+1. Asynchronously complete the algorithm.
 
 </div>
 
-Insert a call to [=wait for import maps=] at the beginning of the following HTML spec concepts, and complete the algorithms with a failure when [=wait for import maps=] completes with a failure.
+Insert a call to [=wait for import maps=] at the beginning of the following HTML spec concepts.
 
 - <a spec="html">fetch a module script graph</a>
-- fetch a dynamic module script graph
+- fetch an import() module script graph
+- fetch a modulepreload module script graph
 - fetch an inline module script graph
 - <a spec="html">fetch a module worker script graph</a> using <var ignore>module map settings object</var>
-
-Insert a call to [=wait for import maps=] before Step 11 (a call to <a spec="html">fetch a single module script</a>) of <a spec="html">fetch and process the linked resource</a> algorithm for modulepreload links, and skip Step 11 and set <var ignore>result</var> to null when [=wait for import maps=] completes with a failure.
 
 <p class="advisement">In the current HTML-based spec, the settings object used here is |module map settings object|, not fetch client settings object, because [=resolve a module specifier=] uses the import map of |module map settings object|. In fetch-spec-based import map, this would be <var ignore>fetch client settings object</var> instead. This only affects <a spec="html">fetch a module worker script graph</a> where these two settings objects are different. </p>
 
