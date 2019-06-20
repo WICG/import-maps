@@ -89,104 +89,49 @@ In <a spec="html">set up a worker environment settings object</a>,
 The import maps are spec'ed similarly to the module maps.
 </p>
 
-Each environment settings object has an integer,
-<dfn for="environment settings object">pending import maps count</dfn>.
-It is initially 0.
+Each environment settings object has an integer, <dfn for="environment settings object">pending import maps count</dfn>. It is initially 0.
 
-Each environment settings object has a boolean,
-<dfn for="environment settings object">acquiring import maps flag</dfn>.
-It is initially true.
+Each environment settings object has a boolean, <dfn for="environment settings object">acquiring import maps flag</dfn>. It is initially true.
 
-<p class="note">These two flags are used to achieve the following behavior:
-(1) Import maps are accepted if and only if they are added
-(i.e. their corresponding script elements are added)
-before the first module loading is started,
-even if the loading of the import map files don't finish
-before the first module loading is started.
+<p class="note">
+These two flags are used to achieve the following behavior:
+(1) Import maps are accepted if and only if they are added (i.e. their corresponding script elements are added) before the first module loading is started, even if the loading of the import map files don't finish before the first module loading is started.
 (2) Module loading waits for already started import maps loading, if any.
 </p>
 
 <h3 id="integration-prepare-a-script">Prepare a script</h3>
 
 - <a spec="html">the script's type</a> should be:
-    - which is either "classic", "module", or "importmap".
-  <p class="note">Although we add the third script type,
-  we don't add the third subclass of
-  <a href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-script">script</a>.
-  Import maps are processed outside the existing paths for
-  <a href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-script">script</a>s
-  and their <a spec="html">execute a script block</a>,
-  because the mechanism controlling the orders/dependencies
-  between import map registration and script evaluation
-  is quite separeted and different from the mechanism
-  for controlling script evaluation order.
-  </p>
-- Insert the following step to <a spec="html">prepare a script</a> Step 7,
-  under "Determine the script's type as follows:":
-    - If the script block's type string is an
-      <a spec="infra">ASCII case-insensitive</a> match for the string
-      "importmap", <a spec="html">the script's type</a> is "importmap".
-- Insert the following step
-  before <a spec="html">prepare a script</a> Step 24:
-    - If <a spec="html">the script's type</a> is "importmap" and
-      |settings object|'s
-      [=environment settings object/acquiring import maps flag=] is false,
-      then <a spec="html">queue a task</a> to <a spec="html">fire an event</a> named `error`
-      at the element, and return.
-      <p class="note">
-      Alternative considered:
-      We can proceed to import map loading if
-      [=environment settings object/pending import maps count=] isn't 0,
-      even when [=environment settings object/acquiring import maps flag=]
-      is false,
-      because at that time subsequent module loading is blocked and
-      new import maps loading can be still added.
-      This would allow a little more opportinities for adding import maps,
-      but this would highly depend on the timing of network loading.
-      For example, if the preceding import map loading finishes earlier
-      than expected, then subsequent import maps depending on this behavior
-      might fail.
-      To avoid this kind of nondeterminism,
-      I didn't choose this option, unless there are specific needs.
-      </p>
+  - which is either "classic", "module", or "importmap".
+    <p class="note">Although we add the third script type, we don't add the third subclass of <a href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-script">script</a>. Import maps are processed outside the existing paths for <a href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-script">script</a>s and their <a spec="html">execute a script block</a>, because the mechanism controlling the orders/dependencies between import map registration and script evaluation is quite separeted and different from the mechanism for controlling script evaluation order. </p>
+- Insert the following step to <a spec="html">prepare a script</a> Step 7, under "Determine the script's type as follows:":
+  - If the script block's type string is an <a spec="infra">ASCII case-insensitive</a> match for the string "importmap", <a spec="html">the script's type</a> is "importmap".
+- Insert the following step before <a spec="html">prepare a script</a> Step 24:
+  - If <a spec="html">the script's type</a> is "importmap" and |settings object|'s [=environment settings object/acquiring import maps flag=] is false, then <a spec="html">queue a task</a> to <a spec="html">fire an event</a> named `error` at the element, and return.
+    <p class="note"> Alternative considered: We can proceed to import map loading if [=environment settings object/pending import maps count=] isn't 0, even when [=environment settings object/acquiring import maps flag=] is false, because at that time subsequent module loading is blocked and new import maps loading can be still added. This would allow a little more opportinities for adding import maps, but this would highly depend on the timing of network loading. For example, if the preceding import map loading finishes earlier than expected, then subsequent import maps depending on this behavior might fail. To avoid this kind of nondeterminism, I didn't choose this option, unless there are specific needs. </p>
 - Insert the following before <a spec="html">prepare a script</a> Step 24.6:
-    - If <a spec="html">the script's type</a> is "importmap", then:
-        1. Increment |settings object|'s
-           [=environment settings object/pending import maps count=].
-        1. <a>Fetch an import map</a> given <var ignore>url</var>, |settings object|, and <var ignore>options</var>.
-        1. When the previous step asynchronously completes with |result|:
-            1. Decrement |settings object|'s
-               [=environment settings object/pending import maps count=].
-               <p class="note">This unblocks [=wait for import maps=] algorithms
-               asynchronously when
-               [=environment settings object/pending import maps count=]
-               becomes 0.</p>
-            1. <a>Register an import map</a> given |result|,
-               |settings object|, |base URL|, and the element.
-        1. Return.
+  - If <a spec="html">the script's type</a> is "importmap", then:
+    1. Increment |settings object|'s [=environment settings object/pending import maps count=].
+    1. <a>Fetch an import map</a> given <var ignore>url</var>, |settings object|, and <var ignore>options</var>.
+    1. When the previous step asynchronously completes with |result|:
+       1. Decrement |settings object|'s [=environment settings object/pending import maps count=].
+          <p class="note">This unblocks [=wait for import maps=] algorithms asynchronously when [=environment settings object/pending import maps count=] becomes 0.</p>
+       1. <a>Register an import map</a> given |result|, |settings object|, |base URL|, and the element.
+    1. Return.
 - Insert the following before <a spec="html">prepare a script</a> Step 25.2:
-    - If <a spec="html">the script's type</a> is "importmap", then:
-        1. <a>Register an import map</a>
-           given <var ignore>source text</var>, |settings object|,
-           |base URL|, and the element.
-           <p class="note">CSP is already applied in Step 13 of
-           <a spec="html">prepare a script</a>, just like an inline script.</p>
-        1. Return.
+  - If <a spec="html">the script's type</a> is "importmap", then:
+    1. <a>Register an import map</a> given <var ignore>source text</var>, |settings object|, |base URL|, and the element.
+       <p class="note">CSP is already applied in Step 13 of <a spec="html">prepare a script</a>, just like an inline script.</p>
+    1. Return.
 
-<p class="issue">CSP is applied to import maps just like scripts.
-Is it sufficient?
-<a href="https://github.com/WICG/import-maps/issues/105">Issue #105</a></p>
+<p class="issue">CSP is applied to import maps just like scripts. Is it sufficient? <a href="https://github.com/WICG/import-maps/issues/105">Issue #105</a></p>
 
-<p class="note">The script never becomes
-<a spec="html" lt="the script is ready">ready</a> and
-<a spec="html">the script's script</a> remains null.</p>
+<p class="note">The script never becomes <a spec="html" lt="the script is ready">ready</a> and <a spec="html">the script's script</a> remains null.</p>
 
 <div algorithm>
-To <dfn export>fetch an import map</dfn> given <var ignore>url</var>,
-<var ignore>settings object</var>, and <var ignore>options</var>:
+To <dfn export>fetch an import map</dfn> given <var ignore>url</var>, <var ignore>settings object</var>, and <var ignore>options</var>:
 
-1. <p class="note">TODO: Implement external import map fetching.
-   This asynchronously returns a string or a failure.</p>
+1. <p class="note">TODO: Implement external import map fetching. This asynchronously returns a string or a failure.</p>
 
 <p class="note">CSP is to be applied in the Fetch spec.</p>
 
@@ -195,22 +140,16 @@ To <dfn export>fetch an import map</dfn> given <var ignore>url</var>,
 <h3 id="integration-wait-for-import-maps">Wait for import maps</h3>
 
 <div algorithm>
-To <dfn export>wait for import maps</dfn> given |settings object|,
-run these steps.
+To <dfn export>wait for import maps</dfn> given |settings object|, run these steps.
 
-1. If |settings object|'s
-   [=environment settings object/acquiring import maps flag=] is false, then
-   asynchronously complete the algorithm with a failure.
-1. <a spec="html">Spin the event loop</a> until |settings object|'s
-   [=environment settings object/pending import maps count=] is 0.
-1. Set |settings object|'s
-   [=environment settings object/acquiring import maps flag=] to false.
+1. If |settings object|'s [=environment settings object/acquiring import maps flag=] is false, then asynchronously complete the algorithm with a failure.
+1. <a spec="html">Spin the event loop</a> until |settings object|'s [=environment settings object/pending import maps count=] is 0.
+1. Set |settings object|'s [=environment settings object/acquiring import maps flag=] to false.
 1. Asynchronously complete the algorithm with a success.
 
 </div>
 
-Insert a call to [=wait for import maps=] at the beginning of the following HTML spec concepts,
-and complete the algorithms with a failure when [=wait for import maps=] completes with a failure.
+Insert a call to [=wait for import maps=] at the beginning of the following HTML spec concepts, and complete the algorithms with a failure when [=wait for import maps=] completes with a failure.
 
 - <a spec="html">fetch a module script graph</a>
 - fetch a dynamic module script graph
@@ -218,76 +157,34 @@ and complete the algorithms with a failure when [=wait for import maps=] complet
 - <a spec="html">fetch a module worker script graph</a> using
   <var ignore>module map settings object</var>
 
-Insert a call to [=wait for import maps=] before Step 11
-(a call to <a spec="html">fetch a single module script</a>) of
-<a spec="html">fetch and process the linked resource</a> algorithm for modulepreload links, and
-skip Step 11 and set <var ignore>result</var> to null
-when [=wait for import maps=] completes with a failure.
+Insert a call to [=wait for import maps=] before Step 11 (a call to <a spec="html">fetch a single module script</a>) of <a spec="html">fetch and process the linked resource</a> algorithm for modulepreload links, and skip Step 11 and set <var ignore>result</var> to null when [=wait for import maps=] completes with a failure.
 
-<p class="advisement">
-In the current HTML-based spec,
-the settings object used here is |module map settings object|,
-not fetch client settings object, because
-[=resolve a module specifier=] uses
-the import map of |module map settings object|.
-In fetch-spec-based import map, this would be
-<var ignore>fetch client settings object</var> instead.
-This only affects <a spec="html">fetch a module worker script graph</a>
-where these two settings objects are different.
-</p>
+<p class="advisement">In the current HTML-based spec, the settings object used here is |module map settings object|, not fetch client settings object, because [=resolve a module specifier=] uses the import map of |module map settings object|. In fetch-spec-based import map, this would be <var ignore>fetch client settings object</var> instead. This only affects <a spec="html">fetch a module worker script graph</a> where these two settings objects are different. </p>
 
-<p class="advisement">Depending on the exact location of
-[=wait for import maps=], there would be observable behavior differences
-between HTML- and Fetch-based import maps.
-For example, the current HTML-spec-based draft here calls
-[=wait for import maps=] at very early stages of module loading before
-[=resolve a module specifier=]. Therefore,
-[=environment settings object/acquiring import maps flag=] is always
-cleared, even if [=resolve a module specifier=] fails e.g. in parsing
-http://:invalid.
-When we switch to Fetch-spec-based, import map resolution would be
-done inside Fetch spec after [=resolve a module specifier=] and thus
-we might also want to [=wait for import maps=] after
-[=resolve a module specifier=].
-In that case,
-[=environment settings object/acquiring import maps flag=] wouldn't
-be cleared for http://:invalid, because we early-exit module loading.
-</p>
+<p class="advisement">Depending on the exact location of [=wait for import maps=], there would be observable behavior differences between HTML- and Fetch-based import maps. For example, the current HTML-spec-based draft here calls [=wait for import maps=] at very early stages of module loading before [=resolve a module specifier=]. Therefore, [=environment settings object/acquiring import maps flag=] is always cleared, even if [=resolve a module specifier=] fails e.g. in parsing http://:invalid. When we switch to Fetch-spec-based, import map resolution would be done inside Fetch spec after [=resolve a module specifier=] and thus we might also want to [=wait for import maps=] after [=resolve a module specifier=]. In that case, [=environment settings object/acquiring import maps flag=] wouldn't be cleared for http://:invalid, because we early-exit module loading. </p>
 
 <h3 id="integration-register-an-import-map">Registering an import map</h3>
 
 <div algorithm>
-To <dfn>register an import map</dfn> given a [=string=] or a failure |source text|,
-|settings object|, a [=URL=] |base URL|, and an [=/Element=] |element|,
-run the following steps.
+To <dfn>register an import map</dfn> given a [=string=] or a failure |source text|, |settings object|, a [=URL=] |base URL|, and an [=/Element=] |element|, run the following steps.
+
 1. If |source text| is a failure:
-    1. <a spec="html">queue a task</a> to <a spec="html">fire an event</a> named `error` at
-       |element|, and return.
-1. If |element|'s <a spec="html">node document</a>'s
-   <a spec="html">relevant settings object</a>
-   is not equal to |settings object|, then return.
-   <p class="note">This is spec'ed consistently with
-   <a href="https://github.com/whatwg/html/pull/2673">#2673</a>.</p>
-   <p class="advisement">Currently we don't fire `error` events in this case.
-   If we change the decision at
-   <a href="https://github.com/whatwg/html/pull/2673">#2673</a> to fire `error`
-   events, then we should change this step accordingly.</p>
-1. Let |import map| be the result of <a>parse an import map string</a>,
-   given |source text| and |base URL|.
+    1. <a spec="html">queue a task</a> to <a spec="html">fire an event</a> named `error` at |element|, and return.
+1. If |element|'s <a spec="html">node document</a>'s <a spec="html">relevant settings object</a> is not equal to |settings object|, then return.
+   <p class="note">This is spec'ed consistently with <a href="https://github.com/whatwg/html/pull/2673">#2673</a>.</p>
+   <p class="advisement">Currently we don't fire `error` events in this case. If we change the decision at <a href="https://github.com/whatwg/html/pull/2673">#2673</a> to fire `error` events, then we should change this step accordingly.</p>
+1. Let |import map| be the result of <a>parse an import map string</a>, given |source text| and |base URL|.
 1. If |import map| is null:
-    1. <a spec="html">queue a task</a> to <a spec="html">fire an event</a> named `error` at
-       |element|, and return.
+    1. <a spec="html">queue a task</a> to <a spec="html">fire an event</a> named `error` at |element|, and return.
 1. If |element|'s <a spec="html">node document</a>'s [=Document/import map=] is null, then:
     1. Set |element|'s <a spec="html">node document</a>'s [=Document/import map=] to |import map|.
 1. Otherwise:
-    1. <a>Merge import maps</a>,
-       given |element|'s <a spec="html">node document</a>'s [=Document/import map=] and |import map|.
+    1. <a>Merge import maps</a>, given |element|'s <a spec="html">node document</a>'s [=Document/import map=] and |import map|.
 
 </div>
 
 <div algorithm>
-To <dfn>merge import maps</dfn>, given an [=/import map=] |import map| and
-an [=/import map=] |new import map|:
+To <dfn>merge import maps</dfn>, given an [=/import map=] |import map| and an [=/import map=] |new import map|:
 
 1. Assert: |import map| is not null.
 1. Assert: |new import map| is not null.
