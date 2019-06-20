@@ -60,6 +60,15 @@ A <dfn>import map</dfn> is a [=struct=] with two [=struct/items=]:
 
 An <dfn>empty import map</dfn> is an [=/import map=] with an [=import map/imports=] and [=import map/scopes=] both being empty maps.
 
+<div algorithm>
+To <dfn>update import map</dfn>, given an [=/import map=] |import map| and an [=/import map=] |new import map|:
+
+1. Assert: |import map| is not null.
+1. Assert: |new import map| is not null.
+1. <p class="note">TODO: Implement merging. This merges |new import map| into |import map| and thus updates |import map| in-place.</p>
+
+</div>
+
 <h2 id="acquiring">Acquiring import maps</h2>
 
 <h3 id="integration-environment-settings-object">New members of environment settings object</h3>
@@ -165,15 +174,6 @@ To <dfn>register an import map</dfn> given a [=string=] or a failure |source tex
 1. Let |import map| be the result of <a>parse an import map string</a>, given |source text| and |base URL|.
 1. If |import map| is null, then <a spec="html">queue a task</a> to <a spec="html">fire an event</a> named `error` at |element|, and return.
 1. Otherwise, <a>update import map</a>, given |element|'s <a spec="html">node document</a>'s [=Document/import map=] and |import map|.
-
-</div>
-
-<div algorithm>
-To <dfn>update import map</dfn>, given an [=/import map=] |import map| and an [=/import map=] |new import map|:
-
-1. Assert: |import map| is not null.
-1. Assert: |new import map| is not null.
-1. <p class="note">TODO: Implement merging. This merges |new import map| into |import map| and thus updates |import map| in-place.</p>
 
 </div>
 
