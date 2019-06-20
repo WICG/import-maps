@@ -64,26 +64,21 @@ A <dfn>import map</dfn> is a [=struct=] with two [=struct/items=]:
 
 Each [=environment settings object=] will get an <dfn for="environment settings object">import map</dfn> algorithm, which returns an [=/import map=] created by parsing and merging all `<script type="importmap">` elements that are encountered (before the cutoff).
 
-A <a spec="html">Document</a> has an [=/import map=] <dfn for="Document">import map</dfn>.
+A {{Document}} has an [=/import map=] <dfn for="Document">import map</dfn>.
 It is initially null.
 
 In <a spec="html">set up a window environment settings object</a>,
 <var ignore>settings object</var>'s [=environment settings object/import map=] returns
 the [=Document/import map=] of <var ignore>window</var>'s <a spec="html">associated Document</a>.
 
-A <dfn>WorkerGlobalScope</dfn> has an [=/import map=] <dfn for="WorkerGlobalScope">import map</dfn>.
+A {{WorkerGlobalScope}} has an [=/import map=] <dfn for="WorkerGlobalScope">import map</dfn>.
 It is initially null.
 
 <p class="issue">
-Spec ways to set <a>WorkerGlobalScope</a>'s [=WorkerGlobalScope/import map=].
+Spec ways to set {{WorkerGlobalScope}}'s [=WorkerGlobalScope/import map=].
 We might want to inherit parent context's import maps, or provide APIs on
-<a>WorkerGlobalScope</a>, but we are not sure.
+{{WorkerGlobalScope}}, but we are not sure.
 Currently it is always null.
-</p>
-
-<p class="issue">
-<a>WorkerGlobalScope</a> is not linked to the HTML spec because I couldn't figure out
-how to link that.
 </p>
 
 In <a spec="html">set up a worker environment settings object</a>,
