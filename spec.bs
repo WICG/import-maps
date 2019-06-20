@@ -58,32 +58,23 @@ A <dfn>import map</dfn> is a [=struct=] with two [=struct/items=]:
 * <dfn for="import map" export>imports</dfn>, a [=specifier map=], and
 * <dfn for="import map" export>scopes</dfn>, an [=ordered map=] of [=URLs=] to [=specifier maps=].
 
+An <dfn>empty import map</dfn> is an [=/import map=] with an [=import map/imports=] and [=import map/scopes=] both being empty maps.
+
 <h2 id="acquiring">Acquiring import maps</h2>
 
 <h3 id="integration-environment-settings-object">New members of environment settings object</h3>
 
 Each [=environment settings object=] will get an <dfn for="environment settings object">import map</dfn> algorithm, which returns an [=/import map=] created by parsing and merging all `<script type="importmap">` elements that are encountered (before the cutoff).
 
-A {{Document}} has an [=/import map=] <dfn for="Document">import map</dfn>.
-It is initially null.
+A {{Document}} has an [=/import map=] <dfn for="Document">import map</dfn>. It is initially a new [=/empty import map=].
 
-In <a spec="html">set up a window environment settings object</a>,
-<var ignore>settings object</var>'s [=environment settings object/import map=] returns
-the [=Document/import map=] of <var ignore>window</var>'s <a spec="html">associated Document</a>.
+In <a spec="html">set up a window environment settings object</a>, <var ignore>settings object</var>'s [=environment settings object/import map=] returns the [=Document/import map=] of <var ignore>window</var>'s <a spec="html">associated Document</a>.
 
-A {{WorkerGlobalScope}} has an [=/import map=] <dfn for="WorkerGlobalScope">import map</dfn>.
-It is initially null.
-
+A {{WorkerGlobalScope}} has an [=/import map=] <dfn for="WorkerGlobalScope">import map</dfn>. It is initially a new [=/empty import map=].
 <p class="issue">
-Spec ways to set {{WorkerGlobalScope}}'s [=WorkerGlobalScope/import map=].
-We might want to inherit parent context's import maps, or provide APIs on
-{{WorkerGlobalScope}}, but we are not sure.
-Currently it is always null.
-</p>
+Specify a way to set {{WorkerGlobalScope}}'s [=WorkerGlobalScope/import map=]. We might want to inherit parent context's import maps, or provide APIs on {{WorkerGlobalScope}}, but we are not sure. Currently it is always an [=/empty import map=]. </p>
 
-In <a spec="html">set up a worker environment settings object</a>,
-<var ignore>settings object</var>'s [=environment settings object/import map=] returns
-<var ignore>worker global scope</var>'s [=WorkerGlobalScope/import map=].
+In <a spec="html">set up a worker environment settings object</a>, <var ignore>settings object</var>'s [=environment settings object/import map=] returns <var ignore>worker global scope</var>'s [=WorkerGlobalScope/import map=].
 
 <p class="note">
 The import maps are spec'ed similarly to the module maps.
@@ -154,8 +145,7 @@ Insert a call to [=wait for import maps=] at the beginning of the following HTML
 - <a spec="html">fetch a module script graph</a>
 - fetch a dynamic module script graph
 - fetch an inline module script graph
-- <a spec="html">fetch a module worker script graph</a> using
-  <var ignore>module map settings object</var>
+- <a spec="html">fetch a module worker script graph</a> using <var ignore>module map settings object</var>
 
 Insert a call to [=wait for import maps=] before Step 11 (a call to <a spec="html">fetch a single module script</a>) of <a spec="html">fetch and process the linked resource</a> algorithm for modulepreload links, and skip Step 11 and set <var ignore>result</var> to null when [=wait for import maps=] completes with a failure.
 
@@ -176,19 +166,17 @@ To <dfn>register an import map</dfn> given a [=string=] or a failure |source tex
 1. Let |import map| be the result of <a>parse an import map string</a>, given |source text| and |base URL|.
 1. If |import map| is null:
     1. <a spec="html">queue a task</a> to <a spec="html">fire an event</a> named `error` at |element|, and return.
-1. If |element|'s <a spec="html">node document</a>'s [=Document/import map=] is null, then:
-    1. Set |element|'s <a spec="html">node document</a>'s [=Document/import map=] to |import map|.
 1. Otherwise:
-    1. <a>Merge import maps</a>, given |element|'s <a spec="html">node document</a>'s [=Document/import map=] and |import map|.
+    1. <a>Update import maps</a>, given |element|'s <a spec="html">node document</a>'s [=Document/import map=] and |import map|.
 
 </div>
 
 <div algorithm>
-To <dfn>merge import maps</dfn>, given an [=/import map=] |import map| and an [=/import map=] |new import map|:
+To <dfn>update import maps</dfn>, given an [=/import map=] |import map| and an [=/import map=] |new import map|:
 
 1. Assert: |import map| is not null.
 1. Assert: |new import map| is not null.
-1. <p class="note">TODO: Implement merging. This modifies |import map| in-place.</p>
+1. <p class="note">TODO: Implement merging. This merges |new import map| into |import map| and thus updates |import map| in-place.</p>
 
 </div>
 
