@@ -4,7 +4,7 @@ Shortname: import-maps
 Repository: WICG/import-maps
 Inline Github Issues: true
 Group: WICG
-Status: ED
+Status: CG-DRAFT
 Level: 1
 URL: https://wicg.github.io/import-maps/
 Boilerplate: omit conformance, omit feedback-header
