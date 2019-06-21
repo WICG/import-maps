@@ -176,7 +176,7 @@ At some point, each [=environment settings object=] will get an <dfn for="enviro
 <div algorithm>
   To <dfn lt="parse a URL-like import specifier|parsing a URL-like import specifier">parse a URL-like import specifier</dfn>, given a [=string=] |specifier| and a [=URL=] |baseURL|:
 
-  1. If |specifier| starts with "`/`", "`./`", or "`../`", then return the result of [=URL parser|parsing=] |specifier| with |baseURL| as the base URL.
+  1. If |specifier| [=/starts with=] "`/`", "`./`", or "`../`", then return the result of [=URL parser|parsing=] |specifier| with |baseURL| as the base URL.
   1. Let |url| be the result of [=URL parser|parsing=] |specifier| (with no base URL).
   1. If |url| is failure, then return null.
   1. If |url|'s [=url/scheme=] is either a [=fetch scheme=] or "`std`", then return |url|.
@@ -199,7 +199,7 @@ At some point, each [=environment settings object=] will get an <dfn for="enviro
   1. Let |asURL| be the result of [=parsing a URL-like import specifier=] given |specifier| and |scriptURL|.
   1. Let |normalizedSpecifier| be the [=URL serializer|serialization=] of |asURL|, if |asURL| is non-null; otherwise, |specifier|.
   1. [=map/For each=] |scopePrefix| → |scopeImports| of |importMap|'s [=import map/scopes=],
-    1. If |scopePrefix| is |scriptURLString|, or if |scopePrefix| ends with U+002F (/) and |scriptURLString| [=starts with=] |scopePrefix|, then:
+    1. If |scopePrefix| is |scriptURLString|, or if |scopePrefix| ends with U+002F (/) and |scriptURLString| [=/starts with=] |scopePrefix|, then:
       1. Let |scopeImportsMatch| be the result of [=resolving an imports match=] given |normalizedSpecifier|, |scopeImports|, and |moduleMap|.
       1. If |scopeImportsMatch| is not null, then return |scopeImportsMatch|.
   1. Let |topLevelImportsMatch| be the reuslt of [=resolving an imports match=] given |normalizedSpecifier|, |importMap|'s [=import map/imports=], and |moduleMap|.
@@ -230,7 +230,7 @@ They will also need to be updated to account for it now throwing exceptions, ins
       1. If |addresses|'s [=list/size=] is 2, and |addresses|[0]'s [=url/scheme=] is "`std`", and |addresses|[1]'s [=url/scheme=] is <em>not</em> "`std`", then:
         1. Return |addresses|[0], if |moduleMap|[|addresses|[0]] [=map/exists=]; otherwise, return |addresses|[1].
       1. Otherwise, <span class="advisement">we have no specification for more complicated fallbacks yet; throw a {{TypeError}} indicating this is not yet supported</span>.
-    1. If |specifierKey| ends with U+002F (/) and |normalizedSpecifier| [=starts with=] |specifierKey|, then:
+    1. If |specifierKey| ends with U+002F (/) and |normalizedSpecifier| [=/starts with=] |specifierKey|, then:
       1. If |addresses|'s [=list/size=] is 0, then throw a {{TypeError}} indicating that |normalizedSpecifier| was mapped to no addresses.
       1. If |addresses|'s [=list/size=] is 1, then:
         1. Let |afterPrefix| be the portion of |normalizedSpecifier| after the initial |specifierKey| prefix.
