@@ -176,7 +176,11 @@ At some point, each [=environment settings object=] will get an <dfn for="enviro
 <div algorithm>
   To <dfn lt="parse a URL-like import specifier|parsing a URL-like import specifier">parse a URL-like import specifier</dfn>, given a [=string=] |specifier| and a [=URL=] |baseURL|:
 
-  1. If |specifier| [=/starts with=] "`/`", "`./`", or "`../`", then return the result of [=URL parser|parsing=] |specifier| with |baseURL| as the base URL.
+  1. If |specifier| [=/starts with=] "`/`", "`./`", or "`../`", then:
+    1. Let |url| be the result of [=URL parser|parsing=] |specifier| with |baseURL| as the base URL.
+    1. If |url| is failure, then return null.
+       <p class="note">For example, |specifier| is "`../foo`" and |baseURL| is a data: URL here.</p>
+    1. Return |url|.
   1. Let |url| be the result of [=URL parser|parsing=] |specifier| (with no base URL).
   1. If |url| is failure, then return null.
   1. If |url|'s [=url/scheme=] is either a [=fetch scheme=] or "`std`", then return |url|.
@@ -208,7 +212,7 @@ At some point, each [=environment settings object=] will get an <dfn for="enviro
     If |asURL| is not null, then:
     1. If |asURL|'s [=url/scheme=] is "`std`", and |moduleMap|[|asURL|] does not [=map/exist=], then throw a {{TypeError}} indicating that the requested built-in module is not implemented.
     1. Return |asURL|.
-  1. Throw a {{TypeError}} indicating that |specifier| was a bare specifier, but was not remapped to anything by |importMap|.
+  1. Return failure.
 </div>
 
 <p class="advisement">It seems possible that the return type could end up being a [=list=] of [=URLs=], not just a single URL, to support HTTPS → HTTPS fallback. But, we haven't gotten that far yet; for now let's assume it stays a single URL.</p>
