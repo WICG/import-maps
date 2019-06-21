@@ -22,7 +22,6 @@ spec: infra; type: dfn
   text: string
   text: list
 spec: url; type: dfn; for: /; text: url
-spec: infra; type: dfn; for:/; text: starts with
 spec: html; type: element; text: script
 </pre>
 <pre class="anchors">
