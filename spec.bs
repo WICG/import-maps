@@ -163,7 +163,11 @@ Insert a call to [=wait for import maps=] at the beginning of the following HTML
   This only affects [=fetch a module worker script graph=], where these two settings objects are different. And, given that the import maps for {{WorkerGlobalScope}}s are currently always empty, the only fetch that could be impacted is that of the initial module. But even that would not be impacted, because that fetch is done using URLs, not specifiers. So this is not a future compatibility hazard, just something to keep in mind as we develop import maps in module workers.
 </div>
 
-<p class="advisement">Depending on the exact location of [=wait for import maps=], there would be observable behavior differences between HTML-spec- and Fetch-spec-based import maps. For example, the current HTML-spec-based draft here calls [=wait for import maps=] at very early stages of module loading before [=resolve a module specifier=]. Therefore, [=environment settings object/acquiring import maps=] is always set back to false, even if [=resolve a module specifier=] fails e.g. in parsing `http://:invalid`. When we switch to Fetch-spec-based, import map resolution would be done inside Fetch spec after [=resolve a module specifier=] and thus we might also want to [=wait for import maps=] after [=resolve a module specifier=]. In that case, [=environment settings object/acquiring import maps=] wouldn't be reset to false for `http://:invalid`, because we early-exit module loading. </p>
+<div class="advisement">
+  Depending on the exact location of [=wait for import maps=], `import(unresolvableSpecifier)` might behave differently between a HTML-spec- and Fetch-spec-based import maps. In particular, in the current draft, [=acquiring import maps=] is set to false after an `import()`-initiated failure to [=resolve a module specifier=], thus causing any later-encountered import maps to cause an `error` event instead of being processed. Whereas, if [=wait for import maps=] was called as part of the Fetch spec, it's possible it would be natural to specify things such that [=acquiring import maps=] remains true (as it does for cases like `<script type="module" src="http://:invalidurl">`).
+
+  This should not be much of a compatibility hazard, as it only makes esoteric error cases into successes. And we can always preserve the behavior as specced here if necessary, with some potential additional complexity.
+</div>
 
 <h3 id="integration-register-an-import-map">Registering an import map</h3>
 
