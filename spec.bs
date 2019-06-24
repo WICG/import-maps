@@ -179,7 +179,7 @@ At some point, each [=environment settings object=] will get an <dfn for="enviro
   1. If |specifier| [=/starts with=] "`/`", "`./`", or "`../`", then:
     1. Let |url| be the result of [=URL parser|parsing=] |specifier| with |baseURL| as the base URL.
     1. If |url| is failure, then return null.
-       <p class="note">For example, |specifier| is "`../foo`" and |baseURL| is a data: URL here.</p>
+       <p class="example" id="example-bad-urllike-import-specifier">One way this could happen is if |specifier| is "`../foo`" and |baseURL| is a `data:` URL.</p>
     1. Return |url|.
   1. Let |url| be the result of [=URL parser|parsing=] |specifier| (with no base URL).
   1. If |url| is failure, then return null.
