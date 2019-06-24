@@ -132,11 +132,21 @@ Each [=environment settings object=] has an <dfn for="environment settings objec
 <p class="note">For import maps, the script never becomes <a spec="html" lt="the script is ready">ready</a> and <a spec="html">the script's script</a> remains null.</p>
 
 <div algorithm>
-  To <dfn export>fetch an import map</dfn> given <var ignore>url</var>, <var ignore>settings object</var>, and <var ignore>options</var>:
+  To <dfn export>fetch an import map</dfn> given |url|, |settings object|, and |options|, run the following steps. This algorithm asynchronously returns a [=string=] or a failure.
+  <p class="note">This algorithm is specified consistently with <a spec="html">fetch a single module script</a> steps 5, 7, 8, 9, 10, and 12.1. Particularly, we enforce CORS to avoid leaking the import map contents that shouldn't be accessed.</p>
 
-  1. <p class="note">TODO: Implement external import map fetching. This asynchronously returns a string or a failure.</p>
+  1. Let |request| be a new [=/request=] whose [=request/url=] is |url|, [=request/destination=] is "`script`", [=request/mode=] is "`cors`", [=request/referrer=] is "`client`", and [=request/client=] is |settings object|.
+     <p class="note">Here we use "`script`" as <a spec="fetch">destination</a>, which means `script-src-elem` CSP directive is applied.</p>
+  1. <a spec="html">Set up the module script request</a> given |request| and |options|.
+  1. [=/Fetch=] |request|. Return from this algorithm, and run the remaining steps as part of the fetch's [=/process response=] for the [=/response=] |response|.
+     <p class="note">|response| is always [=CORS-same-origin=].</p>
+  1. If any of the following conditions are met, asynchronously complete this algorithm with a failure, and abort these steps:
+    - |response|'s [=response/type=] is "`error`"
+    - |response|'s [=response/status=] is not an [=ok status=]
+    - The result of [=extracting a MIME type=] from |response|'s [=response/header list=] is not `"application/importmap+json"`
+      <p class="note">For more contexts about MIME type checking, see <a href="https://github.com/WICG/import-maps/pull/119">PR #119</a> and <a href="https://github.com/WICG/import-maps/issues/105">Issue #105</a>.</p>
+  1. Asynchronously complete this algorithm with the result of [=UTF-8 decoding=] response's [=response/body=].
 
-  <p class="note">CSP is to be applied in the Fetch spec.</p>
 </div>
 
 <h3 id="integration-wait-for-import-maps">Wait for import maps</h3>
