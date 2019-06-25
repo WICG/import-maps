@@ -1487,7 +1487,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Import Maps</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Draft Community Group Report, <time class="dt-updated" datetime="2019-06-23">23 June 2019</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Draft Community Group Report, <time class="dt-updated" datetime="2019-06-25">25 June 2019</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1889,7 +1889,16 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      To <dfn class="dfn-paneled" data-dfn-type="dfn" data-lt="parse a URL-like import specifier|parsing a URL-like import specifier" data-noexport id="parse-a-url-like-import-specifier">parse a URL-like import specifier</dfn>, given a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string⑥">string</a> <var>specifier</var> and a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url⑦">URL</a> <var>baseURL</var>: 
     <ol>
      <li data-md>
-      <p>If <var>specifier</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#code-unit-prefix" id="ref-for-code-unit-prefix">starts with</a> "<code>/</code>", "<code>./</code>", or "<code>../</code>", then return the result of <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-parser" id="ref-for-concept-url-parser①">parsing</a> <var>specifier</var> with <var>baseURL</var> as the base URL.</p>
+      <p>If <var>specifier</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#code-unit-prefix" id="ref-for-code-unit-prefix">starts with</a> "<code>/</code>", "<code>./</code>", or "<code>../</code>", then:</p>
+      <ol>
+       <li data-md>
+        <p>Let <var>url</var> be the result of <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-parser" id="ref-for-concept-url-parser①">parsing</a> <var>specifier</var> with <var>baseURL</var> as the base URL.</p>
+       <li data-md>
+        <p>If <var>url</var> is failure, then return null.</p>
+        <p class="example" id="example-bad-urllike-import-specifier"><a class="self-link" href="#example-bad-urllike-import-specifier"></a>One way this could happen is if <var>specifier</var> is "<code>../foo</code>" and <var>baseURL</var> is a <code>data:</code> URL.</p>
+       <li data-md>
+        <p>Return <var>url</var>.</p>
+      </ol>
      <li data-md>
       <p>Let <var>url</var> be the result of <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-parser" id="ref-for-concept-url-parser②">parsing</a> <var>specifier</var> (with no base URL).</p>
      <li data-md>
@@ -1948,7 +1957,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    </div>
    <p class="advisement">It seems possible that the return type could end up being a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list" id="ref-for-list⑥">list</a> of <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url⑧">URLs</a>, not just a single URL, to support HTTPS → HTTPS fallback. But, we haven’t gotten that far yet; for now let’s assume it stays a single URL.</p>
    <p>All call sites of HTML’s existing <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier③">resolve a module specifier</a> will need to be updated to pass the appropriate <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-script" id="ref-for-concept-script③">script</a>, not just its <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-script-base-url" id="ref-for-concept-script-base-url①">base URL</a>.</p>
-   <p>They will also need to be updated to account for it now throwing exceptions, instead of returning failure. (Previously they just turned failures into <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#exceptiondef-typeerror" id="ref-for-exceptiondef-typeerror⑥">TypeError</a></code>s manually, so this is straightforward.)</p>
+   <p>They will also need to be updated to account for it now throwing exceptions, instead of returning failure. (Previously most call sites just turned failures into <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#exceptiondef-typeerror" id="ref-for-exceptiondef-typeerror⑥">TypeError</a></code>s manually, so this is straightforward.)</p>
    <div class="algorithm" data-algorithm="resolve an imports match">
      To <dfn class="dfn-paneled" data-dfn-type="dfn" data-lt="resolve an imports match|resolving an imports match" data-noexport id="resolve-an-imports-match">resolve an imports match</dfn>, given a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string⑧">string</a> <var>normalizedSpecifier</var>, a <a data-link-type="dfn" href="#specifier-map" id="ref-for-specifier-map②">specifier map</a> <var>specifierMap</var>, and a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#module-map" id="ref-for-module-map">module map</a> <var>moduleMap</var>: 
     <ol>
