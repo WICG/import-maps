@@ -116,7 +116,7 @@ Each [=environment settings object=] has an <dfn for="environment settings objec
 - Insert the following before <a spec="html">prepare a script</a> step 24.6:
   - If <a spec="html">the script's type</a> is "`importmap`", then:
     1. Increment |settings object|'s [=environment settings object/pending import maps count=].
-    1. <a>Fetch an import map</a> given <var ignore>url</var>, |settings object|, and <var ignore>options</var>.
+    1. [=Fetch an import map=] given <var ignore>url</var>, |settings object|, and <var ignore>options</var>.
     1. When the previous step asynchronously completes with |result|:
        1. Decrement |settings object|'s [=environment settings object/pending import maps count=].
           <p class="note">If this decreases the [=environment settings object/pending import maps count=] to 0, it will (asynchronously) unblock any [=wait for import maps=] algorithm instances.</p>
@@ -136,7 +136,7 @@ Each [=environment settings object=] has an <dfn for="environment settings objec
   <p class="note">This algorithm is specified consistently with <a spec="html">fetch a single module script</a> steps 5, 7, 8, 9, 10, and 12.1. Particularly, we enforce CORS to avoid leaking the import map contents that shouldn't be accessed.</p>
 
   1. Let |request| be a new [=/request=] whose [=request/url=] is |url|, [=request/destination=] is "`script`", [=request/mode=] is "`cors`", [=request/referrer=] is "`client`", and [=request/client=] is |settings object|.
-     <p class="note">Here we use "`script`" as <a spec="fetch">destination</a>, which means `script-src-elem` CSP directive is applied.</p>
+     <p class="note">Here we use "`script`" as the [=request/destination=], which means the `script-src-elem` CSP directive applies.</p>
   1. <a spec="html">Set up the module script request</a> given |request| and |options|.
   1. [=/Fetch=] |request|. Return from this algorithm, and run the remaining steps as part of the fetch's [=/process response=] for the [=/response=] |response|.
      <p class="note">|response| is always [=CORS-same-origin=].</p>
@@ -144,7 +144,7 @@ Each [=environment settings object=] has an <dfn for="environment settings objec
     - |response|'s [=response/type=] is "`error`"
     - |response|'s [=response/status=] is not an [=ok status=]
     - The result of [=extracting a MIME type=] from |response|'s [=response/header list=] is not `"application/importmap+json"`
-      <p class="note">For more contexts about MIME type checking, see <a href="https://github.com/WICG/import-maps/pull/119">PR #119</a> and <a href="https://github.com/WICG/import-maps/issues/105">Issue #105</a>.</p>
+      <p class="note">For more contexts about MIME type checking, see <a href="https://github.com/WICG/import-maps/issues/105">#105</a> and <a href="https://github.com/WICG/import-maps/pull/119">#119</a>.</p>
   1. Asynchronously complete this algorithm with the result of [=UTF-8 decoding=] response's [=response/body=].
 
 </div>
