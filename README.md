@@ -662,8 +662,6 @@ _Previous versions of this proposal anticipated making `import:` URLs resolve re
 
 ### Installation
 
-_The below represents a tentative idea. See the issue tracker for more discussion and alternatives: [#1](https://github.com/WICG/import-maps/issues/1)._
-
 You can install an import map for your application using a `<script>` element, either inline (for best performance) or with a `src=""` attribute (in which case you'd better be using HTTP/2 push to get that thing to us as soon as possible):
 
 ```html
@@ -676,12 +674,14 @@ You can install an import map for your application using a `<script>` element, e
 ```
 
 ```html
-<script type="importmap" src="import-map.json"></script>
+<script type="importmap" src="import-map.importmap"></script>
 ```
+
+External import maps must use the MIME type `application/importmap+json`. (Why not reuse `application/json`? Doing so could [enable CSP bypasses](https://github.com/WICG/import-maps/issues/105).)
 
 Because they affect all imports, any import maps must be present and successfully fetched before any module resolution is done. This means that module graph fetching, or any fetching of `import:` URLs, is blocked on import map fetching.
 
-Similarly, attempting to add a new `<script type="importmap">` after any module graph fetching, or fetching of `import:` URLs, has started, is an error. The import map will be ignored, and the `<script>` element will fire an error.
+Similarly, attempting to add a new `<script type="importmap">` after any module graph fetching, or fetching of `import:` URLs, has started, is an error. The import map will be ignored, and the `<script>` element will fire an `error` event.
 
 Multiple `<script type="importmap">`s are allowed on the page. (See previous discussion in [#14](https://github.com/WICG/import-maps/issues/14).) They are merged by an intentionally-simple procedure, roughly equivalent to the JavaScript code
 
