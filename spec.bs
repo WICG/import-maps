@@ -183,7 +183,6 @@ Each {{Document}} has an <dfn for="Document">acquiring import maps</dfn> boolean
        1. If |result| is a failure, then set [=HTMLScriptElement/the script's import map=] to null.
        1. Otherwise, set [=HTMLScriptElement/the script's import map=] to the result of [=parsing an import map string=], given |result| and |base URL|.
        1. [=The import map is ready=].
-          <p class="note">If this makes all {{HTMLScriptElement}}s in [=Document/list of pending import map scripts=] [=HTMLScriptElement/the import map is ready|ready=], it will (asynchronously) unblock any [=wait for import maps=] algorithm instances.</p>
     1. Return.
 - Insert the following before <a spec="html">prepare a script</a> step 25.2:
   - If <a spec="html">the script's type</a> is "`importmap`", then:
@@ -202,6 +201,7 @@ Each {{Document}} has an <dfn for="Document">acquiring import maps</dfn> boolean
   1. If the element is not the first element in [=Document/list of pending import map scripts=] to which it was added above, then return without executing the script yet.
   1. <em>Register</em>: [=/Register an import map=] given the first element of [=Document/list of pending import map scripts=].
   1. Remove the first element of [=Document/list of pending import map scripts=].
+     <p class="note">If this makes the [=Document/list of pending import map scripts=] empty, it will (asynchronously) unblock any [=wait for import maps=] algorithm instances.</p>
   1. If the [=Document/list of pending import map scripts=] is still not empty and the first entry's [=HTMLScriptElement/the import map is ready=], then jump back to the step labeled <em>Register</em>.
 
 <p class="note">
