@@ -1651,12 +1651,31 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <p class="issue" id="issue-5c762fbe"><a class="self-link" href="#issue-5c762fbe"></a>CSP is applied to import maps just like JavaScript scripts. Is this sufficient? <a href="https://github.com/WICG/import-maps/issues/105">#105</a>.</p>
    <p class="note" role="note">For import maps, the script never becomes <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#the-script-is-ready" id="ref-for-the-script-is-ready">ready</a> and <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#concept-script-script" id="ref-for-concept-script-script">the script’s script</a> remains null.</p>
    <div class="algorithm" data-algorithm="fetch an import map">
-     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="fetch-an-import-map">fetch an import map</dfn> given <var>url</var>, <var>settings object</var>, and <var>options</var>: 
+     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="fetch-an-import-map">fetch an import map</dfn> given <var>url</var>, <var>settings object</var>, and <var>options</var>, run the following steps. This algorithm asynchronously returns a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string①">string</a> or a failure. 
+    <p class="note" role="note">This algorithm is specified consistently with <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#fetch-a-single-module-script" id="ref-for-fetch-a-single-module-script">fetch a single module script</a> steps 5, 7, 8, 9, 10, and 12.1. Particularly, we enforce CORS to avoid leaking the import map contents that shouldn’t be accessed.</p>
     <ol>
      <li data-md>
-      <p class="note" role="note">TODO: Implement external import map fetching. This asynchronously returns a string or a failure.</p>
+      <p>Let <var>request</var> be a new <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request" id="ref-for-concept-request">request</a> whose <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-url" id="ref-for-concept-request-url">url</a> is <var>url</var>, <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-destination" id="ref-for-concept-request-destination">destination</a> is "<code>script</code>", <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-mode" id="ref-for-concept-request-mode">mode</a> is "<code>cors</code>", <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-referrer" id="ref-for-concept-request-referrer">referrer</a> is "<code>client</code>", and <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client" id="ref-for-concept-request-client">client</a> is <var>settings object</var>.</p>
+      <p class="note" role="note">Here we use "<code>script</code>" as the <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-destination" id="ref-for-concept-request-destination①">destination</a>, which means the <code>script-src-elem</code> CSP directive applies.</p>
+     <li data-md>
+      <p><a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#set-up-the-module-script-request" id="ref-for-set-up-the-module-script-request">Set up the module script request</a> given <var>request</var> and <var>options</var>.</p>
+     <li data-md>
+      <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-fetch" id="ref-for-concept-fetch">Fetch</a> <var>request</var>. Return from this algorithm, and run the remaining steps as part of the fetch’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#process-response" id="ref-for-process-response">process response</a> for the <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response">response</a> <var>response</var>.</p>
+      <p class="note" role="note"><var>response</var> is always <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/urls-and-fetching.html#cors-same-origin" id="ref-for-cors-same-origin">CORS-same-origin</a>.</p>
+     <li data-md>
+      <p>If any of the following conditions are met, asynchronously complete this algorithm with a failure, and abort these steps:</p>
+      <ul>
+       <li data-md>
+        <p><var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-type" id="ref-for-concept-response-type">type</a> is "<code>error</code>"</p>
+       <li data-md>
+        <p><var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-status" id="ref-for-concept-response-status">status</a> is not an <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#ok-status" id="ref-for-ok-status">ok status</a></p>
+       <li data-md>
+        <p>The result of <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-header-extract-mime-type" id="ref-for-concept-header-extract-mime-type">extracting a MIME type</a> from <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-header-list" id="ref-for-concept-response-header-list">header list</a> is not <code>"application/importmap+json"</code></p>
+        <p class="note" role="note">For more contexts about MIME type checking, see <a href="https://github.com/WICG/import-maps/issues/105">#105</a> and <a href="https://github.com/WICG/import-maps/pull/119">#119</a>.</p>
+      </ul>
+     <li data-md>
+      <p>Asynchronously complete this algorithm with the result of <a data-link-type="dfn" href="https://encoding.spec.whatwg.org/#utf-8-decode" id="ref-for-utf-8-decode">UTF-8 decoding</a> response’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-body" id="ref-for-concept-response-body">body</a>.</p>
     </ol>
-    <p class="note" role="note">CSP is to be applied in the Fetch spec.</p>
    </div>
    <h3 class="heading settled" data-level="2.3" id="integration-wait-for-import-maps"><span class="secno">2.3. </span><span class="content">Wait for import maps</span><a class="self-link" href="#integration-wait-for-import-maps"></a></h3>
    <div class="algorithm" data-algorithm="wait for import maps">
@@ -1693,7 +1712,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    </div>
    <h3 class="heading settled" data-level="2.4" id="integration-register-an-import-map"><span class="secno">2.4. </span><span class="content">Registering an import map</span><a class="self-link" href="#integration-register-an-import-map"></a></h3>
    <div class="algorithm" data-algorithm="register an import map">
-     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="register-an-import-map">register an import map</dfn> given a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string①">string</a> or a null <var>source text</var>, an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#environment-settings-object" id="ref-for-environment-settings-object③">environment settings object</a> <var>settings object</var>, a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url②">URL</a> <var>base URL</var>, and an <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/scripting.html#htmlscriptelement" id="ref-for-htmlscriptelement">HTMLScriptElement</a></code> <var>element</var>: 
+     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="register-an-import-map">register an import map</dfn> given a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string②">string</a> or a null <var>source text</var>, an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#environment-settings-object" id="ref-for-environment-settings-object③">environment settings object</a> <var>settings object</var>, a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url②">URL</a> <var>base URL</var>, and an <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/scripting.html#htmlscriptelement" id="ref-for-htmlscriptelement">HTMLScriptElement</a></code> <var>element</var>: 
     <ol>
      <li data-md>
       <p>If <var>source text</var> is null, then <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#queue-a-task" id="ref-for-queue-a-task①">queue a task</a> to <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-event-fire" id="ref-for-concept-event-fire①">fire an event</a> named <code>error</code> at <var>element</var>, and return.</p>
@@ -1711,7 +1730,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    </div>
    <h2 class="heading settled" data-level="3" id="parsing"><span class="secno">3. </span><span class="content">Parsing import maps</span><a class="self-link" href="#parsing"></a></h2>
    <div class="algorithm" data-algorithm="parse an import map string">
-     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-lt="parse an import map string|parsing an import map string" data-noexport id="parse-an-import-map-string">parse an import map string</dfn>, given a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string②">string</a> <var>input</var> and a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url③">URL</a> <var>baseURL</var>: 
+     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-lt="parse an import map string|parsing an import map string" data-noexport id="parse-an-import-map-string">parse an import map string</dfn>, given a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string③">string</a> <var>input</var> and a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url③">URL</a> <var>baseURL</var>: 
     <ol>
      <li data-md>
       <p>Let <var>parsed</var> be the result of <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#parse-json-into-infra-values" id="ref-for-parse-json-into-infra-values">parsing JSON into Infra values</a> given <var>input</var>.</p>
@@ -1779,7 +1798,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
        <li data-md>
         <p>If <var>normalizedSpecifierKey</var> is null, then <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue" id="ref-for-iteration-continue">continue</a>.</p>
        <li data-md>
-        <p>If <var>value</var> is a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string③">string</a>, then set <var>normalized</var>[<var>normalizedSpecifierKey</var>] to «<var>value</var>».</p>
+        <p>If <var>value</var> is a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string④">string</a>, then set <var>normalized</var>[<var>normalizedSpecifierKey</var>] to «<var>value</var>».</p>
        <li data-md>
         <p>Otherwise, if <var>value</var> is null, then set <var>normalized</var>[<var>normalizedSpecifierKey</var>] to a new empty list.</p>
        <li data-md>
@@ -1796,7 +1815,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
         <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-iterate" id="ref-for-list-iterate">For each</a> <var>potentialAddress</var> of <var>potentialAddresses</var>,</p>
         <ol>
          <li data-md>
-          <p>If <var>potentialAddress</var> is not a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string④">string</a>, then <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue" id="ref-for-iteration-continue①">continue</a>.</p>
+          <p>If <var>potentialAddress</var> is not a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string⑤">string</a>, then <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue" id="ref-for-iteration-continue①">continue</a>.</p>
          <li data-md>
           <p>Let <var>addressURL</var> be the result of <a data-link-type="dfn" href="#parse-a-url-like-import-specifier" id="ref-for-parse-a-url-like-import-specifier">parsing a URL-like import specifier</a> given <var>potentialAddress</var> and <var>baseURL</var>.</p>
          <li data-md>
@@ -1859,7 +1878,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
     </ol>
    </div>
    <div class="algorithm" data-algorithm="normalize a specifier key">
-     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-lt="normalize a specifier key|normalizing a specifier key" data-noexport id="normalize-a-specifier-key">normalize a specifier key</dfn>, given a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string⑤">string</a> <var>specifierKey</var> and a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url⑥">URL</a> <var>baseURL</var>: 
+     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-lt="normalize a specifier key|normalizing a specifier key" data-noexport id="normalize-a-specifier-key">normalize a specifier key</dfn>, given a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string⑥">string</a> <var>specifierKey</var> and a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url⑥">URL</a> <var>baseURL</var>: 
     <ol>
      <li data-md>
       <p>If <var>specifierKey</var> is the empty string, then return null.</p>
@@ -1886,7 +1905,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
     </ol>
    </div>
    <div class="algorithm" data-algorithm="parse a URL-like import specifier">
-     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-lt="parse a URL-like import specifier|parsing a URL-like import specifier" data-noexport id="parse-a-url-like-import-specifier">parse a URL-like import specifier</dfn>, given a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string⑥">string</a> <var>specifier</var> and a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url⑦">URL</a> <var>baseURL</var>: 
+     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-lt="parse a URL-like import specifier|parsing a URL-like import specifier" data-noexport id="parse-a-url-like-import-specifier">parse a URL-like import specifier</dfn>, given a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string⑦">string</a> <var>specifier</var> and a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url⑦">URL</a> <var>baseURL</var>: 
     <ol>
      <li data-md>
       <p>If <var>specifier</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#code-unit-prefix" id="ref-for-code-unit-prefix">starts with</a> "<code>/</code>", "<code>./</code>", or "<code>../</code>", then:</p>
@@ -1909,7 +1928,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
       <p>Return null.</p>
     </ol>
    </div>
-   <div class="algorithm" data-algorithm="longer or code unit less than"> A <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string⑦">string</a> <var>a</var> is <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="longer-or-code-unit-less-than">longer or code unit less than</dfn> <var>b</var> if <var>a</var>’s <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string-length" id="ref-for-string-length">length</a> is greater than <var>b</var>’s <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string-length" id="ref-for-string-length①">length</a>, or if <var>a</var> is <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#code-unit-less-than" id="ref-for-code-unit-less-than">code unit less than</a> <var>b</var>. </div>
+   <div class="algorithm" data-algorithm="longer or code unit less than"> A <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string⑧">string</a> <var>a</var> is <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="longer-or-code-unit-less-than">longer or code unit less than</dfn> <var>b</var> if <var>a</var>’s <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string-length" id="ref-for-string-length">length</a> is greater than <var>b</var>’s <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string-length" id="ref-for-string-length①">length</a>, or if <var>a</var> is <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#code-unit-less-than" id="ref-for-code-unit-less-than">code unit less than</a> <var>b</var>. </div>
    <h2 class="heading settled" data-level="4" id="resolving"><span class="secno">4. </span><span class="content">Resolving module specifiers</span><a class="self-link" href="#resolving"></a></h2>
    <div class="algorithm" data-algorithm="resolve a module specifier">
      HTML already has a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier②">resolve a module specifier</a> algorithm. We replace it with the following <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="resolve-a-module-specifier">resolve a module specifier</dfn> algorithm, given a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-script" id="ref-for-concept-script②">script</a> <var>referringScript</var> and a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#javascript-string" id="ref-for-javascript-string">JavaScript string</a> <var>specifier</var>: 
@@ -1959,7 +1978,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <p>All call sites of HTML’s existing <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier③">resolve a module specifier</a> will need to be updated to pass the appropriate <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-script" id="ref-for-concept-script③">script</a>, not just its <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-script-base-url" id="ref-for-concept-script-base-url①">base URL</a>.</p>
    <p>They will also need to be updated to account for it now throwing exceptions, instead of returning failure. (Previously most call sites just turned failures into <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#exceptiondef-typeerror" id="ref-for-exceptiondef-typeerror⑥">TypeError</a></code>s manually, so this is straightforward.)</p>
    <div class="algorithm" data-algorithm="resolve an imports match">
-     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-lt="resolve an imports match|resolving an imports match" data-noexport id="resolve-an-imports-match">resolve an imports match</dfn>, given a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string⑧">string</a> <var>normalizedSpecifier</var>, a <a data-link-type="dfn" href="#specifier-map" id="ref-for-specifier-map②">specifier map</a> <var>specifierMap</var>, and a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#module-map" id="ref-for-module-map">module map</a> <var>moduleMap</var>: 
+     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-lt="resolve an imports match|resolving an imports match" data-noexport id="resolve-an-imports-match">resolve an imports match</dfn>, given a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string⑨">string</a> <var>normalizedSpecifier</var>, a <a data-link-type="dfn" href="#specifier-map" id="ref-for-specifier-map②">specifier map</a> <var>specifierMap</var>, and a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#module-map" id="ref-for-module-map">module map</a> <var>moduleMap</var>: 
     <ol>
      <li data-md>
       <p>For each <var>specifierKey</var> → <var>addresses</var> of <var>specifierMap</var>,</p>
@@ -2201,10 +2220,106 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
     <li><a href="#ref-for-concept-node-document">2.4. Registering an import map</a>
    </ul>
   </aside>
+  <aside class="dfn-panel" data-for="term-for-utf-8-decode">
+   <a href="https://encoding.spec.whatwg.org/#utf-8-decode">https://encoding.spec.whatwg.org/#utf-8-decode</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-utf-8-decode">2.2. Prepare a script</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-concept-response-body">
+   <a href="https://fetch.spec.whatwg.org/#concept-response-body">https://fetch.spec.whatwg.org/#concept-response-body</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-concept-response-body">2.2. Prepare a script</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-concept-request-client">
+   <a href="https://fetch.spec.whatwg.org/#concept-request-client">https://fetch.spec.whatwg.org/#concept-request-client</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-concept-request-client">2.2. Prepare a script</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-concept-request-destination">
+   <a href="https://fetch.spec.whatwg.org/#concept-request-destination">https://fetch.spec.whatwg.org/#concept-request-destination</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-concept-request-destination">2.2. Prepare a script</a> <a href="#ref-for-concept-request-destination①">(2)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-concept-header-extract-mime-type">
+   <a href="https://fetch.spec.whatwg.org/#concept-header-extract-mime-type">https://fetch.spec.whatwg.org/#concept-header-extract-mime-type</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-concept-header-extract-mime-type">2.2. Prepare a script</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-concept-fetch">
+   <a href="https://fetch.spec.whatwg.org/#concept-fetch">https://fetch.spec.whatwg.org/#concept-fetch</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-concept-fetch">2.2. Prepare a script</a>
+   </ul>
+  </aside>
   <aside class="dfn-panel" data-for="term-for-fetch-scheme">
    <a href="https://fetch.spec.whatwg.org/#fetch-scheme">https://fetch.spec.whatwg.org/#fetch-scheme</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-fetch-scheme">3. Parsing import maps</a> <a href="#ref-for-fetch-scheme①">(2)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-concept-response-header-list">
+   <a href="https://fetch.spec.whatwg.org/#concept-response-header-list">https://fetch.spec.whatwg.org/#concept-response-header-list</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-concept-response-header-list">2.2. Prepare a script</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-concept-request-mode">
+   <a href="https://fetch.spec.whatwg.org/#concept-request-mode">https://fetch.spec.whatwg.org/#concept-request-mode</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-concept-request-mode">2.2. Prepare a script</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-ok-status">
+   <a href="https://fetch.spec.whatwg.org/#ok-status">https://fetch.spec.whatwg.org/#ok-status</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-ok-status">2.2. Prepare a script</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-process-response">
+   <a href="https://fetch.spec.whatwg.org/#process-response">https://fetch.spec.whatwg.org/#process-response</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-process-response">2.2. Prepare a script</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-concept-request-referrer">
+   <a href="https://fetch.spec.whatwg.org/#concept-request-referrer">https://fetch.spec.whatwg.org/#concept-request-referrer</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-concept-request-referrer">2.2. Prepare a script</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-concept-request">
+   <a href="https://fetch.spec.whatwg.org/#concept-request">https://fetch.spec.whatwg.org/#concept-request</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-concept-request">2.2. Prepare a script</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-concept-response">
+   <a href="https://fetch.spec.whatwg.org/#concept-response">https://fetch.spec.whatwg.org/#concept-response</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-concept-response">2.2. Prepare a script</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-concept-response-status">
+   <a href="https://fetch.spec.whatwg.org/#concept-response-status">https://fetch.spec.whatwg.org/#concept-response-status</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-concept-response-status">2.2. Prepare a script</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-concept-response-type">
+   <a href="https://fetch.spec.whatwg.org/#concept-response-type">https://fetch.spec.whatwg.org/#concept-response-type</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-concept-response-type">2.2. Prepare a script</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-concept-request-url">
+   <a href="https://fetch.spec.whatwg.org/#concept-request-url">https://fetch.spec.whatwg.org/#concept-request-url</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-concept-request-url">2.2. Prepare a script</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-htmlscriptelement">
@@ -2232,6 +2347,12 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
     <li><a href="#ref-for-concept-script-base-url">4. Resolving module specifiers</a> <a href="#ref-for-concept-script-base-url①">(2)</a>
    </ul>
   </aside>
+  <aside class="dfn-panel" data-for="term-for-cors-same-origin">
+   <a href="https://html.spec.whatwg.org/multipage/urls-and-fetching.html#cors-same-origin">https://html.spec.whatwg.org/multipage/urls-and-fetching.html#cors-same-origin</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-cors-same-origin">2.2. Prepare a script</a>
+   </ul>
+  </aside>
   <aside class="dfn-panel" data-for="term-for-environment-settings-object">
    <a href="https://html.spec.whatwg.org/multipage/webappapis.html#environment-settings-object">https://html.spec.whatwg.org/multipage/webappapis.html#environment-settings-object</a><b>Referenced in:</b>
    <ul>
@@ -2255,6 +2376,12 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <a href="https://html.spec.whatwg.org/multipage/webappapis.html#fetch-a-modulepreload-module-script-graph">https://html.spec.whatwg.org/multipage/webappapis.html#fetch-a-modulepreload-module-script-graph</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-fetch-a-modulepreload-module-script-graph">2.3. Wait for import maps</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-fetch-a-single-module-script">
+   <a href="https://html.spec.whatwg.org/multipage/webappapis.html#fetch-a-single-module-script">https://html.spec.whatwg.org/multipage/webappapis.html#fetch-a-single-module-script</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-fetch-a-single-module-script">2.2. Prepare a script</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-fetch-a-module-script-tree">
@@ -2335,6 +2462,12 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <a href="https://html.spec.whatwg.org/multipage/workers.html#set-up-a-worker-environment-settings-object">https://html.spec.whatwg.org/multipage/workers.html#set-up-a-worker-environment-settings-object</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-set-up-a-worker-environment-settings-object">2.1. New members of environment settings object</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-set-up-the-module-script-request">
+   <a href="https://html.spec.whatwg.org/multipage/webappapis.html#set-up-the-module-script-request">https://html.spec.whatwg.org/multipage/webappapis.html#set-up-the-module-script-request</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-set-up-the-module-script-request">2.2. Prepare a script</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-settings-object">
@@ -2486,9 +2619,10 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <a href="https://infra.spec.whatwg.org/#string">https://infra.spec.whatwg.org/#string</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-string">1. Definitions</a>
-    <li><a href="#ref-for-string①">2.4. Registering an import map</a>
-    <li><a href="#ref-for-string②">3. Parsing import maps</a> <a href="#ref-for-string③">(2)</a> <a href="#ref-for-string④">(3)</a> <a href="#ref-for-string⑤">(4)</a> <a href="#ref-for-string⑥">(5)</a> <a href="#ref-for-string⑦">(6)</a>
-    <li><a href="#ref-for-string⑧">4. Resolving module specifiers</a>
+    <li><a href="#ref-for-string①">2.2. Prepare a script</a>
+    <li><a href="#ref-for-string②">2.4. Registering an import map</a>
+    <li><a href="#ref-for-string③">3. Parsing import maps</a> <a href="#ref-for-string④">(2)</a> <a href="#ref-for-string⑤">(3)</a> <a href="#ref-for-string⑥">(4)</a> <a href="#ref-for-string⑦">(5)</a> <a href="#ref-for-string⑧">(6)</a>
+    <li><a href="#ref-for-string⑨">4. Resolving module specifiers</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-struct">
@@ -2555,9 +2689,29 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      <li><span class="dfn-paneled" id="term-for-concept-node-document" style="color:initial">node document</span>
     </ul>
    <li>
+    <a data-link-type="biblio">[ENCODING]</a> defines the following terms:
+    <ul>
+     <li><span class="dfn-paneled" id="term-for-utf-8-decode" style="color:initial">utf-8 decode</span>
+    </ul>
+   <li>
     <a data-link-type="biblio">[FETCH]</a> defines the following terms:
     <ul>
+     <li><span class="dfn-paneled" id="term-for-concept-response-body" style="color:initial">body</span>
+     <li><span class="dfn-paneled" id="term-for-concept-request-client" style="color:initial">client</span>
+     <li><span class="dfn-paneled" id="term-for-concept-request-destination" style="color:initial">destination</span>
+     <li><span class="dfn-paneled" id="term-for-concept-header-extract-mime-type" style="color:initial">extracting a mime type</span>
+     <li><span class="dfn-paneled" id="term-for-concept-fetch" style="color:initial">fetch</span>
      <li><span class="dfn-paneled" id="term-for-fetch-scheme" style="color:initial">fetch scheme</span>
+     <li><span class="dfn-paneled" id="term-for-concept-response-header-list" style="color:initial">header list</span>
+     <li><span class="dfn-paneled" id="term-for-concept-request-mode" style="color:initial">mode</span>
+     <li><span class="dfn-paneled" id="term-for-ok-status" style="color:initial">ok status</span>
+     <li><span class="dfn-paneled" id="term-for-process-response" style="color:initial">process response</span>
+     <li><span class="dfn-paneled" id="term-for-concept-request-referrer" style="color:initial">referrer</span>
+     <li><span class="dfn-paneled" id="term-for-concept-request" style="color:initial">request</span>
+     <li><span class="dfn-paneled" id="term-for-concept-response" style="color:initial">response</span>
+     <li><span class="dfn-paneled" id="term-for-concept-response-status" style="color:initial">status</span>
+     <li><span class="dfn-paneled" id="term-for-concept-response-type" style="color:initial">type</span>
+     <li><span class="dfn-paneled" id="term-for-concept-request-url" style="color:initial">url</span>
     </ul>
    <li>
     <a data-link-type="biblio">[HTML]</a> defines the following terms:
@@ -2566,10 +2720,12 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      <li><span class="dfn-paneled" id="term-for-workerglobalscope" style="color:initial">WorkerGlobalScope</span>
      <li><span class="dfn-paneled" id="term-for-concept-document-window" style="color:initial">associated document</span>
      <li><span class="dfn-paneled" id="term-for-concept-script-base-url" style="color:initial">base url</span>
+     <li><span class="dfn-paneled" id="term-for-cors-same-origin" style="color:initial">cors-same-origin</span>
      <li><span class="dfn-paneled" id="term-for-environment-settings-object" style="color:initial">environment settings object</span>
      <li><span class="dfn-paneled" id="term-for-execute-the-script-block" style="color:initial">execute a script block</span>
      <li><span class="dfn-paneled" id="term-for-fetch-a-module-worker-script-tree" style="color:initial">fetch a module worker script graph</span>
      <li><span class="dfn-paneled" id="term-for-fetch-a-modulepreload-module-script-graph" style="color:initial">fetch a modulepreload module script graph</span>
+     <li><span class="dfn-paneled" id="term-for-fetch-a-single-module-script" style="color:initial">fetch a single module script</span>
      <li><span class="dfn-paneled" id="term-for-fetch-a-module-script-tree" style="color:initial">fetch an external module script graph</span>
      <li><span class="dfn-paneled" id="term-for-fetch-an-import()-module-script-graph" style="color:initial">fetch an import() module script graph</span>
      <li><span class="dfn-paneled" id="term-for-fetch-an-inline-module-script-graph" style="color:initial">fetch an inline module script graph</span>
@@ -2583,6 +2739,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      <li><span class="dfn-paneled" id="term-for-concept-script" style="color:initial">script</span>
      <li><span class="dfn-paneled" id="term-for-set-up-a-window-environment-settings-object" style="color:initial">set up a window environment settings object</span>
      <li><span class="dfn-paneled" id="term-for-set-up-a-worker-environment-settings-object" style="color:initial">set up a worker environment settings object</span>
+     <li><span class="dfn-paneled" id="term-for-set-up-the-module-script-request" style="color:initial">set up the module script request</span>
      <li><span class="dfn-paneled" id="term-for-settings-object" style="color:initial">settings object</span>
      <li><span class="dfn-paneled" id="term-for-spin-the-event-loop" style="color:initial">spin the event loop</span>
      <li><span class="dfn-paneled" id="term-for-the-script-is-ready" style="color:initial">the script is ready</span>
@@ -2635,6 +2792,8 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <dd>Dominic Farolino; Terin Stock; Robert Kowalski. <a href="https://console.spec.whatwg.org/">Console Standard</a>. Living Standard. URL: <a href="https://console.spec.whatwg.org/">https://console.spec.whatwg.org/</a>
    <dt id="biblio-dom">[DOM]
    <dd>Anne van Kesteren. <a href="https://dom.spec.whatwg.org/">DOM Standard</a>. Living Standard. URL: <a href="https://dom.spec.whatwg.org/">https://dom.spec.whatwg.org/</a>
+   <dt id="biblio-encoding">[ENCODING]
+   <dd>Anne van Kesteren. <a href="https://encoding.spec.whatwg.org/">Encoding Standard</a>. Living Standard. URL: <a href="https://encoding.spec.whatwg.org/">https://encoding.spec.whatwg.org/</a>
    <dt id="biblio-fetch">[FETCH]
    <dd>Anne van Kesteren. <a href="https://fetch.spec.whatwg.org/">Fetch Standard</a>. Living Standard. URL: <a href="https://fetch.spec.whatwg.org/">https://fetch.spec.whatwg.org/</a>
    <dt id="biblio-html">[HTML]
