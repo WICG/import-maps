@@ -212,14 +212,14 @@ At some point, each [=environment settings object=] will get an <dfn for="enviro
     If |asURL| is not null, then:
     1. If |asURL|'s [=url/scheme=] is "`std`", and |moduleMap|[|asURL|] does not [=map/exist=], then throw a {{TypeError}} indicating that the requested built-in module is not implemented.
     1. Return |asURL|.
-  1. Return failure.
+  1. Throw a {{TypeError}} indicating that |specifier| was a bare specifier, but was not remapped to anything by |importMap|.
 </div>
 
 <p class="advisement">It seems possible that the return type could end up being a [=list=] of [=URLs=], not just a single URL, to support HTTPS → HTTPS fallback. But, we haven't gotten that far yet; for now let's assume it stays a single URL.</p>
 
 All call sites of HTML's existing <a spec="html">resolve a module specifier</a> will need to be updated to pass the appropriate [=script=], not just its [=script/base URL=].
 
-They will also need to be updated to account for it now throwing exceptions, instead of returning failure. (Previously they just turned failures into {{TypeError}}s manually, so this is straightforward.)
+They will also need to be updated to account for it now throwing exceptions, instead of returning failure. (Previously most call sites just turned failures into {{TypeError}}s manually, so this is straightforward.)
 
 <div algorithm>
   To <dfn lt="resolve an imports match|resolving an imports match">resolve an imports match</dfn>, given a [=string=] |normalizedSpecifier|, a [=specifier map=] |specifierMap|, and a [=module map=] |moduleMap|:
