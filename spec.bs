@@ -128,7 +128,7 @@ An <dfn>empty import map</dfn> is an [=/import map=] with its [=import map/impor
 
 <h2 id="acquiring">Acquiring import maps</h2>
 
-<h3 id="integration-environment-settings-object">New members of environment settings object</h3>
+<h3 id="integration-environment-settings-object">New members of environment settings objects</h3>
 
 Each [=environment settings object=] will get an <dfn for="environment settings object">import map</dfn> algorithm, which returns an [=/import map=] created by parsing and merging all `<script type="importmap">` elements that are encountered (before the cutoff).
 
@@ -146,26 +146,30 @@ In <a spec="html">set up a worker environment settings object</a>, <var ignore>s
   This infrastructure is very similar to the existing specification for module maps.
 </p>
 
-A {{Document}} has a <dfn for="Document">list of pending import map scripts</dfn>, which is an ordered list of {{HTMLScriptElement}}s, in the order of [=prepare a script=]. It is initially an empty list.
+A {{Document}} has a <dfn for="Document">list of pending import map scripts</dfn>, which is a [=list=] of {{HTMLScriptElement}}s, initially empty.
+
+<p class="note">{{HTMLScriptElement}}s are added to this list by [[#integration-prepare-a-script]].</p>
 
 Each {{Document}} has an <dfn for="Document">acquiring import maps</dfn> boolean. It is initially true.
 
-<p class="note">
+<div class="note">
   These two pieces of state are used to achieve the following behavior:
 
   <ul>
     <li>Import maps are accepted if and only if they are added (i.e., their corresponding <{script}> elements are added) before the first module load is started, even if the loading of the import map files don't finish before the first module load is started.
     <li>Module loading waits for any import maps that have already started loading, if any.
   </ul>
-</p>
+</div>
 
-{{HTMLScriptElement}} has <dfn for="HTMLScriptElement">the script's import map</dfn>. This is set asynchronously after the import map is fetched. Once it is set, either to an [=/import map=] in the case of success or to null in the case of failure, the fetching algorithms will note that <dfn for="HTMLScriptElement">the import map is ready</dfn>, which can trigger other actions. The user agent must delay the load event of the element's <a spec="html">node document</a> until [=HTMLScriptElement/the import map is ready=].
+<h3 id="integration-prepare-a-script">Prepare a script</h3>
+
+A <{script}> element has <dfn for="HTMLScriptElement">the script's import map</dfn>. This is set asynchronously after the import map is fetched. Once it is set, either to an [=/import map=] in the case of success or to null in the case of failure, the fetching algorithms will note that <dfn for="HTMLScriptElement">the import map is ready</dfn>, which can trigger other actions. The user agent must delay the load event of the element's <a spec="html">node document</a> until [=HTMLScriptElement/the import map is ready=].
 
 <p class="note">
   This infrastructure is very similar to the existing specification for <a spec="html">the script's script</a> and <a spec="html">the script is ready</a>, but is specified separately because different mechanisms are triggered ([=/register an import map=] and <a spec="html">execute a script block</a>).
 </p>
 
-<h3 id="integration-prepare-a-script">Prepare a script</h3>
+Inside the <a spec="html">prepare a script</a> algorithm, we make the following changes:
 
 - <a spec="html">the script's type</a> should be:
   - which is either "classic", "module", or "`importmap`".
@@ -198,7 +202,7 @@ Each {{Document}} has an <dfn for="Document">acquiring import maps</dfn> boolean
 <div algorithm="the import map is ready hook">
   When [=HTMLScriptElement/the import map is ready=], run the following steps:
 
-  1. If the element is not the first element in [=Document/list of pending import map scripts=] to which it was added above, then return without executing the script yet.
+  1. If the element is not the first element in the [=Document/list of pending import map scripts=] to which it was added above, then return without registering the import map yet.
   1. <em>Register</em>: [=/Register an import map=] given the first element of [=Document/list of pending import map scripts=].
   1. Remove the first element of [=Document/list of pending import map scripts=].
      <p class="note">If this makes the [=Document/list of pending import map scripts=] empty, it will (asynchronously) unblock any [=wait for import maps=] algorithm instances.</p>
@@ -267,7 +271,7 @@ Insert a call to [=wait for import maps=] at the beginning of the following HTML
 <h3 id="integration-register-an-import-map">Registering an import map</h3>
 
 <div algorithm>
-To <dfn>register an import map</dfn> given an [=environment settings object=] |settings object|, and an {{HTMLScriptElement}} |element|:
+To <dfn>register an import map</dfn> given an [=environment settings object=] |settings object| and an {{HTMLScriptElement}} |element|:
 
 1. If |element|'s [=HTMLScriptElement/the script's import map=] is null, then [=queue a task=] to [=fire an event=] named `error` at |element|, and return.
 1. If |element|'s <a spec="html">node document</a>'s <a spec="html">relevant settings object</a> is not equal to |settings object|, then return.
@@ -276,8 +280,7 @@ To <dfn>register an import map</dfn> given an [=environment settings object=] |s
 1. Otherwise, [=update an import map|update=] |element|'s [=node document=]'s [=Document/import map=] with |element|'s [=HTMLScriptElement/the script's import map=].
 
 <p class="note">
-  The timing of [=/register an import map=] is observable by possible `error` events, or by the fact that after [=/register an import map=] an import map {{HTMLScriptElement}} can be moved to another Document.
-  On the other hand, the updated [=Document/import map=] is not observable until [=/wait for import maps=] completes.
+  The timing of [=/register an import map=] is observable by possible `error` events, or by the fact that after [=/register an import map=] an import map <{script}> can be moved to another {{Document}}. On the other hand, the updated [=Document/import map=] is not observable until [=/wait for import maps=] completes.
 </p>
 
 </div>
