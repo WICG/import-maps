@@ -1,4 +1,4 @@
-# Import maps stuff to formalize and merge into the spec
+# Import semantics yet to be specified
 
 The spec for import maps is located at https://wicg.github.io/import-maps/. This document contains notes on things that will eventually be formalized and make their way into the spec.
 
