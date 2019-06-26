@@ -677,7 +677,7 @@ You can install an import map for your application using a `<script>` element, e
 <script type="importmap" src="import-map.importmap"></script>
 ```
 
-External import maps must use the MIME type `application/importmap+json`. (Why not reuse `application/json`? Doing so could [enable CSP bypasses](https://github.com/WICG/import-maps/issues/105).)
+When the `src=""` attribute is used, the resulting HTTP response must have the MIME type `application/importmap+json`. (Why not reuse `application/json`? Doing so could [enable CSP bypasses](https://github.com/WICG/import-maps/issues/105).)
 
 Because they affect all imports, any import maps must be present and successfully fetched before any module resolution is done. This means that module graph fetching, or any fetching of `import:` URLs, is blocked on import map fetching.
 
