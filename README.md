@@ -51,6 +51,7 @@ _Or, how to control the behavior of JavaScript imports_
   - [Further implementation staging](#further-implementation-staging)
   - [`import:` URL loads and origins](#import-url-loads-and-origins)
   - [`import:` URL interaction with other loading infrastructure](#import-url-interaction-with-other-loading-infrastructure)
+- [Community polyfills and tooling](#community-polyfills-and-tooling)
 - [Acknowledgments](#acknowledgments)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -872,6 +873,19 @@ We can easily start by disallowing such uses of `import:` URLs, and expanding to
 Several implementer questions come up around how `import:` URLs are envisioned to interact with other loading infrastructure, for example service workers. Initial attempts to answer these sorts of questions are in [the proto-spec](./spec.md).
 
 The high-level summary is that any fetch of an `import:` URL should be thought of as sugar for a series of if-then-else statements that in turn fetch the mapped-to URLs. For example, each fetch will pass through the service worker, until one succeeds.
+
+## Community polyfills and tooling
+
+Several members of the community have been working on polyfills and tooling related to import maps. Here are the ones we know about:
+
+* [@import-maps/generate](https://www.npmjs.com/package/@import-maps/generate) generates an import map from your `yarn.lock`.
+* [@jsenv/node-module-import-map](https://www.npmjs.com/package/@jsenv/node-module-import-map) generates an import map from your `package.json` and `node_modules/` directories.
+* [importly](https://www.npmjs.com/package/importly) generates an import map from a config file.
+* [Built-in Module Demo (with Rollup)](https://glitch.com/edit/#!/rollup-built-in-modules) contains code for a [Rollup](https://rollupjs.org/) plugin that generates an import map, focused on built-in module polyfills.
+* [SystemJS](https://github.com/systemjs/systemjs) provides a polyfill for import maps using `<script type="system-importmap">`.
+* [Deno](https://github.com/denoland/deno) is a JavaScript/TypeScript runtime with [built-in support for import maps](https://deno.land/manual.html#importmaps).
+
+Feel free to send a pull request with more! Also, you can use [#146](https://github.com/WICG/import-maps/issues/146) in the issue tracker for discussion about this space.
 
 ## Acknowledgments
 
