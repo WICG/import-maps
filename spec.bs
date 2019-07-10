@@ -294,7 +294,9 @@ To <dfn>register an import map</dfn> given a [=string=] or a null |source text|,
 <div algorithm>
   To <dfn lt="normalize a specifier key|normalizing a specifier key">normalize a specifier key</dfn>, given a [=string=] |specifierKey| and a [=URL=] |baseURL|:
 
-  1. If |specifierKey| is the empty string, then return null.
+  1. If |specifierKey| is the empty string, then:
+    1. [=Report a warning to the console=] that specifier keys cannot be the empty string.
+    1. Return null.
   1. Let |url| be the result of [=parsing a URL-like import specifier=], given |specifierKey| and |baseURL|.
   1. If |url| is not null, then:
     1. Let |urlString| be the [=URL serializer|serialization=] of |url|.

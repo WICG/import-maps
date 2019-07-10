@@ -73,7 +73,8 @@ describe('Mismatching the specifier map schema', () => {
         "": ["https://example.com/"]
       }`,
       'https://base.example/',
-      {}
+      {},
+      [`Invalid empty string specifier key.`]
     );
   });
 
