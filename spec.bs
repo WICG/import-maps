@@ -265,7 +265,9 @@ To <dfn>register an import map</dfn> given a [=string=] or a null |source text|,
         1. [=Report a warning to the console=] that the contents of address arrays must be strings.
         1. [=Continue=].
       1. Let |addressURL| be the result of [=parsing a URL-like import specifier=] given |potentialAddress| and |baseURL|.
-      1. If |addressURL| is null, then [=continue=].
+      1. If |addressURL| is null, then:
+        1. [=Report a warning to the console=] that the address was invalid.
+        1. [=Continue=].
       1. If |specifierKey| ends with U+002F (/), and the [=URL serializer|serialization=] of |addressURL| does not end with U+002F (/), then:
         1. [=Report a warning to the console=] that an invalid target address was given for the specifier key |specifierKey|; since |specifierKey| ended in a slash, so must the address.
         1. [=Continue=].
