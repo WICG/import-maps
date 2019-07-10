@@ -202,11 +202,10 @@ Inside the <a spec="html">prepare a script</a> algorithm, we make the following 
 <div algorithm="the import map is ready hook">
   When [=HTMLScriptElement/the import map is ready=], run the following steps:
 
-  1. If the element is not the first element in the [=Document/list of pending import map scripts=] to which it was added above, then return without registering the import map yet.
-  1. <em>Register</em>: [=/Register an import map=] given the first element of [=Document/list of pending import map scripts=].
-  1. Remove the first element of [=Document/list of pending import map scripts=].
-     <p class="note">If this makes the [=Document/list of pending import map scripts=] empty, it will (asynchronously) unblock any [=wait for import maps=] algorithm instances.</p>
-  1. If the [=Document/list of pending import map scripts=] is still not empty and the first entry's [=HTMLScriptElement/the import map is ready=], then jump back to the step labeled <em>Register</em>.
+  1. Repeat while the [=Document/list of pending import map scripts=] is not empty and the first entry's [=HTMLScriptElement/the import map is ready=]:
+    1. [=/Register an import map=] given the first element of [=Document/list of pending import map scripts=].
+    1. Remove the first element of [=Document/list of pending import map scripts=].
+       <p class="note">If this makes the [=Document/list of pending import map scripts=] empty, it will (asynchronously) unblock any [=wait for import maps=] algorithm instances.</p>
 
 <p class="note">
   This is specified similarly to <a spec="html">list of scripts that will execute in order as soon as possible</a>, to register import maps and fire `error` events in order (<a spec="html">list of scripts that will execute in order as soon as possible</a> is almost never used in the wild though).
