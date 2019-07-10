@@ -130,8 +130,8 @@ describe('Built-in module addresses', () => {
         good: [expect.toMatchURL(`${BUILT_IN_MODULE_SCHEME}:foo\\baz`)]
       },
       [
-        `Invalid target address "${BUILT_IN_MODULE_SCHEME}:foo/". Built-in module URLs must not contain "/".`,
-        `Invalid target address "${BUILT_IN_MODULE_SCHEME}:foo/bar". Built-in module URLs must not contain "/".`
+        `Invalid address "${BUILT_IN_MODULE_SCHEME}:foo/". Built-in module URLs must not contain "/".`,
+        `Invalid address "${BUILT_IN_MODULE_SCHEME}:foo/bar". Built-in module URLs must not contain "/".`
       ]
     );
   });
@@ -290,7 +290,7 @@ describe('Absolute URL addresses', () => {
         {
           'trailer/': []
         },
-        [`Invalid target address "https://base.example/notrailer" for package specifier "trailer/". Package address targets must end with "/".`]
+        [`Invalid address "https://base.example/notrailer" for package specifier key "trailer/". Package addresses must end with "/".`]
       );
     });
 
@@ -303,7 +303,7 @@ describe('Absolute URL addresses', () => {
         {
           'trailer/': []
         },
-        [`Invalid target address "https://base.example/notrailer" for package specifier "trailer/". Package address targets must end with "/".`]
+        [`Invalid address "https://base.example/notrailer" for package specifier key "trailer/". Package addresses must end with "/".`]
       );
     });
 
@@ -316,7 +316,7 @@ describe('Absolute URL addresses', () => {
         {
           'trailer/': [expect.toMatchURL('https://base.example/atrailer/')]
         },
-        [`Invalid target address "https://base.example/notrailer" for package specifier "trailer/". Package address targets must end with "/".`]
+        [`Invalid address "https://base.example/notrailer" for package specifier key "trailer/". Package addresses must end with "/".`]
       );
     });
   });

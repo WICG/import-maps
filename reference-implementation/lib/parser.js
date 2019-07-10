@@ -81,13 +81,13 @@ function sortAndNormalizeSpecifierMap(obj, baseURL) {
       }
 
       if (specifierKey.endsWith('/') && !addressURL.href.endsWith('/')) {
-        console.warn(`Invalid target address "${addressURL.href}" for package specifier "${specifierKey}". ` +
-            `Package address targets must end with "/".`);
+        console.warn(`Invalid address "${addressURL.href}" for package specifier key "${specifierKey}". ` +
+            `Package addresses must end with "/".`);
         continue;
       }
 
       if (addressURL.protocol === BUILT_IN_MODULE_PROTOCOL && addressURL.href.includes('/')) {
-        console.warn(`Invalid target address "${potentialAddress}". Built-in module URLs must not contain "/".`);
+        console.warn(`Invalid address "${potentialAddress}". Built-in module URLs must not contain "/".`);
         continue;
       }
 
