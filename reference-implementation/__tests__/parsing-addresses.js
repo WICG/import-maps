@@ -19,6 +19,22 @@ describe('Relative URL-like addresses', () => {
     );
   });
 
+  it('should not accept strings prefixed with ./, ../, or / for data: base URLs', () => {
+    expectSpecifierMap(
+      `{
+        "dotSlash": "./foo",
+        "dotDotSlash": "../foo",
+        "slash": "/foo"
+      }`,
+      'data:text/html,test',
+      {
+        dotSlash: [],
+        dotDotSlash: [],
+        slash: []
+      }
+    );
+  });
+
   it('should accept the literal strings ./, ../, or / with no suffix', () => {
     expectSpecifierMap(
       `{

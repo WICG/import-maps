@@ -20,7 +20,7 @@ exports.tryURLParse = (string, baseURL) => {
 
 exports.tryURLLikeSpecifierParse = (specifier, baseURL) => {
   if (specifier.startsWith('/') || specifier.startsWith('./') || specifier.startsWith('../')) {
-    return new URL(specifier, baseURL);
+    return exports.tryURLParse(specifier, baseURL);
   }
 
   const url = exports.tryURLParse(specifier);
