@@ -117,6 +117,28 @@ describe('Absolute URL scope keys', () => {
         'https://example.net/',
         'https://example.com/foo/',
         'https://example.com/%41'
+      ],
+      [
+        'Invalid scope "https://ex ample.org/" (parsed against base URL "https://base.example/path1/path2/path3").',
+        'Invalid scope "https://example.com:demo" (parsed against base URL "https://base.example/path1/path2/path3").',
+        'Invalid scope "http://[www.example.com]/" (parsed against base URL "https://base.example/path1/path2/path3").'
+      ]
+    );
+  });
+
+  it('should ignore relative URL scope keys when the base URL is a data: URL', () => {
+    expectScopes(
+      [
+        './foo',
+        '../foo',
+        '/foo'
+      ],
+      'data:text/html,test',
+      [],
+      [
+        'Invalid scope "./foo" (parsed against base URL "data:text/html,test").',
+        'Invalid scope "../foo" (parsed against base URL "data:text/html,test").',
+        'Invalid scope "/foo" (parsed against base URL "data:text/html,test").'
       ]
     );
   });

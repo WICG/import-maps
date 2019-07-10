@@ -114,6 +114,7 @@ function sortAndNormalizeScopes(obj, baseURL) {
 
     const scopePrefixURL = tryURLParse(scopePrefix, baseURL);
     if (scopePrefixURL === null) {
+      console.warn(`Invalid scope "${scopePrefix}" (parsed against base URL "${baseURL}").`);
       continue;
     }
 
