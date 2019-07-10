@@ -77,13 +77,15 @@ import { partition } from "lodash";
 
 Today, this throws, as such bare specifiers [are explicitly reserved](https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier). By supplying the browser with the following import map
 
-```json
+```html
+<script type="importmap">
 {
   "imports": {
     "moment": "/node_modules/moment/src/moment.js",
     "lodash": "/node_modules/lodash-es/lodash.js"
   }
 }
+</script>
 ```
 
 the above would act as if you had written
@@ -98,6 +100,8 @@ You would also be able to use these mappings in other contexts via the `import:`
 ```html
 <link rel="modulepreload" href="import:lodash">
 ```
+
+For more on the new `"importmap"` value for `<script>`'s `type=""` attribute, see the [installation section](#installation). For now, we'll concentrate on the semantics of the mapping, deferring the installation discussion.
 
 ## Background
 
@@ -663,7 +667,7 @@ _Previous versions of this proposal anticipated making `import:` URLs resolve re
 
 ### Installation
 
-You can install an import map for your application using a `<script>` element, either inline (for best performance) or with a `src=""` attribute (in which case you'd better be using HTTP/2 push to get that thing to us as soon as possible):
+You can install an import map for your application using a `<script>` element, either inline or with a `src=""` attribute:
 
 ```html
 <script type="importmap">
@@ -682,7 +686,9 @@ When the `src=""` attribute is used, the resulting HTTP response must have the M
 
 Because they affect all imports, any import maps must be present and successfully fetched before any module resolution is done. This means that module graph fetching, or any fetching of `import:` URLs, is blocked on import map fetching.
 
-Similarly, attempting to add a new `<script type="importmap">` after any module graph fetching, or fetching of `import:` URLs, has started, is an error. The import map will be ignored, and the `<script>` element will fire an `error` event.
+This means that the inline form of import maps is _strongly recommended_ for best performance. This is similar to the best practice of [inlining critical CSS](https://developers.google.com/speed/docs/insights/OptimizeCSSDelivery); both types of resources block your application from doing important work until they're processed, so introducing a second network round-trip (or even disk-cache round trip) is a bad idea. If your heart is set on using external import maps, you can attempt to mitigate this round-trip penalty with technologies like HTTP/2 Push or [bundled HTTP exchanges](https://wicg.github.io/webpackage/draft-yasskin-wpack-bundled-exchanges.html).
+
+As another consequence of how import maps affect all imports, attempting to add a new `<script type="importmap">` after any module graph fetching, or fetching of `import:` URLs, has started, is an error. The import map will be ignored, and the `<script>` element will fire an `error` event.
 
 Multiple `<script type="importmap">`s are allowed on the page. (See previous discussion in [#14](https://github.com/WICG/import-maps/issues/14).) They are merged by an intentionally-simple procedure, roughly equivalent to the JavaScript code
 
