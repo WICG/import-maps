@@ -63,11 +63,67 @@ A <dfn>import map</dfn> is a [=struct=] with two [=struct/items=]:
 An <dfn>empty import map</dfn> is an [=/import map=] with its [=import map/imports=] and [=import map/scopes=] both being empty maps.
 
 <div algorithm>
-  To <dfn>update an import map</dfn> |import map| with a second [=/import map=] |new import map|:
+  To <dfn>update an import map</dfn> |importMap| with a second [=/import map=] |newImportMap|:
 
-  1. Assert: |import map| is not null.
-  1. Assert: |new import map| is not null.
-  1. <p class="note">TODO: Implement merging. This merges |new import map| into |import map| and thus updates |import map| in-place.</p>
+  1. For each |specifier| → |addresses| of |newImportMap|'s [=import map/imports=], [=map/set=] |importMap|[|specifier|] to |addresses|.
+  1. For each |url| → |specifierMap| of |newImportMap|'s [=import map/scopes=], [=map/set=] |importMap|[|url|] to |specifierMap|.
+  1. Set |importMap|'s [=import map/imports=] to the result of [=map/sorting=] |importMap|'s [=import map/imports=], with an entry |a| being less than an entry |b| if |a|'s [=map/key=] is [=longer or code unit less than=] |b|'s [=map/key=].
+  1. Set |importMap|'s [=import map/scopes=] to the result of [=map/sorting=] |importMap|'s [=import map/scopes=], with an entry |a| being less than an entry |b| if |a|'s [=map/key=] is [=longer or code unit less than=] |b|'s [=map/key=].
+</div>
+
+<div class="example" id="example-merging">
+  [=Update an import map=] merges the two import maps in a very simple way, not performing any deep merging beyond the top level of the "`imports`" and "`scopes`" keys. For example,
+
+  <xmp highlight="html">
+    <script type="importmap">
+    {
+      "imports": {
+        "a": "/a-1.mjs",
+        "b": "/b-1.mjs",
+        "std:kv-storage": ["std:kv-storage", "/kvs-1.mjs"]
+      },
+      "scopes": {
+        "/scope1/": {
+          "a": "/a-2.mjs"
+        }
+      }
+    }
+    </script>
+    <script type="importmap">
+    {
+      "imports": {
+        "b": null,
+        "std:kv-storage": "kvs-2.mjs"
+      },
+      "scopes": {
+        "/scope1/": {
+          "b": "/b-2.mjs"
+        }
+      }
+    }
+    </script>
+  </xmp>
+
+  is equivalent to
+
+  <xmp highlight="html">
+    <script type="importmap">
+    {
+      "imports": {
+        "a": "/a-1.mjs",
+        "b": null,
+        "std:kv-storage": "kvs-2.mjs"
+      },
+      "scopes": {
+        "/scope1/": {
+          "b": "/b-2.mjs"
+        }
+      }
+    }
+    </script>
+  </xmp>
+
+  Notice how the definition for "`/scope1/`" was completely overridden, so there is no longer a redirection for the "`a`" module specifier within that scope.
 </div>
 
 <h2 id="acquiring">Acquiring import maps</h2>
