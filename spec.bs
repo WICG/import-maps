@@ -163,59 +163,56 @@ Each {{Document}} has an <dfn for="Document">acquiring import maps</dfn> boolean
 
 <h3 id="integration-prepare-a-script">Prepare a script</h3>
 
-A <{script}> element has <dfn for="HTMLScriptElement">the script's import map</dfn>. This is set asynchronously after the import map is fetched. Once it is set, either to an [=/import map=] in the case of success or to null in the case of failure, the fetching algorithms will note that <dfn for="HTMLScriptElement">the import map is ready</dfn>, which can trigger other actions. The user agent must delay the load event of the element's <a spec="html">node document</a> until [=HTMLScriptElement/the import map is ready=].
-
-<p class="note">
-  This infrastructure is very similar to the existing specification for <a spec="html">the script's script</a> and <a spec="html">the script is ready</a>, but is specified separately because different mechanisms are triggered ([=/register an import map=] and <a spec="html">execute a script block</a>).
-</p>
-
 Inside the <a spec="html">prepare a script</a> algorithm, we make the following changes:
 
-- <a spec="html">the script's type</a> should be:
-  - which is either "classic", "module", or "`importmap`".
-    <p class="note">Although we add the new script type, we don't add the new subclass of [=script=]. Import maps are processed outside the existing paths for [=scripts=] and <a spec="html">execute a script block</a>, because the mechanism controlling the orders/dependencies between import map registration and script evaluation is quite separeted and different from the mechanism for controlling script evaluation order.</p>
+- <a spec="html">the script's type</a> should be either "classic", "module", or "`importmap`".
+- <a spec="html">the script's script</a> should be a <a spec="html">script</a> or an [=/import map=].
+  <p class="note">We add the new script type and extend the type of <a spec="html">the script's script</a> to specify <a spec="html">prepare a script</a> consistently, but we don't make [=/import map=] the new subclass of [=script=] to leave other script execution-related specs unaffected.</p>
 - Insert the following step to [=prepare a script=] step 7, under "Determine the script's type as follows:":
   - If the script block's type string is an [=ASCII case-insensitive=] match for the string "`importmap`", <a spec="html">the script's type</a> is "`importmap`".
 - Insert the following step before <a spec="html">prepare a script</a> step 24:
   - If <a spec="html">the script's type</a> is "`importmap`" and the element's <a spec="html">node document</a>'s [=Document/acquiring import maps=] is false, then <a spec="html">queue a task</a> to <a spec="html">fire an event</a> named `error` at the element, and return.
-    <p class="note">Alternative considered: We can proceed to import map loading unless [=HTMLScriptElement/the import map is ready=] for all {{HTMLScriptElement}} in [=Document/list of pending import map scripts=], even when [=Document/acquiring import maps=] is false, because at that time subsequent module loading is blocked and new import map loads could be still added. This would allow a few more opportinities for adding import maps, but this would highly depend on the timing of network loading. For example, if the preceding import map load finishes earlier than expected, then subsequent import maps depending on this behavior might fail. To avoid this kind of nondeterminism, we didn't choose this option, at least for now.</p>
-- Insert the following before <a spec="html">prepare a script</a> step 24.6:
-  - If <a spec="html">the script's type</a> is "`importmap`", then:
-    1. [=list/Append=] the element to the element's <a spec="html">node document</a>'s [=Document/list of pending import map scripts=].
-    1. [=Fetch an import map=] given <var ignore>url</var>, <var ignore>settings object</var>, and <var ignore>options</var>.
-    1. When the previous step asynchronously completes with |result|:
-       1. If |result| is a failure, then set [=HTMLScriptElement/the script's import map=] to null.
-       1. Otherwise, set [=HTMLScriptElement/the script's import map=] to the result of [=parsing an import map string=], given |result| and |base URL|.
-       1. [=The import map is ready=].
-    1. Return.
-- Insert the following before <a spec="html">prepare a script</a> step 25.2:
-  - If <a spec="html">the script's type</a> is "`importmap`", then:
-    1. [=list/Append=] the element to the element's <a spec="html">node document</a>'s [=Document/list of pending import map scripts=].
-    1. Set [=HTMLScriptElement/the script's import map=] to the result of [=parsing an import map string=], given <var ignore>source text</var> and |base URL|.
-    1. [=The import map is ready=].
-    1. Return.
+    <p class="note">Alternative considered: We can proceed to import map loading unless <a spec="html">the script is ready</a> for all {{HTMLScriptElement}} in [=Document/list of pending import map scripts=], even when [=Document/acquiring import maps=] is false, because at that time subsequent module loading is blocked and new import map loads could be still added. This would allow a few more opportinities for adding import maps, but this would highly depend on the timing of network loading. For example, if the preceding import map load finishes earlier than expected, then subsequent import maps depending on this behavior might fail. To avoid this kind of nondeterminism, we didn't choose this option, at least for now.</p>
+- Insert the following case to <a spec="html">prepare a script</a> step 24.6:
+  <dl>
+    <dt>"`importmap`"</dt>
+    <dd>
+      [=Fetch an import map=] given <var ignore>url</var>, |base URL|, <var ignore>settings object</var>, and <var ignore>options</var>.
+    </dd>
+  </dl>
+- Insert the following case to <a spec="html">prepare a script</a> step 25.2:
+  <dl>
+    <dt>"`importmap`"</dt>
+    <dd>
+      1. Let |import map| be the result of [=parsing an import map string=], given <var ignore>source text</var> and |base URL|.
+      1. Set <a spec="html">the script's script</a> to |import map|.
+      1. <a spec="html">The script is ready</a>.
+    </dd>
+  </dl>
+- Insert the following case to <a spec="html">prepare a script</a> step 26:
+  <dl>
+    <dt>If <a spec="html">the script's type</a> is "`importmap`"</dt>
+    <dd>
+      [=list/Append=] the element to the element's <a spec="html">node document</a>'s [=Document/list of pending import map scripts=].
+      When <a spec="html">the script is ready</a>, run the following steps:
+        1. Repeat while the [=Document/list of pending import map scripts=] is not empty and the first entry's <a spec="html">the script is ready</a>:
+          1. [=/Register an import map=] given the first element of [=Document/list of pending import map scripts=].
+          1. Remove the first element of [=Document/list of pending import map scripts=].
+             <p class="note">If this makes the [=Document/list of pending import map scripts=] empty, it will (asynchronously) unblock any [=wait for import maps=] algorithm instances.</p>
+    </dd>
+  </dl>
 
 <p class="issue">CSP is applied to import maps just like JavaScript scripts. Is this sufficient? <a href="https://github.com/WICG/import-maps/issues/105">#105</a>.</p>
 
-<p class="note">For import maps, the script never becomes <a spec="html" lt="the script is ready">ready</a> and <a spec="html">the script's script</a> remains null.</p>
-
-<div algorithm="the import map is ready hook">
-  When [=HTMLScriptElement/the import map is ready=], run the following steps:
-
-  1. Repeat while the [=Document/list of pending import map scripts=] is not empty and the first entry's [=HTMLScriptElement/the import map is ready=]:
-    1. [=/Register an import map=] given the first element of [=Document/list of pending import map scripts=].
-    1. Remove the first element of [=Document/list of pending import map scripts=].
-       <p class="note">If this makes the [=Document/list of pending import map scripts=] empty, it will (asynchronously) unblock any [=wait for import maps=] algorithm instances.</p>
-
 <p class="note">
-  This is specified similarly to <a spec="html">list of scripts that will execute in order as soon as possible</a>, to register import maps and fire `error` events in order (<a spec="html">list of scripts that will execute in order as soon as possible</a> is almost never used in the wild though).
+  This is specified similarly to <a spec="html">list of scripts that will execute in order as soon as possible</a>, to register import maps and fire `error` events in order (<a spec="html">list of scripts that will execute in order as soon as possible</a> is rarely used in the wild though).
   There can be other alternatives, e.g. executing a similar loop inside [=/wait for import maps=].
 </p>
 
 </div>
 
 <div algorithm>
-  To <dfn export>fetch an import map</dfn> given |url|, |settings object|, and |options|, run the following steps. This algorithm asynchronously returns a [=string=] or a failure.
+  To <dfn export>fetch an import map</dfn> given |url|, |base URL|, |settings object|, and |options|, run the following steps. This algorithm asynchronously returns an [=/import map=] or null.
   <p class="note">This algorithm is specified consistently with <a spec="html">fetch a single module script</a> steps 5, 7, 8, 9, 10, and 12.1. Particularly, we enforce CORS to avoid leaking the import map contents that shouldn't be accessed.</p>
 
   1. Let |request| be a new [=/request=] whose [=request/url=] is |url|, [=request/destination=] is "`script`", [=request/mode=] is "`cors`", [=request/referrer=] is "`client`", and [=request/client=] is |settings object|.
@@ -223,12 +220,13 @@ Inside the <a spec="html">prepare a script</a> algorithm, we make the following 
   1. <a spec="html">Set up the module script request</a> given |request| and |options|.
   1. [=/Fetch=] |request|. Return from this algorithm, and run the remaining steps as part of the fetch's [=/process response=] for the [=/response=] |response|.
      <p class="note">|response| is always [=CORS-same-origin=].</p>
-  1. If any of the following conditions are met, asynchronously complete this algorithm with a failure, and abort these steps:
+  1. If any of the following conditions are met, asynchronously complete this algorithm with null, and abort these steps:
     - |response|'s [=response/type=] is "`error`"
     - |response|'s [=response/status=] is not an [=ok status=]
     - The result of [=extracting a MIME type=] from |response|'s [=response/header list=] is not `"application/importmap+json"`
       <p class="note">For more contexts about MIME type checking, see <a href="https://github.com/WICG/import-maps/issues/105">#105</a> and <a href="https://github.com/WICG/import-maps/pull/119">#119</a>.</p>
-  1. Asynchronously complete this algorithm with the result of [=UTF-8 decoding=] response's [=response/body=].
+  1. Let |source text| be the result of [=UTF-8 decoding=] response's [=response/body=].
+  1. Asynchronously complete this algorithm with the result of [=parsing an import map string=], given |source text| and |base URL|.
 
 </div>
 
@@ -272,11 +270,11 @@ Insert a call to [=wait for import maps=] at the beginning of the following HTML
 <div algorithm>
 To <dfn>register an import map</dfn> given an [=environment settings object=] |settings object| and an {{HTMLScriptElement}} |element|:
 
-1. If |element|'s [=HTMLScriptElement/the script's import map=] is null, then [=queue a task=] to [=fire an event=] named `error` at |element|, and return.
+1. If |element|'s <a spec="html">the script's script</a> is null, then [=queue a task=] to [=fire an event=] named `error` at |element|, and return.
 1. If |element|'s <a spec="html">node document</a>'s <a spec="html">relevant settings object</a> is not equal to |settings object|, then return.
    <p class="note">This is spec'ed consistently with <a href="https://github.com/whatwg/html/pull/2673">whatwg/html#2673</a>.</p>
    <p class="advisement">Currently we don't fire `error` events in this case. If we change the decision at <a href="https://github.com/whatwg/html/pull/2673">whatwg/html#2673</a> to fire `error` events, then we should change this step accordingly.</p>
-1. Otherwise, [=update an import map|update=] |element|'s [=node document=]'s [=Document/import map=] with |element|'s [=HTMLScriptElement/the script's import map=].
+1. Otherwise, [=update an import map|update=] |element|'s [=node document=]'s [=Document/import map=] with |element|'s <a spec="html">the script's script</a>.
 
 <p class="note">
   The timing of [=/register an import map=] is observable by possible `error` events, or by the fact that after [=/register an import map=] an import map <{script}> can be moved to another {{Document}}. On the other hand, the updated [=Document/import map=] is not observable until [=/wait for import maps=] completes.
