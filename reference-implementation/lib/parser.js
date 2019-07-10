@@ -69,6 +69,8 @@ function sortAndNormalizeSpecifierMap(obj, baseURL) {
     const validNormalizedAddresses = [];
     for (const potentialAddress of potentialAddresses) {
       if (typeof potentialAddress !== 'string') {
+        console.warn(`Invalid address ${JSON.stringify(potentialAddress)} inside the address array for the ` +
+            `specifier key "${specifierKey}". Address arrays must only contain strings.`);
         continue;
       }
 
