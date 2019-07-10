@@ -256,6 +256,7 @@ To <dfn>register an import map</dfn> given a [=string=] or a null |source text|,
     1. If |value| is a [=string=], then set |normalized|[|normalizedSpecifierKey|] to «|value|».
     1. Otherwise, if |value| is null, then set |normalized|[|normalizedSpecifierKey|] to a new empty list.
     1. Otherwise, if |value| is a [=list=], then set |normalized|[|normalizedSpecifierKey|] to |value|.
+    1. Otherwise, [=report a warning to the console=] that addresses must be strings, arrays, or null.
   1. Next, normalize and validate each potential address in the value [=lists=]. [=map/For each=] |specifierKey| → |potentialAddresses| of |normalized|,
     1. Assert: |potentialAddresses| is a [=list=], because of the previous normalization pass.
     1. Let |validNormalizedAddresses| be an empty [=list=].
