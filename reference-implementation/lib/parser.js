@@ -76,6 +76,7 @@ function sortAndNormalizeSpecifierMap(obj, baseURL) {
 
       const addressURL = tryURLLikeSpecifierParse(potentialAddress, baseURL);
       if (addressURL === null) {
+        console.warn(`Invalid address "${potentialAddress}" for the specifier key "${specifierKey}".`);
         continue;
       }
 

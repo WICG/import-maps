@@ -31,7 +31,12 @@ describe('Relative URL-like addresses', () => {
         dotSlash: [],
         dotDotSlash: [],
         slash: []
-      }
+      },
+      [
+        `Invalid address "./foo" for the specifier key "dotSlash".`,
+        `Invalid address "../foo" for the specifier key "dotDotSlash".`,
+        `Invalid address "/foo" for the specifier key "slash".`
+      ]
     );
   });
 
@@ -71,7 +76,16 @@ describe('Relative URL-like addresses', () => {
         slash2: [],
         dotSlash3: [],
         dotDotSlash3: []
-      }
+      },
+      [
+        `Invalid address "%2E/" for the specifier key "dotSlash1".`,
+        `Invalid address "%2E%2E/" for the specifier key "dotDotSlash1".`,
+        `Invalid address ".%2F" for the specifier key "dotSlash2".`,
+        `Invalid address "..%2F" for the specifier key "dotDotSlash2".`,
+        `Invalid address "%2F" for the specifier key "slash2".`,
+        `Invalid address "%2E%2F" for the specifier key "dotSlash3".`,
+        `Invalid address "%2E%2E%2F" for the specifier key "dotDotSlash3".`
+      ]
     );
   });
 });
@@ -97,7 +111,8 @@ describe('Built-in module addresses', () => {
       'https://base.example/path1/path2/path3',
       {
         foo: []
-      }
+      },
+      [`Invalid address "${encodeURIComponent(BUILT_IN_MODULE_SCHEME + ':')}foo" for the specifier key "foo".`]
     );
   });
 
@@ -153,7 +168,13 @@ describe('Absolute URL addresses', () => {
         mailto: [],
         javascript: [],
         wss: []
-      }
+      },
+      [
+        `Invalid address "import:bad" for the specifier key "import".`,
+        `Invalid address "mailto:bad" for the specifier key "mailto".`,
+        `Invalid address "javascript:bad" for the specifier key "javascript".`,
+        `Invalid address "wss:bad" for the specifier key "wss".`
+      ]
     );
   });
 
@@ -187,7 +208,13 @@ describe('Absolute URL addresses', () => {
         mailto: [],
         javascript: [],
         wss: []
-      }
+      },
+      [
+        `Invalid address "import:bad" for the specifier key "import".`,
+        `Invalid address "mailto:bad" for the specifier key "mailto".`,
+        `Invalid address "javascript:bad" for the specifier key "javascript".`,
+        `Invalid address "wss:bad" for the specifier key "wss".`
+      ]
     );
   });
 
@@ -213,7 +240,12 @@ describe('Absolute URL addresses', () => {
         prettyNormal: [expect.toMatchURL('https://example.net/')],
         percentDecoding: [expect.toMatchURL('https://example.com/')],
         noPercentDecoding: [expect.toMatchURL('https://example.com/%41')]
-      }
+      },
+      [
+        `Invalid address "https://ex ample.org/" for the specifier key "unparseable1".`,
+        `Invalid address "https://example.com:demo" for the specifier key "unparseable2".`,
+        `Invalid address "http://[www.example.com]/" for the specifier key "unparseable3".`
+      ]
     );
   });
 
@@ -239,7 +271,12 @@ describe('Absolute URL addresses', () => {
         prettyNormal: [expect.toMatchURL('https://example.net/')],
         percentDecoding: [expect.toMatchURL('https://example.com/')],
         noPercentDecoding: [expect.toMatchURL('https://example.com/%41')]
-      }
+      },
+      [
+        `Invalid address "https://ex ample.org/" for the specifier key "unparseable1".`,
+        `Invalid address "https://example.com:demo" for the specifier key "unparseable2".`,
+        `Invalid address "http://[www.example.com]/" for the specifier key "unparseable3".`
+      ]
     );
   });
 
@@ -290,12 +327,13 @@ describe('Other invalid addresses', () => {
     for (const bad of ['bar', '\\bar', '~bar', '#bar', '?bar']) {
       expectSpecifierMap(
         `{
-          "foo": "${bad}"
+          "foo": ${JSON.stringify(bad)}
         }`,
         'https://base.example/path1/path2/path3',
         {
           foo: []
-        }
+        },
+        [`Invalid address "${bad}" for the specifier key "foo".`]
       );
     }
   });

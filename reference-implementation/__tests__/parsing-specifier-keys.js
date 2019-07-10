@@ -21,6 +21,22 @@ describe('Relative URL-like specifier keys', () => {
     );
   });
 
+  it('should not absolutize strings prefixed with ./, ../, or / with a data: URL base', () => {
+    expectSpecifierMap(
+      `{
+        "./foo": "https://example.com/dotslash",
+        "../foo": "https://example.com/dotdotslash",
+        "/foo": "https://example.com/slash"
+      }`,
+      'data:text/html,test',
+      {
+        './foo': [expect.toMatchURL('https://example.com/dotslash')],
+        '../foo': [expect.toMatchURL('https://example.com/dotdotslash')],
+        '/foo': [expect.toMatchURL('https://example.com/slash')]
+      }
+    );
+  });
+
   it('should absolutize the literal strings ./, ../, or / with no suffix', () => {
     expectSpecifierMap(
       `{
