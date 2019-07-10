@@ -342,7 +342,9 @@ To <dfn>register an import map</dfn> given a [=string=] or a null |source text|,
   1. [=map/For each=] |scopePrefix| → |potentialSpecifierMap| of |originalMap|,
     1. If |potentialSpecifierMap| is not a [=map=], then throw a {{TypeError}} indicating that the value of the scope with prefix |scopePrefix| must be a JSON object.
     1. Let |scopePrefixURL| be the result of [=URL parser|parsing=] |scopePrefix| with |baseURL| as the base URL.
-    1. If |scopePrefixURL| is failure, then [=continue=].
+    1. If |scopePrefixURL| is failure, then:
+      1. [=Report a warning to the console=] that the scope prefix URL was not parseable.
+      1. [=Continue=].
     1. If |scopePrefixURL|'s [=url/scheme=] is not a [=fetch scheme=], then:
       1. [=Report a warning to the console=] that scope prefix URLs must have a fetch scheme.
       1. [=Continue=].
