@@ -39,6 +39,13 @@ exports.expectBad = (input, baseURL, warnings = []) => {
   checkWarnings();
 };
 
+exports.expectWarnings = (input, baseURL, output, warnings = []) => {
+  const checkWarnings = testWarningHandler(warnings);
+  expect(parseFromString(input, baseURL)).toEqual(output);
+
+  checkWarnings();
+};
+
 function testWarningHandler(expectedWarnings) {
   const warnings = [];
   const { warn } = console;
