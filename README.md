@@ -164,7 +164,7 @@ import moment from "moment";
 import("lodash").then(_ => ...);
 ```
 
-Note that the right-hand side of the mapping (known as the "address") must start with `/`, `../`, or `./`, or be parseable as an absolute URL, to identify a URL. (Other cases are explained [later](#for-built-in-modules-in-module-import-map-supporting-browsers).)
+Note that the right-hand side of the mapping (known as the "address") must start with `/`, `../`, or `./`, or be parseable as an absolute URL, to identify a URL. In the case of relative-URL-like addresses, they are resolved relative to the import map's base URL, i.e. the base URL of the page for inline import maps, and the URL of the import map resource for external import maps.
 
 #### "Packages" via trailing slashes
 
@@ -392,6 +392,8 @@ We support this use case in import maps by allowing you to change the meaning of
 (This is example is one of several [in-the-wild examples](https://github.com/WICG/import-maps/issues/5#issuecomment-374175653) of multiple versions per application provided by @zkat. Thanks, @zkat!)
 
 With this mapping, inside any modules whose URLs start with `/node_modules/socksjs-client/`, the `"querystringify"` specifier will refer to `/node_modules/socksjs-client/querystringify/index.js`. Whereas otherwise, the top-level mapping will ensure that `"querystringify"` refers to `/node_modules/querystringify/index.js`.
+
+Note that being in a scope does not change how an address is resolved; the import map's base URL is still used, instead of e.g. the scope URL prefix.
 
 #### Scope inheritance
 
