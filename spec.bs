@@ -265,6 +265,8 @@ To <dfn>register an import map</dfn> given a [=string=] or a null |source text|,
   1. If |parsed|["`scopes`"] [=map/exists=], then:
     1. If |parsed|["`scopes`"] is not a [=map=], then throw a {{TypeError}} indicating that the "`scopes`" top-level key must be a JSON object.
     1. Set |sortedAndNormalizedScopes| to the result of [=sorting and normalizing scopes=] given |parsed|["`scopes`"] and |baseURL|.
+  1. If |parsed|'s [=map/get the keys|keys=] [=set/contains=] any items besides "`imports`" or "`scopes`", [=report a warning to the console=] that an invalid top-level key was present in the import map.
+     <p class="note">This can help detect typos. It is not an error, because that would prevent any future extensions from being added backward-compatibly.</p>
   1. Return the [=/import map=] whose [=import map/imports=] are |sortedAndNormalizedImports| and whose [=import map/scopes=] scopes are |sortedAndNormalizedScopes|.
 </div>
 

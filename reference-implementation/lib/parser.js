@@ -25,6 +25,13 @@ exports.parseFromString = (input, baseURL) => {
     sortedAndNormalizedScopes = sortAndNormalizeScopes(parsed.scopes, baseURL);
   }
 
+  const badTopLevelKeys = new Set(Object.keys(parsed));
+  badTopLevelKeys.delete('imports');
+  badTopLevelKeys.delete('scopes');
+  for (const badKey of badTopLevelKeys) {
+    console.warn(`Invalid top-level key "${badKey}". Only "imports" and "scopes" can be present.`);
+  }
+
   // Always have these two keys, and exactly these two keys, in the result.
   return {
     imports: sortedAndNormalizedImports,

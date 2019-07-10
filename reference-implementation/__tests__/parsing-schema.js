@@ -1,6 +1,6 @@
 'use strict';
 const { parseFromString } = require('../lib/parser.js');
-const { expectBad, expectSpecifierMap } = require('./helpers/parsing.js');
+const { expectBad, expectWarnings, expectSpecifierMap } = require('./helpers/parsing.js');
 
 const nonObjectStrings = ['null', 'true', '1', '"foo"', '[]'];
 
@@ -28,11 +28,19 @@ describe('Mismatching the top-level schema', () => {
   });
 
   it('should ignore unspecified top-level entries', () => {
-    expect(parseFromString(`{
-      "imports": {},
-      "new-feature": {}
-    }`, 'https://base.example/'))
-      .toEqual({ imports: {}, scopes: {} });
+    expectWarnings(
+      `{
+        "imports": {},
+        "new-feature": {},
+        "scops": {}
+      }`,
+      'https://base.example/',
+      { imports: {}, scopes: {} },
+      [
+        `Invalid top-level key "new-feature". Only "imports" and "scopes" can be present.`,
+        `Invalid top-level key "scops". Only "imports" and "scopes" can be present.`
+      ]
+    );
   });
 });
 
