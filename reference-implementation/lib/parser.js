@@ -135,6 +135,7 @@ function sortAndNormalizeScopes(obj, baseURL) {
 function normalizeSpecifierKey(specifierKey, baseURL) {
   // Ignore attempts to use the empty string as a specifier key
   if (specifierKey === '') {
+    console.warn(`Invalid empty string specifier key.`);
     return null;
   }
 
