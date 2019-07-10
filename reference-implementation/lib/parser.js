@@ -56,6 +56,9 @@ function sortAndNormalizeSpecifierMap(obj, baseURL) {
       normalized[normalizedSpecifierKey] = [];
     } else if (Array.isArray(value)) {
       normalized[normalizedSpecifierKey] = obj[specifierKey];
+    } else {
+      console.warn(`Invalid address ${JSON.stringify(value)} for the specifier key "${specifierKey}". ` +
+          `Addresses must be strings, arrays, or null.`);
     }
   }
 
