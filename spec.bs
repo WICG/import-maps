@@ -161,13 +161,35 @@ Each {{Document}} has an <dfn for="Document">acquiring import maps</dfn> boolean
   </ul>
 </div>
 
+<h3 id="integration-script-type">Script type</h3>
+
+To process import maps in the <a spec="html">prepare a script</a> algorithm consistently with existing script types (i.e. classic or module), we make the following changes:
+
+- Introduce <dfn>import map parse result</dfn>, which is a [=struct=] with three [=struct/items=]:
+  - An <dfn for="import map parse result">settings object</dfn>, an [=environment settings object=],
+  - An <dfn for="import map parse result">import map</dfn>, an [=/import map=], and
+  - An <dfn for="import map parse result">error to rethrow</dfn>, a JavaScript value representing a parse error when non-null.
+- <a spec="html">the script's type</a> should be either "`classic`", "`module`", or "`importmap`".
+- Rename <a spec="html">the script's script</a> to <dfn>the script's result</dfn>, which can be either a <a spec="html">script</a> or an [=/import map=].
+
+The following algorithms are updated accordingly:
+
+- <a spec="html">prepare a script</a>: see [[#integration-prepare-a-script]].
+- <a spec="html">execute a script block</a> Step 4: add the following case.
+  <dl>
+    <dt>"`importmap`"</dt>
+    <dd>
+      1. Assert: Never reached.
+         <p class="note">Import maps are processed by [=/register an import map=] instead of <a spec="html">execute a script block</a>.</p>
+    </dd>
+  </dl>
+
+<p class="note">Because we don't make [=import map parse result=] the new subclass of [=script=], other script execution-related specs are left unaffected.</p>
+
 <h3 id="integration-prepare-a-script">Prepare a script</h3>
 
 Inside the <a spec="html">prepare a script</a> algorithm, we make the following changes:
 
-- <a spec="html">the script's type</a> should be either "`classic`", "`module`", or "`importmap`".
-- Rename <a spec="html">the script's script</a> to <dfn>the script's result</dfn>, which can be either a <a spec="html">script</a> or an [=/import map=]. (This will require a couple updates in places not noted here, such as in <a spec="html">execute a script block</a>.)
-  <p class="note">We add the new script type and extend the type of <a spec="html">the script's script</a> to specify <a spec="html">prepare a script</a> consistently, but we don't make [=/import map=] the new subclass of [=script=] to leave other script execution-related specs unaffected.</p>
 - Insert the following step to [=prepare a script=] step 7, under "Determine the script's type as follows:":
   - If the script block's type string is an [=ASCII case-insensitive=] match for the string "`importmap`", <a spec="html">the script's type</a> is "`importmap`".
 - Insert the following step before <a spec="html">prepare a script</a> step 24:
@@ -184,8 +206,8 @@ Inside the <a spec="html">prepare a script</a> algorithm, we make the following 
   <dl>
     <dt>"`importmap`"</dt>
     <dd>
-      1. Let |import map| be the result of [=parsing an import map string=], given <var ignore>source text</var> and |base URL|.
-      1. Set [=the script's result=] to |import map|.
+      1. Let |import map parse result| be the result of [=parsing an import map string=], given <var ignore>source text</var> and |base URL|.
+      1. Set [=the script's result=] to |import map parse result|.
       1. <a spec="html">The script is ready</a>.
     </dd>
   </dl>
@@ -268,13 +290,28 @@ Insert a call to [=wait for import maps=] at the beginning of the following HTML
 <h3 id="integration-register-an-import-map">Registering an import map</h3>
 
 <div algorithm>
-To <dfn>register an import map</dfn> given an [=environment settings object=] |settings object| and an {{HTMLScriptElement}} |element|:
+To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
 
 1. If |element|'s [=the script's result=] is null, then [=queue a task=] to [=fire an event=] named `error` at |element|, and return.
+1. Let |import map parse result| be |element|'s [=the script's result=].
+1. Assert: |element|'s <a spec="html">the script's type</a> is "`importmap`".
+1. Assert: |import map parse result| is an [=import map parse result=].
+1. Let |settings object| be |import map parse result|'s [=import map parse result/settings object=].
 1. If |element|'s <a spec="html">node document</a>'s <a spec="html">relevant settings object</a> is not equal to |settings object|, then return.
    <p class="note">This is spec'ed consistently with <a href="https://github.com/whatwg/html/pull/2673">whatwg/html#2673</a>.</p>
    <p class="advisement">Currently we don't fire `error` events in this case. If we change the decision at <a href="https://github.com/whatwg/html/pull/2673">whatwg/html#2673</a> to fire `error` events, then we should change this step accordingly.</p>
-1. Otherwise, [=update an import map|update=] |element|'s [=node document=]'s [=Document/import map=] with |element|'s [=the script's result=].
+1. If |import map parse result|'s [=import map parse result/error to rethrow=] is not null, then:
+  1. <div class="issue">
+       Should we do the following, in order to match the behavior with <a spec="html">execute a script block</a>?
+       1. Increment/decrement <a spec="html">ignore-destructive-writes counter</a> of |element|'s [=node document=].
+       1. <a spec="html">Check if we can run script</a> with |settings object|. If this returns "`do not run`" then return.
+       1. <a spec="html">Prepare to run script</a> given |settings object|.
+       1. <a spec="html">Clean up after running script</a> given |settings object|.
+     </div>
+  1. <a spec="html">Report the exception</a> given |import map parse result|'s [=import map parse result/error to rethrow=].
+     <p class="issue">There are no relevant [=script=], because [=import map parse result=] isn't a [=script=]. Perhaps <a href="https://github.com/whatwg/html/issues/958">whatwg/html#958</a> might resolve this issue.</p>
+  1. Return.
+1. [=update an import map|Update=] |element|'s [=node document=]'s [=Document/import map=] with |import map parse result|'s [=import map parse result/import map=].
 
 <p class="note">
   The timing of [=/register an import map=] is observable by possible `error` events, or by the fact that after [=/register an import map=] an import map <{script}> can be moved to another {{Document}}. On the other hand, the updated [=Document/import map=] is not observable until [=/wait for import maps=] completes.
@@ -297,7 +334,8 @@ To <dfn>register an import map</dfn> given an [=environment settings object=] |s
   1. If |parsed|["`scopes`"] [=map/exists=], then:
     1. If |parsed|["`scopes`"] is not a [=map=], then throw a {{TypeError}} indicating that the "`scopes`" top-level key must be a JSON object.
     1. Set |sortedAndNormalizedScopes| to the result of [=sorting and normalizing scopes=] given |parsed|["`scopes`"] and |baseURL|.
-  1. Return the [=/import map=] whose [=import map/imports=] are |sortedAndNormalizedImports| and whose [=import map/scopes=] scopes are |sortedAndNormalizedScopes|.
+  1. Let |import map| be a new [=/import map=] whose [=import map/imports=] are |sortedAndNormalizedImports| and whose [=import map/scopes=] scopes are |sortedAndNormalizedScopes|.
+  1. Return an [=import map parse result=] with [=import map parse result/settings object=] is ... [=import map parse result/import map=] is |import map|, and [=import map parse result/error to rethrow=] is ....
 </div>
 
 <div class="example" id="parsing-example">
