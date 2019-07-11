@@ -378,17 +378,23 @@ To <dfn>register an import map</dfn> given a [=string=] or a null |source text|,
 
 <h2 id="resolving">Resolving module specifiers</h2>
 
+<h3 id="new-resolve-algorithm">New "resolve a module specifier"</h3>
+
 <div algorithm>
   HTML already has a <a spec="html">resolve a module specifier</a> algorithm. We replace it with the following <dfn export>resolve a module specifier</dfn> algorithm, given a [=script=] |referringScript| and a [=JavaScript string=] |specifier|:
 
-  1. Let |importMap| be |referringScript|'s [=script/settings object=]'s [=environment settings object/import map=].
-  1. Let |moduleMap| be |referringScript|'s [=script/settings object=]'s [=environment settings object/module map=].
-  1. Let |scriptURL| be |referringScript|'s [=script/base URL=].
-  1. Let |scriptURLString| be |scriptURL|, [=URL serializer|serialized=].
-  1. Let |asURL| be the result of [=parsing a URL-like import specifier=] given |specifier| and |scriptURL|.
+  1. Let |settingsObject| be the [=current settings object=].
+  1. Let |baseURL| be |settingsObject|'s [=environment settings object/API base URL=].
+  1. If |referringScript| is not null, then:
+    1. Set |settingsObject| to |referringScript|'s [=script/settings object=].
+    1. Set |baseURL| to |referringScript|'s [=script/base URL=].
+  1. Let |importMap| be |settingsObject|'s [=environment settings object/import map=].
+  1. Let |moduleMap| be |settingsObject|'s [=environment settings object/module map=].
+  1. Let |baseURLString| be |baseURL|, [=URL serializer|serialized=].
+  1. Let |asURL| be the result of [=parsing a URL-like import specifier=] given |specifier| and |baseURL|.
   1. Let |normalizedSpecifier| be the [=URL serializer|serialization=] of |asURL|, if |asURL| is non-null; otherwise, |specifier|.
   1. [=map/For each=] |scopePrefix| → |scopeImports| of |importMap|'s [=import map/scopes=],
-    1. If |scopePrefix| is |scriptURLString|, or if |scopePrefix| ends with U+002F (/) and |scriptURLString| [=/starts with=] |scopePrefix|, then:
+    1. If |scopePrefix| is |baseURLString|, or if |scopePrefix| ends with U+002F (/) and |baseURLString| [=/starts with=] |scopePrefix|, then:
       1. Let |scopeImportsMatch| be the result of [=resolving an imports match=] given |normalizedSpecifier|, |scopeImports|, and |moduleMap|.
       1. If |scopeImportsMatch| is not null, then return |scopeImportsMatch|.
   1. Let |topLevelImportsMatch| be the reuslt of [=resolving an imports match=] given |normalizedSpecifier|, |importMap|'s [=import map/imports=], and |moduleMap|.
@@ -401,10 +407,6 @@ To <dfn>register an import map</dfn> given a [=string=] or a null |source text|,
 </div>
 
 <p class="advisement">It seems possible that the return type could end up being a [=list=] of [=URLs=], not just a single URL, to support HTTPS → HTTPS fallback. But, we haven't gotten that far yet; for now let's assume it stays a single URL.</p>
-
-All call sites of HTML's existing <a spec="html">resolve a module specifier</a> will need to be updated to pass the appropriate [=script=], not just its [=script/base URL=].
-
-They will also need to be updated to account for it now throwing exceptions, instead of returning failure. (Previously most call sites just turned failures into {{TypeError}}s manually, so this is straightforward.)
 
 <div algorithm>
   To <dfn lt="resolve an imports match|resolving an imports match">resolve an imports match</dfn>, given a [=string=] |normalizedSpecifier|, a [=specifier map=] |specifierMap|, and a [=module map=] |moduleMap|:
@@ -428,3 +430,12 @@ They will also need to be updated to account for it now throwing exceptions, ins
         1. Return |url|.
       1. Otherwise, <span class="advisement">we have no specification for more complicated fallbacks yet; throw a {{TypeError}} indicating this is not yet supported</span>.
 </div>
+
+<h3 id="resolving-updates">Updates to other algorithms</h3>
+
+All call sites of HTML's existing <a spec="html">resolve a module specifier</a> will need to be updated to pass the appropriate [=script=], not just its [=script/base URL=]. Some particular interesting cases:
+
+* <a spec="html">HostResolveImportedModule</a> and <a spec="html">HostImportModuleDynamically</a> no longer need to compute the base URL themselves, as [=resolve a module specifier=] now handles that.
+* [=Fetch an import() module script graph=] will also need to take a [=script=] instead of a base URL.
+
+Call sites will also need to be updated to account for [=resolve a module specifier=] now throwing exceptions, instead of returning failure. (Previously most call sites just turned failures into {{TypeError}}s manually, so this is straightforward.)
