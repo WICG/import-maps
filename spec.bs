@@ -199,14 +199,14 @@ Inside the <a spec="html">prepare a script</a> algorithm, we make the following 
   <dl>
     <dt>"`importmap`"</dt>
     <dd>
-      [=Fetch an import map=] given <var ignore>url</var>, |base URL|, <var ignore>settings object</var>, and <var ignore>options</var>.
+      [=Fetch an import map=] given <var ignore>url</var>, |base URL|, |settings object|, and <var ignore>options</var>.
     </dd>
   </dl>
 - Insert the following case to <a spec="html">prepare a script</a> step 25.2:
   <dl>
     <dt>"`importmap`"</dt>
     <dd>
-      1. Let |import map parse result| be the result of [=parsing an import map string=], given <var ignore>source text</var> and |base URL|.
+      1. Let |import map parse result| be the result of [=create an import map parse result=], given <var ignore>source text</var>, |base URL| and |settings object|.
       1. Set [=the script's result=] to |import map parse result|.
       1. <a spec="html">The script is ready</a>.
     </dd>
@@ -248,7 +248,7 @@ Inside the <a spec="html">prepare a script</a> algorithm, we make the following 
     - The result of [=extracting a MIME type=] from |response|'s [=response/header list=] is not `"application/importmap+json"`
       <p class="note">For more context on MIME type checking, see <a href="https://github.com/WICG/import-maps/issues/105">#105</a> and <a href="https://github.com/WICG/import-maps/pull/119">#119</a>.</p>
   1. Let |source text| be the result of [=UTF-8 decoding=] response's [=response/body=].
-  1. Asynchronously complete this algorithm with the result of [=parsing an import map string=], given |source text| and |base URL|.
+  1. Asynchronously complete this algorithm with the result of [=create an import map parse result=], given |source text|, |base URL|, and |settings object|.
 
 </div>
 
@@ -334,9 +334,16 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
   1. If |parsed|["`scopes`"] [=map/exists=], then:
     1. If |parsed|["`scopes`"] is not a [=map=], then throw a {{TypeError}} indicating that the "`scopes`" top-level key must be a JSON object.
     1. Set |sortedAndNormalizedScopes| to the result of [=sorting and normalizing scopes=] given |parsed|["`scopes`"] and |baseURL|.
-  1. Let |import map| be a new [=/import map=] whose [=import map/imports=] are |sortedAndNormalizedImports| and whose [=import map/scopes=] scopes are |sortedAndNormalizedScopes|.
-  1. Return an [=import map parse result=] with [=import map parse result/settings object=] is ... [=import map parse result/import map=] is |import map|, and [=import map parse result/error to rethrow=] is ....
+  1. Return the [=/import map=] whose [=import map/imports=] are |sortedAndNormalizedImports| and whose [=import map/scopes=] scopes are |sortedAndNormalizedScopes|.
 </div>
+
+<div algorithm>
+  To <dfn>create an import map parse result</dfn>, given a [=string=] |input|, a [=URL=] |baseURL|, and an [=environment settings object=] |settings object|:
+
+  1. Let |import map| be the result of [=parse an import map string=] given |input| and |baseURL|. If this throws an exception, let |error to rethrow| be the exception. Otherwise, let |error to rethrow| be null.
+  1. Return an [=import map parse result=] with [=import map parse result/settings object=] is |settings object|, [=import map parse result/import map=] is |import map|, and [=import map parse result/error to rethrow=] is |error to rethrow|.
+</div>
+
 
 <div class="example" id="parsing-example">
   The [=/import map=] is a highly normalized structure. For example, given a base URL of `<https://example.com/base/page.html>`, the input
