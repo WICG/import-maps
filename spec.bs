@@ -165,7 +165,7 @@ Each {{Document}} has an <dfn for="Document">acquiring import maps</dfn> boolean
 
 Inside the <a spec="html">prepare a script</a> algorithm, we make the following changes:
 
-- <a spec="html">the script's type</a> should be either "classic", "module", or "`importmap`".
+- <a spec="html">the script's type</a> should be either "`classic`", "`module`", or "`importmap`".
 - <a spec="html">the script's script</a> should be a <a spec="html">script</a> or an [=/import map=].
   <p class="note">We add the new script type and extend the type of <a spec="html">the script's script</a> to specify <a spec="html">prepare a script</a> consistently, but we don't make [=/import map=] the new subclass of [=script=] to leave other script execution-related specs unaffected.</p>
 - Insert the following step to [=prepare a script=] step 7, under "Determine the script's type as follows:":
@@ -224,7 +224,7 @@ Inside the <a spec="html">prepare a script</a> algorithm, we make the following 
     - |response|'s [=response/type=] is "`error`"
     - |response|'s [=response/status=] is not an [=ok status=]
     - The result of [=extracting a MIME type=] from |response|'s [=response/header list=] is not `"application/importmap+json"`
-      <p class="note">For more contexts about MIME type checking, see <a href="https://github.com/WICG/import-maps/issues/105">#105</a> and <a href="https://github.com/WICG/import-maps/pull/119">#119</a>.</p>
+      <p class="note">For more context on MIME type checking, see <a href="https://github.com/WICG/import-maps/issues/105">#105</a> and <a href="https://github.com/WICG/import-maps/pull/119">#119</a>.</p>
   1. Let |source text| be the result of [=UTF-8 decoding=] response's [=response/body=].
   1. Asynchronously complete this algorithm with the result of [=parsing an import map string=], given |source text| and |base URL|.
 
