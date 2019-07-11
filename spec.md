@@ -2,38 +2,6 @@
 
 The spec for import maps is located at https://wicg.github.io/import-maps/. This document contains notes on things that will eventually be formalized and make their way into the spec.
 
-## Merging import maps
-
-We're looking to do the minimal thing that could work here. As such, I propose the following:
-
-Given two import maps _A_ and _B_, the merged import map is a new import map whose imports are the result of merging _A_'s imports and _B_'s imports, and whose scopes are the result of merging _A_'s scopes and _B_'s scopes. Here, merging two maps means appending their entries to each other, with any conflicting keys from the first map removed.
-
-Example:
-
-```json
-{
-  "imports": { "a": "1", "b": "2" }
-}
-```
-
-+
-
-```json
-{
-  "imports": { "a": "3" }
-}
-```
-
-=
-
-```json
-{
-  "imports": { "b": "2", "a": "3" }
-}
-```
-
-Note that we do not introspect the scopes. If there's two conflicting definitions of how things behave inside a scope, then the last one wins.
-
 ## `import:` URL fetches
 
 _Unlike in previous import map proposals, `import:` URLs no longer involve changes to the URL parser._
