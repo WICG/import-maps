@@ -461,16 +461,21 @@ All call sites of HTML's existing <a spec="html">resolve a module specifier</a> 
 
 Call sites will also need to be updated to account for [=resolve a module specifier=] now throwing exceptions, instead of returning failure. (Previously most call sites just turned failures into {{TypeError}}s manually, so this is straightforward.)
 
-In addition to the call sites for [=validate a module script URL=] explicitly added within this spec, insert the following:
+In addition to the call sites for [=validate a module script URL=] explicitly added within this spec, insert the following at the beginning of <a spec="html">fetch a single module script</a>:
 
 <div algorithm="check-access-snippet">
-  1. [=Validate the module script URL=] given <var ignore>url</var>, |settings object|, and |settings object|'s [=environment settings object/API base URL=]. If this throws an error, then asynchronously complete this algorithm with null, and abort these steps.
+  1. [=Validate the module script URL=] given <var ignore>url</var>, |module map settings object|, and |module map settings object|'s [=environment settings object/API base URL=]. If this throws an error, then asynchronously complete this algorithm with null, and abort these steps.
 </div>
 
-at the beginning of the following HTML spec concepts (after [=wait for import maps=]):
+<div class="note">
+This will call [=validate the module script URL=] twice for each non-toplevel script fetch, in [=resolve a module specifier=], then in <a spec="html">fetch a single module script</a>. The behavior of the two calls is identical.
 
-- [=fetch an external module script graph=]
-- [=fetch a modulepreload module script graph=]
-- [=fetch a module worker script graph=] (using <var ignore>module map settings object</var>)
+Alternatively, we can add the snippet at the beginning of the following HTML spec concepts (after [=wait for import maps=]), so that the validation is not done twice:
+
+- [=fetch an external module script graph=] (using <var ignore>settings object</var>)
+- [=fetch a modulepreload module script graph=] (using <var ignore>settings object</var>)
+- [=fetch a module worker script graph=]
+
+</div>
 
 <p class="note">[=Validate a module script URL=] is applied to all module URLs before start loading, even in paths where [=resolve a module specifier=] and import maps are not applied (e.g. `<script src="..." type="module">`).</p>
