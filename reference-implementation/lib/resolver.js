@@ -13,14 +13,14 @@ exports.resolve = (specifier, parsedImportMap, scriptURL) => {
     if (scopePrefix === scriptURLString ||
         (scopePrefix.endsWith('/') && scriptURLString.startsWith(scopePrefix))) {
       const scopeImportsMatch = resolveImportsMatch(normalizedSpecifier, scopeImports);
-      if (scopeImportsMatch) {
+      if (scopeImportsMatch !== null) {
         return scopeImportsMatch;
       }
     }
   }
 
   const topLevelImportsMatch = resolveImportsMatch(normalizedSpecifier, parsedImportMap.imports);
-  if (topLevelImportsMatch) {
+  if (topLevelImportsMatch !== null) {
     return topLevelImportsMatch;
   }
 
@@ -71,5 +71,5 @@ function resolveImportsMatch(normalizedSpecifier, specifierMap) {
       }
     }
   }
-  return undefined;
+  return null;
 }

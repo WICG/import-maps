@@ -429,6 +429,7 @@ To <dfn>register an import map</dfn> given a [=string=] or a null |source text|,
         1. If |url| is failure, throw a {{TypeError}}, implicating |normalizedSpecifier| (and in particular the |afterPrefix| portion).
         1. Return |url|.
       1. Otherwise, <span class="advisement">we have no specification for more complicated fallbacks yet; throw a {{TypeError}} indicating this is not yet supported</span>.
+  1. Return null.
 </div>
 
 <h3 id="resolving-updates">Updates to other algorithms</h3>
