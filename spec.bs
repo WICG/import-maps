@@ -65,8 +65,8 @@ An <dfn>empty import map</dfn> is an [=/import map=] with its [=import map/impor
 <div algorithm>
   To <dfn>update an import map</dfn> |importMap| with a second [=/import map=] |newImportMap|:
 
-  1. For each |specifier| → |addresses| of |newImportMap|'s [=import map/imports=], [=map/set=] |importMap|[|specifier|] to |addresses|.
-  1. For each |url| → |specifierMap| of |newImportMap|'s [=import map/scopes=], [=map/set=] |importMap|[|url|] to |specifierMap|.
+  1. For each |specifier| → |addresses| of |newImportMap|'s [=import map/imports=], [=map/set=] |importMap|'s [=import map/imports=][|specifier|] to |addresses|.
+  1. For each |url| → |specifierMap| of |newImportMap|'s [=import map/scopes=], [=map/set=] |importMap|'s [=import map/scopes=][|url|] to |specifierMap|.
   1. Set |importMap|'s [=import map/imports=] to the result of [=map/sorting=] |importMap|'s [=import map/imports=], with an entry |a| being less than an entry |b| if |a|'s [=map/key=] is [=longer or code unit less than=] |b|'s [=map/key=].
   1. Set |importMap|'s [=import map/scopes=] to the result of [=map/sorting=] |importMap|'s [=import map/scopes=], with an entry |a| being less than an entry |b| if |a|'s [=map/key=] is [=longer or code unit less than=] |b|'s [=map/key=].
 </div>
