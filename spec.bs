@@ -396,12 +396,16 @@ To <dfn>register an import map</dfn> given a [=string=] or a null |source text|,
   1. [=map/For each=] |scopePrefix| → |scopeImports| of |importMap|'s [=import map/scopes=],
     1. If |scopePrefix| is |baseURLString|, or if |scopePrefix| ends with U+002F (/) and |baseURLString| [=/starts with=] |scopePrefix|, then:
       1. Let |scopeImportsMatch| be the result of [=resolving an imports match=] given |normalizedSpecifier|, |scopeImports|, and |moduleMap|.
-      1. If |scopeImportsMatch| is not null, then return |scopeImportsMatch|.
+      1. If |scopeImportsMatch| is not null, then:
+        1. [=Check access=] given |scopeImportsMatch|, |settingsObject|, and |baseURL|.
+        1. Return |scopeImportsMatch|.
   1. Let |topLevelImportsMatch| be the reuslt of [=resolving an imports match=] given |normalizedSpecifier|, |importMap|'s [=import map/imports=], and |moduleMap|.
-  1. If |topLevelImportsMatch| is not null, then return |topLevelImportsMatch|.
+  1. If |topLevelImportsMatch| is not null, then:
+    1. [=/Check access=] given |topLevelImportsMatch|, |settingsObject|, and |baseURL|.
+    1. Return |topLevelImportsMatch|.
   1. <p class="note">At this point, the specifier was able to be turned in to a URL, but it wasn't remapped to anything by |importMap|.</p>
     If |asURL| is not null, then:
-    1. If |asURL|'s [=url/scheme=] is "`std`", and |moduleMap|[|asURL|] does not [=map/exist=], then throw a {{TypeError}} indicating that the requested built-in module is not implemented.
+    1. [=/Check access=] given |asURL|, |settingsObject|, and |baseURL|.
     1. Return |asURL|.
   1. Throw a {{TypeError}} indicating that |specifier| was a bare specifier, but was not remapped to anything by |importMap|.
 </div>
@@ -431,6 +435,22 @@ To <dfn>register an import map</dfn> given a [=string=] or a null |source text|,
       1. Otherwise, <span class="advisement">we have no specification for more complicated fallbacks yet; throw a {{TypeError}} indicating this is not yet supported</span>.
   1. Return null.
 </div>
+<div algorithm>
+  To <dfn>check access</dfn>, given a [=URL=] |url|, an [=environment settings object=] |settings object|, and a [=URL=] |base URL|:
+
+  1. <div class="note">Optionally, we can apply context-dependent access restrictions based on |base URL|. For example, Chromium might implement the followings, which aren't observable by users.
+         1. If |url|'s [=url/scheme=] is "`std-internal`" and |base URL|'s [=url/scheme=] is "`std-internal`", then return. This allows the use of "`std-internal`" within built-in modules, and rejects "`std-internal`" from user-provided scripts.
+         1. If |url|'s [=url/scheme=] is "`std`", |url| represents an access-restricted built-in module, and |base URL|'s [=url/scheme=] is not "`std-internal`", then throw a {{TypeError}}. This will be used to restrict access to getOriginals only within built-in modules.
+       This kind of access restrictions is similar to import map's scope matching, as both uses the same |base URL|, but the check here is enforced in all cases (and thus can be used as a security mechanism), while import map's scoping can be bypassed as e.g. the URLs in `<script src="..." type="module">` isn't controlled by import maps.
+     </div>
+  1. If |url|'s [=url/scheme=] is "`std`", then:
+    1. If the [=URL serializer|serialization=] of |url| contains U+002F (/), then throw a {{TypeError}} indicating that |url| is a malformed built-in URL.
+    1. Let |moduleMap| be |settings object|'s [=environment settings object/module map=].
+    1. If |moduleMap|[|url|] does not [=map/exist=], then throw a {{TypeError}} indicating that the requested built-in module is not implemented.
+       <p class="note">This condition is added to ensure that |moduleMap|[|url|] does not [=map/exist=] for unimplemented built-ins. Without this condition, <a spec="html">fetch a single module script</a> might be called and |moduleMap|[|url|] can be set to null, which might complicates the spec around built-ins.</p>
+    1. Return.
+  1. If |url|'s [=url/scheme=] is not a [=fetch scheme=], then throw a {{TypeError}} indicating that |url| is not a fetch scheme.
+</div>
 
 <h3 id="resolving-updates">Updates to other algorithms</h3>
 
@@ -440,3 +460,17 @@ All call sites of HTML's existing <a spec="html">resolve a module specifier</a> 
 * [=Fetch an import() module script graph=] will also need to take a [=script=] instead of a base URL.
 
 Call sites will also need to be updated to account for [=resolve a module specifier=] now throwing exceptions, instead of returning failure. (Previously most call sites just turned failures into {{TypeError}}s manually, so this is straightforward.)
+
+In addition to the call sites for [=check access=] explicitly added within this spec, insert the following:
+
+<div algorithm="check-access-snippet">
+  1. [=Check access=] given <var ignore>url</var>, |settings object|, and |settings object|'s [=environment settings object/API base URL=]. If this throws an error, then asynchronously complete this algorithm with null, and abort these steps.
+</div>
+
+at the beginning of the following HTML spec concepts (after [=wait for import maps=]):
+
+- [=fetch an external module script graph=]
+- [=fetch a modulepreload module script graph=]
+- [=fetch a module worker script graph=] (using <var ignore>module map settings object</var>)
+
+<p class="note">[=Check access=] is applied to all module URLs before start loading, even in paths where [=resolve a module specifier=] and import maps are not applied (e.g. `<script src="..." type="module">`).</p>
