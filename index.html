@@ -1487,7 +1487,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Import Maps</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Draft Community Group Report, <time class="dt-updated" datetime="2019-07-10">10 July 2019</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Draft Community Group Report, <time class="dt-updated" datetime="2019-07-11">11 July 2019</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1562,15 +1562,65 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    </ul>
    <p>An <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="empty-import-map">empty import map</dfn> is an <a data-link-type="dfn" href="#import-map" id="ref-for-import-map">import map</a> with its <a data-link-type="dfn" href="#import-map-imports" id="ref-for-import-map-imports">imports</a> and <a data-link-type="dfn" href="#import-map-scopes" id="ref-for-import-map-scopes">scopes</a> both being empty maps.</p>
    <div class="algorithm" data-algorithm="update an import map">
-     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="update-an-import-map">update an import map</dfn> <var>import map</var> with a second <a data-link-type="dfn" href="#import-map" id="ref-for-import-map①">import map</a> <var>new import map</var>: 
+     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="update-an-import-map">update an import map</dfn> <var>importMap</var> with a second <a data-link-type="dfn" href="#import-map" id="ref-for-import-map①">import map</a> <var>newImportMap</var>: 
     <ol>
      <li data-md>
-      <p class="assertion">Assert: <var>import map</var> is not null.</p>
+      <p>For each <var>specifier</var> → <var>addresses</var> of <var>newImportMap</var>’s <a data-link-type="dfn" href="#import-map-imports" id="ref-for-import-map-imports①">imports</a>, <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-set" id="ref-for-map-set">set</a> <var>importMap</var>’s <a data-link-type="dfn" href="#import-map-imports" id="ref-for-import-map-imports②">imports</a>[<var>specifier</var>] to <var>addresses</var>.</p>
      <li data-md>
-      <p class="assertion">Assert: <var>new import map</var> is not null.</p>
+      <p>For each <var>url</var> → <var>specifierMap</var> of <var>newImportMap</var>’s <a data-link-type="dfn" href="#import-map-scopes" id="ref-for-import-map-scopes①">scopes</a>, <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-set" id="ref-for-map-set①">set</a> <var>importMap</var>’s <a data-link-type="dfn" href="#import-map-scopes" id="ref-for-import-map-scopes②">scopes</a>[<var>url</var>] to <var>specifierMap</var>.</p>
      <li data-md>
-      <p class="note" role="note">TODO: Implement merging. This merges <var>new import map</var> into <var>import map</var> and thus updates <var>import map</var> in-place.</p>
+      <p>Set <var>importMap</var>’s <a data-link-type="dfn" href="#import-map-imports" id="ref-for-import-map-imports③">imports</a> to the result of <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-sort-in-ascending-order" id="ref-for-map-sort-in-ascending-order">sorting</a> <var>importMap</var>’s <a data-link-type="dfn" href="#import-map-imports" id="ref-for-import-map-imports④">imports</a>, with an entry <var>a</var> being less than an entry <var>b</var> if <var>a</var>’s <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-key" id="ref-for-map-key">key</a> is <a data-link-type="dfn" href="#longer-or-code-unit-less-than" id="ref-for-longer-or-code-unit-less-than">longer or code unit less than</a> <var>b</var>’s <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-key" id="ref-for-map-key①">key</a>.</p>
+     <li data-md>
+      <p>Set <var>importMap</var>’s <a data-link-type="dfn" href="#import-map-scopes" id="ref-for-import-map-scopes③">scopes</a> to the result of <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-sort-in-ascending-order" id="ref-for-map-sort-in-ascending-order①">sorting</a> <var>importMap</var>’s <a data-link-type="dfn" href="#import-map-scopes" id="ref-for-import-map-scopes④">scopes</a>, with an entry <var>a</var> being less than an entry <var>b</var> if <var>a</var>’s <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-key" id="ref-for-map-key②">key</a> is <a data-link-type="dfn" href="#longer-or-code-unit-less-than" id="ref-for-longer-or-code-unit-less-than①">longer or code unit less than</a> <var>b</var>’s <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-key" id="ref-for-map-key③">key</a>.</p>
     </ol>
+   </div>
+   <div class="example" id="example-merging">
+    <a class="self-link" href="#example-merging"></a> <a data-link-type="dfn" href="#update-an-import-map" id="ref-for-update-an-import-map">Update an import map</a> merges the two import maps in a very simple way, not performing any deep merging beyond the top level of the "<code>imports</code>" and "<code>scopes</code>" keys. For example, 
+<pre class="highlight"><c- p>&lt;</c-><c- f>script</c-> <c- e>type</c-><c- o>=</c-><c- s>"importmap"</c-><c- p>></c->
+<c- p>{</c->
+  <c- u>"imports"</c-><c- o>:</c-> <c- p>{</c->
+    <c- u>"a"</c-><c- o>:</c-> <c- u>"/a-1.mjs"</c-><c- p>,</c->
+    <c- u>"b"</c-><c- o>:</c-> <c- u>"/b-1.mjs"</c-><c- p>,</c->
+    <c- u>"std:kv-storage"</c-><c- o>:</c-> <c- p>[</c-><c- u>"std:kv-storage"</c-><c- p>,</c-> <c- u>"/kvs-1.mjs"</c-><c- p>]</c->
+  <c- p>},</c->
+  <c- u>"scopes"</c-><c- o>:</c-> <c- p>{</c->
+    <c- u>"/scope1/"</c-><c- o>:</c-> <c- p>{</c->
+      <c- u>"a"</c-><c- o>:</c-> <c- u>"/a-2.mjs"</c->
+    <c- p>}</c->
+  <c- p>}</c->
+<c- p>}</c->
+<c- p>&lt;/</c-><c- f>script</c-><c- p>></c->
+<c- p>&lt;</c-><c- f>script</c-> <c- e>type</c-><c- o>=</c-><c- s>"importmap"</c-><c- p>></c->
+<c- p>{</c->
+  <c- u>"imports"</c-><c- o>:</c-> <c- p>{</c->
+    <c- u>"b"</c-><c- o>:</c-> <c- kc>null</c-><c- p>,</c->
+    <c- u>"std:kv-storage"</c-><c- o>:</c-> <c- u>"kvs-2.mjs"</c->
+  <c- p>},</c->
+  <c- u>"scopes"</c-><c- o>:</c-> <c- p>{</c->
+    <c- u>"/scope1/"</c-><c- o>:</c-> <c- p>{</c->
+      <c- u>"b"</c-><c- o>:</c-> <c- u>"/b-2.mjs"</c->
+    <c- p>}</c->
+  <c- p>}</c->
+<c- p>}</c->
+<c- p>&lt;/</c-><c- f>script</c-><c- p>></c->
+</pre>
+    <p>is equivalent to</p>
+<pre class="highlight"><c- p>&lt;</c-><c- f>script</c-> <c- e>type</c-><c- o>=</c-><c- s>"importmap"</c-><c- p>></c->
+<c- p>{</c->
+  <c- u>"imports"</c-><c- o>:</c-> <c- p>{</c->
+    <c- u>"a"</c-><c- o>:</c-> <c- u>"/a-1.mjs"</c-><c- p>,</c->
+    <c- u>"b"</c-><c- o>:</c-> <c- kc>null</c-><c- p>,</c->
+    <c- u>"std:kv-storage"</c-><c- o>:</c-> <c- u>"kvs-2.mjs"</c->
+  <c- p>},</c->
+  <c- u>"scopes"</c-><c- o>:</c-> <c- p>{</c->
+    <c- u>"/scope1/"</c-><c- o>:</c-> <c- p>{</c->
+      <c- u>"b"</c-><c- o>:</c-> <c- u>"/b-2.mjs"</c->
+    <c- p>}</c->
+  <c- p>}</c->
+<c- p>}</c->
+<c- p>&lt;/</c-><c- f>script</c-><c- p>></c->
+</pre>
+    <p>Notice how the definition for "<code>/scope1/</code>" was completely overridden, so there is no longer a redirection for the "<code>a</code>" module specifier within that scope.</p>
    </div>
    <h2 class="heading settled" data-level="2" id="acquiring"><span class="secno">2. </span><span class="content">Acquiring import maps</span><a class="self-link" href="#acquiring"></a></h2>
    <h3 class="heading settled" data-level="2.1" id="integration-environment-settings-object"><span class="secno">2.1. </span><span class="content">New members of environment settings object</span><a class="self-link" href="#integration-environment-settings-object"></a></h3>
@@ -1725,7 +1775,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      <li data-md>
       <p>If <var>import map</var> is null, then <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#queue-a-task" id="ref-for-queue-a-task②">queue a task</a> to <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-event-fire" id="ref-for-concept-event-fire②">fire an event</a> named <code>error</code> at <var>element</var>, and return.</p>
      <li data-md>
-      <p>Otherwise, <a data-link-type="dfn" href="#update-an-import-map" id="ref-for-update-an-import-map">update</a> <var>element</var>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node-document" id="ref-for-concept-node-document">node document</a>'s <a data-link-type="dfn" href="#document-import-map" id="ref-for-document-import-map①">import map</a> with <var>import map</var>.</p>
+      <p>Otherwise, <a data-link-type="dfn" href="#update-an-import-map" id="ref-for-update-an-import-map①">update</a> <var>element</var>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node-document" id="ref-for-concept-node-document">node document</a>'s <a data-link-type="dfn" href="#document-import-map" id="ref-for-document-import-map①">import map</a> with <var>import map</var>.</p>
     </ol>
    </div>
    <h2 class="heading settled" data-level="3" id="parsing"><span class="secno">3. </span><span class="content">Parsing import maps</span><a class="self-link" href="#parsing"></a></h2>
@@ -1757,7 +1807,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
         <p>Set <var>sortedAndNormalizedScopes</var> to the result of <a data-link-type="dfn" href="#sort-and-normalize-scopes" id="ref-for-sort-and-normalize-scopes">sorting and normalizing scopes</a> given <var>parsed</var>["<code>scopes</code>"] and <var>baseURL</var>.</p>
       </ol>
      <li data-md>
-      <p>Return the <a data-link-type="dfn" href="#import-map" id="ref-for-import-map⑤">import map</a> whose <a data-link-type="dfn" href="#import-map-imports" id="ref-for-import-map-imports①">imports</a> are <var>sortedAndNormalizedImports</var> and whose <a data-link-type="dfn" href="#import-map-scopes" id="ref-for-import-map-scopes①">scopes</a> scopes are <var>sortedAndNormalizedScopes</var>.</p>
+      <p>Return the <a data-link-type="dfn" href="#import-map" id="ref-for-import-map⑤">import map</a> whose <a data-link-type="dfn" href="#import-map-imports" id="ref-for-import-map-imports⑤">imports</a> are <var>sortedAndNormalizedImports</var> and whose <a data-link-type="dfn" href="#import-map-scopes" id="ref-for-import-map-scopes⑤">scopes</a> scopes are <var>sortedAndNormalizedScopes</var>.</p>
     </ol>
    </div>
    <div class="example" id="parsing-example">
@@ -1772,7 +1822,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
   <c- p>}</c->
 <c- p>}</c->
 </pre>
-    <p>will generate an <a data-link-type="dfn" href="#import-map" id="ref-for-import-map⑦">import map</a> with <a data-link-type="dfn" href="#import-map-imports" id="ref-for-import-map-imports②">imports</a> of</p>
+    <p>will generate an <a data-link-type="dfn" href="#import-map" id="ref-for-import-map⑦">import map</a> with <a data-link-type="dfn" href="#import-map-imports" id="ref-for-import-map-imports⑥">imports</a> of</p>
 <pre>«[
   "https://example.com/app/helper" → «
     &lt;https://example.com/base/node_modules/helper/index.mjs>
@@ -1783,7 +1833,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
   »
 ]»
 </pre>
-    <p>and (despite nothing being present in the input) an empty <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-map" id="ref-for-ordered-map⑦">map</a> for its <a data-link-type="dfn" href="#import-map-scopes" id="ref-for-import-map-scopes②">scopes</a>.</p>
+    <p>and (despite nothing being present in the input) an empty <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-map" id="ref-for-ordered-map⑦">map</a> for its <a data-link-type="dfn" href="#import-map-scopes" id="ref-for-import-map-scopes⑥">scopes</a>.</p>
    </div>
    <div class="algorithm" data-algorithm="sort and normalize a specifier map">
      To <dfn class="dfn-paneled" data-dfn-type="dfn" data-lt="sort and normalize a specifier map|sorting and normalizing a specifier map" data-noexport id="sort-and-normalize-a-specifier-map">sort and normalize a specifier map</dfn>, given a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-map" id="ref-for-ordered-map⑧">map</a> <var>originalMap</var> and a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url④">URL</a> <var>baseURL</var>: 
@@ -1843,7 +1893,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
         <p>Set <var>normalized</var>[<var>specifierKey</var>] to <var>validNormalizedAddresses</var>.</p>
       </ol>
      <li data-md>
-      <p>Return the result of <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-sort-in-ascending-order" id="ref-for-map-sort-in-ascending-order">sorting</a> <var>normalized</var>, with an entry <var>a</var> being less than an entry <var>b</var> if <var>a</var>’s <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-key" id="ref-for-map-key">key</a> is <a data-link-type="dfn" href="#longer-or-code-unit-less-than" id="ref-for-longer-or-code-unit-less-than">longer or code unit less than</a> <var>b</var>’s <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-key" id="ref-for-map-key①">key</a>.</p>
+      <p>Return the result of <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-sort-in-ascending-order" id="ref-for-map-sort-in-ascending-order②">sorting</a> <var>normalized</var>, with an entry <var>a</var> being less than an entry <var>b</var> if <var>a</var>’s <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-key" id="ref-for-map-key④">key</a> is <a data-link-type="dfn" href="#longer-or-code-unit-less-than" id="ref-for-longer-or-code-unit-less-than②">longer or code unit less than</a> <var>b</var>’s <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-key" id="ref-for-map-key⑤">key</a>.</p>
     </ol>
    </div>
    <div class="algorithm" data-algorithm="sort and normalize scopes">
@@ -1874,7 +1924,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
         <p>Set <var>normalized</var>[<var>normalizedScopePrefix</var>] to the result of <a data-link-type="dfn" href="#sort-and-normalize-a-specifier-map" id="ref-for-sort-and-normalize-a-specifier-map①">sorting and normalizing a specifier map</a> given <var>potentialSpecifierMap</var> and <var>baseURL</var>.</p>
       </ol>
      <li data-md>
-      <p>Return the result of <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-sort-in-ascending-order" id="ref-for-map-sort-in-ascending-order①">sorting</a> <var>normalized</var>, with an entry <var>a</var> being less than an entry <var>b</var> if <var>a</var>’s <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-key" id="ref-for-map-key②">key</a> is <a data-link-type="dfn" href="#longer-or-code-unit-less-than" id="ref-for-longer-or-code-unit-less-than①">longer or code unit less than</a> <var>b</var>’s <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-key" id="ref-for-map-key③">key</a>.</p>
+      <p>Return the result of <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-sort-in-ascending-order" id="ref-for-map-sort-in-ascending-order③">sorting</a> <var>normalized</var>, with an entry <var>a</var> being less than an entry <var>b</var> if <var>a</var>’s <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-key" id="ref-for-map-key⑥">key</a> is <a data-link-type="dfn" href="#longer-or-code-unit-less-than" id="ref-for-longer-or-code-unit-less-than③">longer or code unit less than</a> <var>b</var>’s <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-key" id="ref-for-map-key⑦">key</a>.</p>
     </ol>
    </div>
    <div class="algorithm" data-algorithm="normalize a specifier key">
@@ -1946,7 +1996,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      <li data-md>
       <p>Let <var>normalizedSpecifier</var> be the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer" id="ref-for-concept-url-serializer⑤">serialization</a> of <var>asURL</var>, if <var>asURL</var> is non-null; otherwise, <var>specifier</var>.</p>
      <li data-md>
-      <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-iterate" id="ref-for-map-iterate③">For each</a> <var>scopePrefix</var> → <var>scopeImports</var> of <var>importMap</var>’s <a data-link-type="dfn" href="#import-map-scopes" id="ref-for-import-map-scopes③">scopes</a>,</p>
+      <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-iterate" id="ref-for-map-iterate③">For each</a> <var>scopePrefix</var> → <var>scopeImports</var> of <var>importMap</var>’s <a data-link-type="dfn" href="#import-map-scopes" id="ref-for-import-map-scopes⑦">scopes</a>,</p>
       <ol>
        <li data-md>
         <p>If <var>scopePrefix</var> is <var>scriptURLString</var>, or if <var>scopePrefix</var> ends with U+002F (/) and <var>scriptURLString</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#code-unit-prefix" id="ref-for-code-unit-prefix①">starts with</a> <var>scopePrefix</var>, then:</p>
@@ -1958,7 +2008,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
         </ol>
       </ol>
      <li data-md>
-      <p>Let <var>topLevelImportsMatch</var> be the reuslt of <a data-link-type="dfn" href="#resolve-an-imports-match" id="ref-for-resolve-an-imports-match①">resolving an imports match</a> given <var>normalizedSpecifier</var>, <var>importMap</var>’s <a data-link-type="dfn" href="#import-map-imports" id="ref-for-import-map-imports③">imports</a>, and <var>moduleMap</var>.</p>
+      <p>Let <var>topLevelImportsMatch</var> be the reuslt of <a data-link-type="dfn" href="#resolve-an-imports-match" id="ref-for-resolve-an-imports-match①">resolving an imports match</a> given <var>normalizedSpecifier</var>, <var>importMap</var>’s <a data-link-type="dfn" href="#import-map-imports" id="ref-for-import-map-imports⑦">imports</a>, and <var>moduleMap</var>.</p>
      <li data-md>
       <p>If <var>topLevelImportsMatch</var> is not null, then return <var>topLevelImportsMatch</var>.</p>
      <li data-md>
@@ -2559,7 +2609,8 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
   <aside class="dfn-panel" data-for="term-for-map-key">
    <a href="https://infra.spec.whatwg.org/#map-key">https://infra.spec.whatwg.org/#map-key</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-map-key">3. Parsing import maps</a> <a href="#ref-for-map-key①">(2)</a> <a href="#ref-for-map-key②">(3)</a> <a href="#ref-for-map-key③">(4)</a>
+    <li><a href="#ref-for-map-key">1. Definitions</a> <a href="#ref-for-map-key①">(2)</a> <a href="#ref-for-map-key②">(3)</a> <a href="#ref-for-map-key③">(4)</a>
+    <li><a href="#ref-for-map-key④">3. Parsing import maps</a> <a href="#ref-for-map-key⑤">(2)</a> <a href="#ref-for-map-key⑥">(3)</a> <a href="#ref-for-map-key⑦">(4)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-string-length">
@@ -2596,6 +2647,12 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
     <li><a href="#ref-for-parse-json-into-infra-values">3. Parsing import maps</a>
    </ul>
   </aside>
+  <aside class="dfn-panel" data-for="term-for-map-set">
+   <a href="https://infra.spec.whatwg.org/#map-set">https://infra.spec.whatwg.org/#map-set</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-map-set">1. Definitions</a> <a href="#ref-for-map-set①">(2)</a>
+   </ul>
+  </aside>
   <aside class="dfn-panel" data-for="term-for-list-size">
    <a href="https://infra.spec.whatwg.org/#list-size">https://infra.spec.whatwg.org/#list-size</a><b>Referenced in:</b>
    <ul>
@@ -2605,7 +2662,8 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
   <aside class="dfn-panel" data-for="term-for-map-sort-in-ascending-order">
    <a href="https://infra.spec.whatwg.org/#map-sort-in-ascending-order">https://infra.spec.whatwg.org/#map-sort-in-ascending-order</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-map-sort-in-ascending-order">3. Parsing import maps</a> <a href="#ref-for-map-sort-in-ascending-order①">(2)</a>
+    <li><a href="#ref-for-map-sort-in-ascending-order">1. Definitions</a> <a href="#ref-for-map-sort-in-ascending-order①">(2)</a>
+    <li><a href="#ref-for-map-sort-in-ascending-order②">3. Parsing import maps</a> <a href="#ref-for-map-sort-in-ascending-order③">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-code-unit-prefix">
@@ -2764,6 +2822,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      <li><span class="dfn-paneled" id="term-for-ordered-map" style="color:initial">map</span>
      <li><span class="dfn-paneled" id="term-for-ordered-map①" style="color:initial">ordered map</span>
      <li><span class="dfn-paneled" id="term-for-parse-json-into-infra-values" style="color:initial">parse json into infra values</span>
+     <li><span class="dfn-paneled" id="term-for-map-set" style="color:initial">set</span>
      <li><span class="dfn-paneled" id="term-for-list-size" style="color:initial">size</span>
      <li><span class="dfn-paneled" id="term-for-map-sort-in-ascending-order" style="color:initial">sorting</span>
      <li><span class="dfn-paneled" id="term-for-code-unit-prefix" style="color:initial">starts with</span>
@@ -2828,17 +2887,17 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
   <aside class="dfn-panel" data-for="import-map-imports">
    <b><a href="#import-map-imports">#import-map-imports</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-import-map-imports">1. Definitions</a>
-    <li><a href="#ref-for-import-map-imports①">3. Parsing import maps</a> <a href="#ref-for-import-map-imports②">(2)</a>
-    <li><a href="#ref-for-import-map-imports③">4. Resolving module specifiers</a>
+    <li><a href="#ref-for-import-map-imports">1. Definitions</a> <a href="#ref-for-import-map-imports①">(2)</a> <a href="#ref-for-import-map-imports②">(3)</a> <a href="#ref-for-import-map-imports③">(4)</a> <a href="#ref-for-import-map-imports④">(5)</a>
+    <li><a href="#ref-for-import-map-imports⑤">3. Parsing import maps</a> <a href="#ref-for-import-map-imports⑥">(2)</a>
+    <li><a href="#ref-for-import-map-imports⑦">4. Resolving module specifiers</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="import-map-scopes">
    <b><a href="#import-map-scopes">#import-map-scopes</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-import-map-scopes">1. Definitions</a>
-    <li><a href="#ref-for-import-map-scopes①">3. Parsing import maps</a> <a href="#ref-for-import-map-scopes②">(2)</a>
-    <li><a href="#ref-for-import-map-scopes③">4. Resolving module specifiers</a>
+    <li><a href="#ref-for-import-map-scopes">1. Definitions</a> <a href="#ref-for-import-map-scopes①">(2)</a> <a href="#ref-for-import-map-scopes②">(3)</a> <a href="#ref-for-import-map-scopes③">(4)</a> <a href="#ref-for-import-map-scopes④">(5)</a>
+    <li><a href="#ref-for-import-map-scopes⑤">3. Parsing import maps</a> <a href="#ref-for-import-map-scopes⑥">(2)</a>
+    <li><a href="#ref-for-import-map-scopes⑦">4. Resolving module specifiers</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="empty-import-map">
@@ -2850,7 +2909,8 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
   <aside class="dfn-panel" data-for="update-an-import-map">
    <b><a href="#update-an-import-map">#update-an-import-map</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-update-an-import-map">2.4. Registering an import map</a>
+    <li><a href="#ref-for-update-an-import-map">1. Definitions</a>
+    <li><a href="#ref-for-update-an-import-map①">2.4. Registering an import map</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="environment-settings-object-import-map">
@@ -2940,7 +3000,8 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
   <aside class="dfn-panel" data-for="longer-or-code-unit-less-than">
    <b><a href="#longer-or-code-unit-less-than">#longer-or-code-unit-less-than</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-longer-or-code-unit-less-than">3. Parsing import maps</a> <a href="#ref-for-longer-or-code-unit-less-than①">(2)</a>
+    <li><a href="#ref-for-longer-or-code-unit-less-than">1. Definitions</a> <a href="#ref-for-longer-or-code-unit-less-than①">(2)</a>
+    <li><a href="#ref-for-longer-or-code-unit-less-than②">3. Parsing import maps</a> <a href="#ref-for-longer-or-code-unit-less-than③">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="resolve-a-module-specifier">
