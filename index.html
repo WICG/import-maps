@@ -1487,7 +1487,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Import Maps</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Draft Community Group Report, <time class="dt-updated" datetime="2019-07-11">11 July 2019</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Draft Community Group Report, <time class="dt-updated" datetime="2019-07-12">12 July 2019</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1812,6 +1812,9 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
         <p>Set <var>sortedAndNormalizedScopes</var> to the result of <a data-link-type="dfn" href="#sort-and-normalize-scopes" id="ref-for-sort-and-normalize-scopes">sorting and normalizing scopes</a> given <var>parsed</var>["<code>scopes</code>"] and <var>baseURL</var>.</p>
       </ol>
      <li data-md>
+      <p>If <var>parsed</var>’s <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-getting-the-keys" id="ref-for-map-getting-the-keys">keys</a> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-contain" id="ref-for-list-contain">contains</a> any items besides "<code>imports</code>" or "<code>scopes</code>", <a data-link-type="dfn" href="https://console.spec.whatwg.org/#report-a-warning-to-the-console" id="ref-for-report-a-warning-to-the-console">report a warning to the console</a> that an invalid top-level key was present in the import map.</p>
+      <p class="note" role="note">This can help detect typos. It is not an error, because that would prevent any future extensions from being added backward-compatibly.</p>
+     <li data-md>
       <p>Return the <a data-link-type="dfn" href="#import-map" id="ref-for-import-map⑤">import map</a> whose <a data-link-type="dfn" href="#import-map-imports" id="ref-for-import-map-imports⑤">imports</a> are <var>sortedAndNormalizedImports</var> and whose <a data-link-type="dfn" href="#import-map-scopes" id="ref-for-import-map-scopes⑤">scopes</a> scopes are <var>sortedAndNormalizedScopes</var>.</p>
     </ol>
    </div>
@@ -1858,6 +1861,8 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
         <p>Otherwise, if <var>value</var> is null, then set <var>normalized</var>[<var>normalizedSpecifierKey</var>] to a new empty list.</p>
        <li data-md>
         <p>Otherwise, if <var>value</var> is a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list" id="ref-for-list②">list</a>, then set <var>normalized</var>[<var>normalizedSpecifierKey</var>] to <var>value</var>.</p>
+       <li data-md>
+        <p>Otherwise, <a data-link-type="dfn" href="https://console.spec.whatwg.org/#report-a-warning-to-the-console" id="ref-for-report-a-warning-to-the-console①">report a warning to the console</a> that addresses must be strings, arrays, or null.</p>
       </ol>
      <li data-md>
       <p>Next, normalize and validate each potential address in the value <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list" id="ref-for-list③">lists</a>. <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-iterate" id="ref-for-map-iterate①">For each</a> <var>specifierKey</var> → <var>potentialAddresses</var> of <var>normalized</var>,</p>
@@ -1870,16 +1875,28 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
         <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-iterate" id="ref-for-list-iterate">For each</a> <var>potentialAddress</var> of <var>potentialAddresses</var>,</p>
         <ol>
          <li data-md>
-          <p>If <var>potentialAddress</var> is not a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string⑤">string</a>, then <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue" id="ref-for-iteration-continue①">continue</a>.</p>
+          <p>If <var>potentialAddress</var> is not a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string⑤">string</a>, then:</p>
+          <ol>
+           <li data-md>
+            <p><a data-link-type="dfn" href="https://console.spec.whatwg.org/#report-a-warning-to-the-console" id="ref-for-report-a-warning-to-the-console②">Report a warning to the console</a> that the contents of address arrays must be strings.</p>
+           <li data-md>
+            <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue" id="ref-for-iteration-continue①">Continue</a>.</p>
+          </ol>
          <li data-md>
           <p>Let <var>addressURL</var> be the result of <a data-link-type="dfn" href="#parse-a-url-like-import-specifier" id="ref-for-parse-a-url-like-import-specifier">parsing a URL-like import specifier</a> given <var>potentialAddress</var> and <var>baseURL</var>.</p>
          <li data-md>
-          <p>If <var>addressURL</var> is null, then <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue" id="ref-for-iteration-continue②">continue</a>.</p>
+          <p>If <var>addressURL</var> is null, then:</p>
+          <ol>
+           <li data-md>
+            <p><a data-link-type="dfn" href="https://console.spec.whatwg.org/#report-a-warning-to-the-console" id="ref-for-report-a-warning-to-the-console③">Report a warning to the console</a> that the address was invalid.</p>
+           <li data-md>
+            <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue" id="ref-for-iteration-continue②">Continue</a>.</p>
+          </ol>
          <li data-md>
           <p>If <var>specifierKey</var> ends with U+002F (/), and the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer" id="ref-for-concept-url-serializer">serialization</a> of <var>addressURL</var> does not end with U+002F (/), then:</p>
           <ol>
            <li data-md>
-            <p><a data-link-type="dfn" href="https://console.spec.whatwg.org/#report-a-warning-to-the-console" id="ref-for-report-a-warning-to-the-console">Report a warning to the console</a> that an invalid target address was given for the specifier key <var>specifierKey</var>; since <var>specifierKey</var> ended in a slash, so must the address.</p>
+            <p><a data-link-type="dfn" href="https://console.spec.whatwg.org/#report-a-warning-to-the-console" id="ref-for-report-a-warning-to-the-console④">Report a warning to the console</a> that an invalid address was given for the specifier key <var>specifierKey</var>; since <var>specifierKey</var> ended in a slash, so must the address.</p>
            <li data-md>
             <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue" id="ref-for-iteration-continue③">Continue</a>.</p>
           </ol>
@@ -1887,7 +1904,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
           <p>If <var>specifierKey</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme">scheme</a> is "<code>std</code>" and the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer" id="ref-for-concept-url-serializer①">serialization</a> of <var>addressURL</var> contains U+002F (/), then:</p>
           <ol>
            <li data-md>
-            <p><a data-link-type="dfn" href="https://console.spec.whatwg.org/#report-a-warning-to-the-console" id="ref-for-report-a-warning-to-the-console①">Report a warning to the console</a> that built-in module URLs must not contain slashes.</p>
+            <p><a data-link-type="dfn" href="https://console.spec.whatwg.org/#report-a-warning-to-the-console" id="ref-for-report-a-warning-to-the-console⑤">Report a warning to the console</a> that built-in module URLs must not contain slashes.</p>
            <li data-md>
             <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue" id="ref-for-iteration-continue④">Continue</a>.</p>
           </ol>
@@ -1914,12 +1931,18 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
        <li data-md>
         <p>Let <var>scopePrefixURL</var> be the result of <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-parser" id="ref-for-concept-url-parser">parsing</a> <var>scopePrefix</var> with <var>baseURL</var> as the base URL.</p>
        <li data-md>
-        <p>If <var>scopePrefixURL</var> is failure, then <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue" id="ref-for-iteration-continue⑤">continue</a>.</p>
+        <p>If <var>scopePrefixURL</var> is failure, then:</p>
+        <ol>
+         <li data-md>
+          <p><a data-link-type="dfn" href="https://console.spec.whatwg.org/#report-a-warning-to-the-console" id="ref-for-report-a-warning-to-the-console⑥">Report a warning to the console</a> that the scope prefix URL was not parseable.</p>
+         <li data-md>
+          <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue" id="ref-for-iteration-continue⑤">Continue</a>.</p>
+        </ol>
        <li data-md>
         <p>If <var>scopePrefixURL</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme①">scheme</a> is not a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#fetch-scheme" id="ref-for-fetch-scheme">fetch scheme</a>, then:</p>
         <ol>
          <li data-md>
-          <p><a data-link-type="dfn" href="https://console.spec.whatwg.org/#report-a-warning-to-the-console" id="ref-for-report-a-warning-to-the-console②">Report a warning to the console</a> that scope prefix URLs must have a fetch scheme.</p>
+          <p><a data-link-type="dfn" href="https://console.spec.whatwg.org/#report-a-warning-to-the-console" id="ref-for-report-a-warning-to-the-console⑦">Report a warning to the console</a> that scope prefix URLs must have a fetch scheme.</p>
          <li data-md>
           <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue" id="ref-for-iteration-continue⑥">Continue</a>.</p>
         </ol>
@@ -1936,7 +1959,13 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      To <dfn class="dfn-paneled" data-dfn-type="dfn" data-lt="normalize a specifier key|normalizing a specifier key" data-noexport id="normalize-a-specifier-key">normalize a specifier key</dfn>, given a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string⑥">string</a> <var>specifierKey</var> and a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url⑥">URL</a> <var>baseURL</var>: 
     <ol>
      <li data-md>
-      <p>If <var>specifierKey</var> is the empty string, then return null.</p>
+      <p>If <var>specifierKey</var> is the empty string, then:</p>
+      <ol>
+       <li data-md>
+        <p><a data-link-type="dfn" href="https://console.spec.whatwg.org/#report-a-warning-to-the-console" id="ref-for-report-a-warning-to-the-console⑧">Report a warning to the console</a> that specifier keys cannot be the empty string.</p>
+       <li data-md>
+        <p>Return null.</p>
+      </ol>
      <li data-md>
       <p>Let <var>url</var> be the result of <a data-link-type="dfn" href="#parse-a-url-like-import-specifier" id="ref-for-parse-a-url-like-import-specifier①">parsing a URL-like import specifier</a>, given <var>specifierKey</var> and <var>baseURL</var>.</p>
      <li data-md>
@@ -1948,7 +1977,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
         <p>If <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme②">scheme</a> is "<code>std</code>" and <var>urlString</var> contains U+002F (/), then:</p>
         <ol>
          <li data-md>
-          <p><a data-link-type="dfn" href="https://console.spec.whatwg.org/#report-a-warning-to-the-console" id="ref-for-report-a-warning-to-the-console③">Report a warning to the console</a> that built-in module specifiers must not contain slashes.</p>
+          <p><a data-link-type="dfn" href="https://console.spec.whatwg.org/#report-a-warning-to-the-console" id="ref-for-report-a-warning-to-the-console⑨">Report a warning to the console</a> that built-in module specifiers must not contain slashes.</p>
          <li data-md>
           <p>Return null.</p>
         </ol>
@@ -2274,7 +2303,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
   <aside class="dfn-panel" data-for="term-for-report-a-warning-to-the-console">
    <a href="https://console.spec.whatwg.org/#report-a-warning-to-the-console">https://console.spec.whatwg.org/#report-a-warning-to-the-console</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-report-a-warning-to-the-console">3. Parsing import maps</a> <a href="#ref-for-report-a-warning-to-the-console①">(2)</a> <a href="#ref-for-report-a-warning-to-the-console②">(3)</a> <a href="#ref-for-report-a-warning-to-the-console③">(4)</a>
+    <li><a href="#ref-for-report-a-warning-to-the-console">3. Parsing import maps</a> <a href="#ref-for-report-a-warning-to-the-console①">(2)</a> <a href="#ref-for-report-a-warning-to-the-console②">(3)</a> <a href="#ref-for-report-a-warning-to-the-console③">(4)</a> <a href="#ref-for-report-a-warning-to-the-console④">(5)</a> <a href="#ref-for-report-a-warning-to-the-console⑤">(6)</a> <a href="#ref-for-report-a-warning-to-the-console⑥">(7)</a> <a href="#ref-for-report-a-warning-to-the-console⑦">(8)</a> <a href="#ref-for-report-a-warning-to-the-console⑧">(9)</a> <a href="#ref-for-report-a-warning-to-the-console⑨">(10)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-document">
@@ -2621,6 +2650,12 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
     <li><a href="#ref-for-code-unit-less-than">3. Parsing import maps</a>
    </ul>
   </aside>
+  <aside class="dfn-panel" data-for="term-for-list-contain">
+   <a href="https://infra.spec.whatwg.org/#list-contain">https://infra.spec.whatwg.org/#list-contain</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-list-contain">3. Parsing import maps</a>
+   </ul>
+  </aside>
   <aside class="dfn-panel" data-for="term-for-iteration-continue">
    <a href="https://infra.spec.whatwg.org/#iteration-continue">https://infra.spec.whatwg.org/#iteration-continue</a><b>Referenced in:</b>
    <ul>
@@ -2645,6 +2680,12 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <ul>
     <li><a href="#ref-for-map-iterate">3. Parsing import maps</a> <a href="#ref-for-map-iterate①">(2)</a> <a href="#ref-for-map-iterate②">(3)</a>
     <li><a href="#ref-for-map-iterate③">4.1. New "resolve a module specifier"</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-map-getting-the-keys">
+   <a href="https://infra.spec.whatwg.org/#map-getting-the-keys">https://infra.spec.whatwg.org/#map-getting-the-keys</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-map-getting-the-keys">3. Parsing import maps</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-struct-item">
@@ -2868,10 +2909,12 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      <li><span class="dfn-paneled" id="term-for-list-append" style="color:initial">append</span>
      <li><span class="dfn-paneled" id="term-for-ascii-case-insensitive" style="color:initial">ascii case-insensitive</span>
      <li><span class="dfn-paneled" id="term-for-code-unit-less-than" style="color:initial">code unit less than</span>
+     <li><span class="dfn-paneled" id="term-for-list-contain" style="color:initial">contain</span>
      <li><span class="dfn-paneled" id="term-for-iteration-continue" style="color:initial">continue</span>
      <li><span class="dfn-paneled" id="term-for-map-entry" style="color:initial">entry</span>
      <li><span class="dfn-paneled" id="term-for-map-exists" style="color:initial">exist</span>
      <li><span class="dfn-paneled" id="term-for-map-iterate" style="color:initial">for each <small>(for map)</small></span>
+     <li><span class="dfn-paneled" id="term-for-map-getting-the-keys" style="color:initial">get the keys</span>
      <li><span class="dfn-paneled" id="term-for-struct-item" style="color:initial">item</span>
      <li><span class="dfn-paneled" id="term-for-javascript-string" style="color:initial">javascript string</span>
      <li><span class="dfn-paneled" id="term-for-map-key" style="color:initial">key</span>
