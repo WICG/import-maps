@@ -199,14 +199,14 @@ Inside the <a spec="html">prepare a script</a> algorithm, we make the following 
   <dl>
     <dt>"`importmap`"</dt>
     <dd>
-      [=Fetch an import map=] given <var ignore>url</var>, |base URL|, |settings object|, and <var ignore>options</var>.
+      [=Fetch an import map=] given <var ignore>url</var>, |settings object|, and <var ignore>options</var>.
     </dd>
   </dl>
 - Insert the following case to <a spec="html">prepare a script</a> step 25.2:
   <dl>
     <dt>"`importmap`"</dt>
     <dd>
-      1. Let |import map parse result| be the result of [=create an import map parse result=], given <var ignore>source text</var>, |base URL| and |settings object|.
+      1. Let |import map parse result| be the result of [=create an import map parse result=], given <var ignore>source text</var>, <var ignore>base URL</var> and |settings object|.
       1. Set [=the script's result=] to |import map parse result|.
       1. <a spec="html">The script is ready</a>.
     </dd>
@@ -234,7 +234,7 @@ Inside the <a spec="html">prepare a script</a> algorithm, we make the following 
 </div>
 
 <div algorithm>
-  To <dfn export>fetch an import map</dfn> given |url|, |base URL|, |settings object|, and |options|, run the following steps. This algorithm asynchronously returns an [=/import map=] or null.
+  To <dfn export>fetch an import map</dfn> given |url|, |settings object|, and |options|, run the following steps. This algorithm asynchronously returns an [=/import map=] or null.
   <p class="note">This algorithm is specified consistently with <a spec="html">fetch a single module script</a> steps 5, 7, 8, 9, 10, and 12.1. Particularly, we enforce CORS to avoid leaking the import map contents that shouldn't be accessed.</p>
 
   1. Let |request| be a new [=/request=] whose [=request/url=] is |url|, [=request/destination=] is "`script`", [=request/mode=] is "`cors`", [=request/referrer=] is "`client`", and [=request/client=] is |settings object|.
@@ -248,7 +248,7 @@ Inside the <a spec="html">prepare a script</a> algorithm, we make the following 
     - The result of [=extracting a MIME type=] from |response|'s [=response/header list=] is not `"application/importmap+json"`
       <p class="note">For more context on MIME type checking, see <a href="https://github.com/WICG/import-maps/issues/105">#105</a> and <a href="https://github.com/WICG/import-maps/pull/119">#119</a>.</p>
   1. Let |source text| be the result of [=UTF-8 decoding=] response's [=response/body=].
-  1. Asynchronously complete this algorithm with the result of [=create an import map parse result=], given |source text|, |base URL|, and |settings object|.
+  1. Asynchronously complete this algorithm with the result of [=create an import map parse result=], given |source text|, |response|'s [=response/url=], and |settings object|.
 
 </div>
 
