@@ -292,7 +292,7 @@ Insert a call to [=wait for import maps=] at the beginning of the following HTML
 <div algorithm>
 To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
 
-1. If |element|'s [=the script's result=] is null, then [=queue a task=] to [=fire an event=] named `error` at |element|, and return.
+1. If |element|'s [=the script's result=] is null, then [=fire an event=] named `error` at |element|, and return.
 1. Let |import map parse result| be |element|'s [=the script's result=].
 1. Assert: |element|'s <a spec="html">the script's type</a> is "`importmap`".
 1. Assert: |import map parse result| is an [=import map parse result=].
@@ -305,9 +305,10 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
      <p class="issue">There are no relevant [=script=], because [=import map parse result=] isn't a [=script=]. This needs to wait for <a href="https://github.com/whatwg/html/issues/958">whatwg/html#958</a> before it is fixable.</p>
   1. Return.
 1. [=update an import map|Update=] |element|'s [=node document=]'s [=Document/import map=] with |import map parse result|'s [=import map parse result/import map=].
+1. If |element| is <a spec="html">from an external file</a>, then [=fire an event=] named `load` at |element|.
 
 <p class="note">
-  The timing of [=/register an import map=] is observable by possible `error` events, or by the fact that after [=/register an import map=] an import map <{script}> can be moved to another {{Document}}. On the other hand, the updated [=Document/import map=] is not observable until [=/wait for import maps=] completes.
+  The timing of [=/register an import map=] is observable by possible `error` and `load` events, or by the fact that after [=/register an import map=] an import map <{script}> can be moved to another {{Document}}. On the other hand, the updated [=Document/import map=] is not observable until [=/wait for import maps=] completes.
 </p>
 
 </div>
