@@ -1703,7 +1703,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      <p>Insert the following case to <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#prepare-a-script" id="ref-for-prepare-a-script⑤">prepare a script</a> step 24.6:</p>
      <dl>
       <dt>"<code>importmap</code>"
-      <dd> <a data-link-type="dfn" href="#fetch-an-import-map" id="ref-for-fetch-an-import-map">Fetch an import map</a> given <var>url</var>, <var>base URL</var>, <var>settings object</var>, and <var>options</var>. 
+      <dd> <a data-link-type="dfn" href="#fetch-an-import-map" id="ref-for-fetch-an-import-map">Fetch an import map</a> given <var>url</var>, <var>settings object</var>, and <var>options</var>. 
      </dl>
     <li data-md>
      <p>Insert the following case to <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#prepare-a-script" id="ref-for-prepare-a-script⑥">prepare a script</a> step 25.2:</p>
@@ -1743,7 +1743,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <p class="note" role="note"> This is specified similar to the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#list-of-scripts-that-will-execute-in-order-as-soon-as-possible" id="ref-for-list-of-scripts-that-will-execute-in-order-as-soon-as-possible">list of scripts that will execute in order as soon as possible</a>, to register import maps and fire <code>error</code> events in order (<a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#list-of-scripts-that-will-execute-in-order-as-soon-as-possible" id="ref-for-list-of-scripts-that-will-execute-in-order-as-soon-as-possible①">list of scripts that will execute in order as soon as possible</a> is rarely used in the wild though).
   There can be other alternatives, e.g. executing a similar loop inside <a data-link-type="dfn" href="#wait-for-import-maps" id="ref-for-wait-for-import-maps①">wait for import maps</a>. </p>
    <div class="algorithm" data-algorithm="fetch an import map">
-     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="fetch-an-import-map">fetch an import map</dfn> given <var>url</var>, <var>base URL</var>, <var>settings object</var>, and <var>options</var>, run the following steps. This algorithm asynchronously returns an <a data-link-type="dfn" href="#import-map" id="ref-for-import-map⑥">import map</a> or null. 
+     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="fetch-an-import-map">fetch an import map</dfn> given <var>url</var>, <var>settings object</var>, and <var>options</var>, run the following steps. This algorithm asynchronously returns an <a data-link-type="dfn" href="#import-map" id="ref-for-import-map⑥">import map</a> or null. 
     <p class="note" role="note">This algorithm is specified consistently with <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#fetch-a-single-module-script" id="ref-for-fetch-a-single-module-script">fetch a single module script</a> steps 5, 7, 8, 9, 10, and 12.1. Particularly, we enforce CORS to avoid leaking the import map contents that shouldn’t be accessed.</p>
     <ol>
      <li data-md>
@@ -1768,7 +1768,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      <li data-md>
       <p>Let <var>source text</var> be the result of <a data-link-type="dfn" href="https://encoding.spec.whatwg.org/#utf-8-decode" id="ref-for-utf-8-decode">UTF-8 decoding</a> response’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-body" id="ref-for-concept-response-body">body</a>.</p>
      <li data-md>
-      <p>Asynchronously complete this algorithm with the result of <a data-link-type="dfn" href="#create-an-import-map-parse-result" id="ref-for-create-an-import-map-parse-result①">create an import map parse result</a>, given <var>source text</var>, <var>base URL</var>, and <var>settings object</var>.</p>
+      <p>Asynchronously complete this algorithm with the result of <a data-link-type="dfn" href="#create-an-import-map-parse-result" id="ref-for-create-an-import-map-parse-result①">create an import map parse result</a>, given <var>source text</var>, <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url" id="ref-for-concept-response-url">url</a>, and <var>settings object</var>.</p>
     </ol>
    </div>
    <h3 class="heading settled" data-level="2.4" id="integration-wait-for-import-maps"><span class="secno">2.4. </span><span class="content">Wait for import maps</span><a class="self-link" href="#integration-wait-for-import-maps"></a></h3>
@@ -2561,10 +2561,10 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
     <li><a href="#ref-for-concept-response-type">2.3. Prepare a script</a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="term-for-concept-request-url">
-   <a href="https://fetch.spec.whatwg.org/#concept-request-url">https://fetch.spec.whatwg.org/#concept-request-url</a><b>Referenced in:</b>
+  <aside class="dfn-panel" data-for="term-for-concept-response-url">
+   <a href="https://fetch.spec.whatwg.org/#concept-response-url">https://fetch.spec.whatwg.org/#concept-response-url</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-request-url">2.3. Prepare a script</a>
+    <li><a href="#ref-for-concept-response-url">2.3. Prepare a script</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-htmlscriptelement">
@@ -3046,7 +3046,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      <li><span class="dfn-paneled" id="term-for-concept-response" style="color:initial">response</span>
      <li><span class="dfn-paneled" id="term-for-concept-response-status" style="color:initial">status</span>
      <li><span class="dfn-paneled" id="term-for-concept-response-type" style="color:initial">type</span>
-     <li><span class="dfn-paneled" id="term-for-concept-request-url" style="color:initial">url</span>
+     <li><span class="dfn-paneled" id="term-for-concept-response-url" style="color:initial">url <small>(for response)</small></span>
     </ul>
    <li>
     <a data-link-type="biblio">[HTML]</a> defines the following terms:
