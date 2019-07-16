@@ -1816,7 +1816,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="register-an-import-map">register an import map</dfn> given an <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/scripting.html#htmlscriptelement" id="ref-for-htmlscriptelement③">HTMLScriptElement</a></code> <var>element</var>: 
     <ol>
      <li data-md>
-      <p>If <var>element</var>’s <a data-link-type="dfn" href="#the-scripts-result" id="ref-for-the-scripts-result①">the script’s result</a> is null, then <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#queue-a-task" id="ref-for-queue-a-task①">queue a task</a> to <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-event-fire" id="ref-for-concept-event-fire①">fire an event</a> named <code>error</code> at <var>element</var>, and return.</p>
+      <p>If <var>element</var>’s <a data-link-type="dfn" href="#the-scripts-result" id="ref-for-the-scripts-result①">the script’s result</a> is null, then <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-event-fire" id="ref-for-concept-event-fire①">fire an event</a> named <code>error</code> at <var>element</var>, and return.</p>
      <li data-md>
       <p>Let <var>import map parse result</var> be <var>element</var>’s <a data-link-type="dfn" href="#the-scripts-result" id="ref-for-the-scripts-result②">the script’s result</a>.</p>
      <li data-md>
@@ -1840,8 +1840,10 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
       </ol>
      <li data-md>
       <p><a data-link-type="dfn" href="#update-an-import-map" id="ref-for-update-an-import-map①">Update</a> <var>element</var>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node-document" id="ref-for-concept-node-document">node document</a>'s <a data-link-type="dfn" href="#document-import-map" id="ref-for-document-import-map①">import map</a> with <var>import map parse result</var>’s <a data-link-type="dfn" href="#import-map-parse-result-import-map" id="ref-for-import-map-parse-result-import-map">import map</a>.</p>
+     <li data-md>
+      <p>If <var>element</var> is <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#concept-script-external" id="ref-for-concept-script-external">from an external file</a>, then <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-event-fire" id="ref-for-concept-event-fire②">fire an event</a> named <code>load</code> at <var>element</var>.</p>
     </ol>
-    <p class="note" role="note"> The timing of <a data-link-type="dfn" href="#register-an-import-map" id="ref-for-register-an-import-map②">register an import map</a> is observable by possible <code>error</code> events, or by the fact that after <a data-link-type="dfn" href="#register-an-import-map" id="ref-for-register-an-import-map③">register an import map</a> an import map <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①">script</a></code> can be moved to another <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document③">Document</a></code>. On the other hand, the updated <a data-link-type="dfn" href="#document-import-map" id="ref-for-document-import-map②">import map</a> is not observable until <a data-link-type="dfn" href="#wait-for-import-maps" id="ref-for-wait-for-import-maps⑤">wait for import maps</a> completes. </p>
+    <p class="note" role="note"> The timing of <a data-link-type="dfn" href="#register-an-import-map" id="ref-for-register-an-import-map②">register an import map</a> is observable by possible <code>error</code> and <code>load</code> events, or by the fact that after <a data-link-type="dfn" href="#register-an-import-map" id="ref-for-register-an-import-map③">register an import map</a> an import map <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①">script</a></code> can be moved to another <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document③">Document</a></code>. On the other hand, the updated <a data-link-type="dfn" href="#document-import-map" id="ref-for-document-import-map②">import map</a> is not observable until <a data-link-type="dfn" href="#wait-for-import-maps" id="ref-for-wait-for-import-maps⑤">wait for import maps</a> completes. </p>
    </div>
    <h2 class="heading settled" data-level="3" id="parsing"><span class="secno">3. </span><span class="content">Parsing import maps</span><a class="self-link" href="#parsing"></a></h2>
    <div class="algorithm" data-algorithm="parse an import map string">
@@ -2455,7 +2457,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
   <aside class="dfn-panel" data-for="term-for-concept-event-fire">
    <a href="https://dom.spec.whatwg.org/#concept-event-fire">https://dom.spec.whatwg.org/#concept-event-fire</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-event-fire①">2.5. Registering an import map</a>
+    <li><a href="#ref-for-concept-event-fire①">2.5. Registering an import map</a> <a href="#ref-for-concept-event-fire②">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-node-document">
@@ -2684,6 +2686,12 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
     <li><a href="#ref-for-concept-event-fire">2.3. Prepare a script</a>
    </ul>
   </aside>
+  <aside class="dfn-panel" data-for="term-for-concept-script-external">
+   <a href="https://html.spec.whatwg.org/multipage/scripting.html#concept-script-external">https://html.spec.whatwg.org/multipage/scripting.html#concept-script-external</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-concept-script-external">2.5. Registering an import map</a>
+   </ul>
+  </aside>
   <aside class="dfn-panel" data-for="term-for-concept-settings-object-global">
    <a href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-global">https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-global</a><b>Referenced in:</b>
    <ul>
@@ -2732,7 +2740,6 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <a href="https://html.spec.whatwg.org/multipage/webappapis.html#queue-a-task">https://html.spec.whatwg.org/multipage/webappapis.html#queue-a-task</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-queue-a-task">2.3. Prepare a script</a>
-    <li><a href="#ref-for-queue-a-task①">2.5. Registering an import map</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-relevant-settings-object">
@@ -3068,6 +3075,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      <li><span class="dfn-paneled" id="term-for-fetch-an-import()-module-script-graph" style="color:initial">fetch an import() module script graph</span>
      <li><span class="dfn-paneled" id="term-for-fetch-an-inline-module-script-graph" style="color:initial">fetch an inline module script graph</span>
      <li><span class="dfn-paneled" id="term-for-concept-event-fire①" style="color:initial">fire an event</span>
+     <li><span class="dfn-paneled" id="term-for-concept-script-external" style="color:initial">from an external file</span>
      <li><span class="dfn-paneled" id="term-for-concept-settings-object-global" style="color:initial">global object</span>
      <li><span class="dfn-paneled" id="term-for-js-hostimportmoduledynamically" style="color:initial">hostimportmoduledynamically</span>
      <li><span class="dfn-paneled" id="term-for-js-hostresolveimportedmodule" style="color:initial">hostresolveimportedmodule</span>
