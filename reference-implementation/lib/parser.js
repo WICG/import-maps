@@ -1,6 +1,6 @@
 'use strict';
 const assert = require('assert');
-const { tryURLParse, hasFetchScheme, tryURLLikeSpecifierParse, BUILT_IN_MODULE_PROTOCOL } = require('./utils.js');
+const { tryURLParse, hasFetchScheme, tryURLLikeSpecifierParse } = require('./utils.js');
 
 exports.parseFromString = (input, baseURL) => {
   const parsed = JSON.parse(input);
@@ -86,11 +86,6 @@ function sortAndNormalizeSpecifierMap(obj, baseURL) {
         continue;
       }
 
-      if (addressURL.protocol === BUILT_IN_MODULE_PROTOCOL && addressURL.href.includes('/')) {
-        console.warn(`Invalid address "${potentialAddress}". Built-in module URLs must not contain "/".`);
-        continue;
-      }
-
       validNormalizedAddresses.push(addressURL);
     }
     normalized[specifierKey] = validNormalizedAddresses;
@@ -145,12 +140,7 @@ function normalizeSpecifierKey(specifierKey, baseURL) {
 
   const url = tryURLLikeSpecifierParse(specifierKey, baseURL);
   if (url !== null) {
-    const urlString = url.href;
-    if (url.protocol === BUILT_IN_MODULE_PROTOCOL && urlString.includes('/')) {
-      console.warn(`Invalid specifier key "${urlString}". Built-in module specifiers must not contain "/".`);
-      return null;
-    }
-    return urlString;
+    return url.href;
   }
 
   return specifierKey;

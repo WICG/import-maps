@@ -139,7 +139,7 @@ describe('Absolute URL specifier keys', () => {
     );
   });
 
-  it('should only parse built-in module specifier keys without a /', () => {
+  it('should parse built-in module specifier keys, including with a "/"', () => {
     expectSpecifierMap(
       `{
         "${BLANK}": "/blank",
@@ -150,12 +150,10 @@ describe('Absolute URL specifier keys', () => {
       'https://base.example/path1/path2/path3',
       {
         [BLANK]: [expect.toMatchURL('https://base.example/blank')],
+        [`${BLANK}/`]: [expect.toMatchURL('https://base.example/blank/')],
+        [`${BLANK}/foo`]: [expect.toMatchURL('https://base.example/blank/foo')],
         [`${BLANK}\\foo`]: [expect.toMatchURL('https://base.example/blank/backslashfoo')]
-      },
-      [
-        `Invalid specifier key "${BLANK}/". Built-in module specifiers must not contain "/".`,
-        `Invalid specifier key "${BLANK}/foo". Built-in module specifiers must not contain "/".`
-      ]
+      }
     );
   });
 });
