@@ -1213,7 +1213,7 @@ Possible extra rowspan handling
 	}
 </style>
   <link href="https://www.w3.org/StyleSheets/TR/2016/cg-draft" rel="stylesheet">
-  <meta content="Bikeshed version 39652c9ea7fd5d09639da5e1182cd481b0c5ae70" name="generator">
+  <meta content="Bikeshed version 2c217db8f2549f1109565b1487be9d7c7a7854fa" name="generator">
   <link href="https://wicg.github.io/import-maps/" rel="canonical">
 <style>
 .selected-text-file-an-issue {
@@ -1487,7 +1487,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Import Maps</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Draft Community Group Report, <time class="dt-updated" datetime="2019-07-22">22 July 2019</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Draft Community Group Report, <time class="dt-updated" datetime="2019-07-30">30 July 2019</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1972,14 +1972,6 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
             <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue" id="ref-for-iteration-continue③">Continue</a>.</p>
           </ol>
          <li data-md>
-          <p>If <var>specifierKey</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme">scheme</a> is "<code>std</code>" and the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer" id="ref-for-concept-url-serializer①">serialization</a> of <var>addressURL</var> contains U+002F (/), then:</p>
-          <ol>
-           <li data-md>
-            <p><a data-link-type="dfn" href="https://console.spec.whatwg.org/#report-a-warning-to-the-console" id="ref-for-report-a-warning-to-the-console⑤">Report a warning to the console</a> that built-in module URLs must not contain slashes.</p>
-           <li data-md>
-            <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue" id="ref-for-iteration-continue④">Continue</a>.</p>
-          </ol>
-         <li data-md>
           <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-append" id="ref-for-list-append①">Append</a> <var>addressURL</var> to <var>validNormalizedAddresses</var>.</p>
         </ol>
        <li data-md>
@@ -2005,20 +1997,20 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
         <p>If <var>scopePrefixURL</var> is failure, then:</p>
         <ol>
          <li data-md>
-          <p><a data-link-type="dfn" href="https://console.spec.whatwg.org/#report-a-warning-to-the-console" id="ref-for-report-a-warning-to-the-console⑥">Report a warning to the console</a> that the scope prefix URL was not parseable.</p>
+          <p><a data-link-type="dfn" href="https://console.spec.whatwg.org/#report-a-warning-to-the-console" id="ref-for-report-a-warning-to-the-console⑤">Report a warning to the console</a> that the scope prefix URL was not parseable.</p>
+         <li data-md>
+          <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue" id="ref-for-iteration-continue④">Continue</a>.</p>
+        </ol>
+       <li data-md>
+        <p>If <var>scopePrefixURL</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme">scheme</a> is not a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#fetch-scheme" id="ref-for-fetch-scheme">fetch scheme</a>, then:</p>
+        <ol>
+         <li data-md>
+          <p><a data-link-type="dfn" href="https://console.spec.whatwg.org/#report-a-warning-to-the-console" id="ref-for-report-a-warning-to-the-console⑥">Report a warning to the console</a> that scope prefix URLs must have a fetch scheme.</p>
          <li data-md>
           <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue" id="ref-for-iteration-continue⑤">Continue</a>.</p>
         </ol>
        <li data-md>
-        <p>If <var>scopePrefixURL</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme①">scheme</a> is not a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#fetch-scheme" id="ref-for-fetch-scheme">fetch scheme</a>, then:</p>
-        <ol>
-         <li data-md>
-          <p><a data-link-type="dfn" href="https://console.spec.whatwg.org/#report-a-warning-to-the-console" id="ref-for-report-a-warning-to-the-console⑦">Report a warning to the console</a> that scope prefix URLs must have a fetch scheme.</p>
-         <li data-md>
-          <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue" id="ref-for-iteration-continue⑥">Continue</a>.</p>
-        </ol>
-       <li data-md>
-        <p>Let <var>normalizedScopePrefix</var> be the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer" id="ref-for-concept-url-serializer②">serialization</a> of <var>scopePrefixURL</var>.</p>
+        <p>Let <var>normalizedScopePrefix</var> be the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer" id="ref-for-concept-url-serializer①">serialization</a> of <var>scopePrefixURL</var>.</p>
        <li data-md>
         <p>Set <var>normalized</var>[<var>normalizedScopePrefix</var>] to the result of <a data-link-type="dfn" href="#sort-and-normalize-a-specifier-map" id="ref-for-sort-and-normalize-a-specifier-map①">sorting and normalizing a specifier map</a> given <var>potentialSpecifierMap</var> and <var>baseURL</var>.</p>
       </ol>
@@ -2033,28 +2025,14 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
       <p>If <var>specifierKey</var> is the empty string, then:</p>
       <ol>
        <li data-md>
-        <p><a data-link-type="dfn" href="https://console.spec.whatwg.org/#report-a-warning-to-the-console" id="ref-for-report-a-warning-to-the-console⑧">Report a warning to the console</a> that specifier keys cannot be the empty string.</p>
+        <p><a data-link-type="dfn" href="https://console.spec.whatwg.org/#report-a-warning-to-the-console" id="ref-for-report-a-warning-to-the-console⑦">Report a warning to the console</a> that specifier keys cannot be the empty string.</p>
        <li data-md>
         <p>Return null.</p>
       </ol>
      <li data-md>
       <p>Let <var>url</var> be the result of <a data-link-type="dfn" href="#parse-a-url-like-import-specifier" id="ref-for-parse-a-url-like-import-specifier①">parsing a URL-like import specifier</a>, given <var>specifierKey</var> and <var>baseURL</var>.</p>
      <li data-md>
-      <p>If <var>url</var> is not null, then:</p>
-      <ol>
-       <li data-md>
-        <p>Let <var>urlString</var> be the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer" id="ref-for-concept-url-serializer③">serialization</a> of <var>url</var>.</p>
-       <li data-md>
-        <p>If <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme②">scheme</a> is "<code>std</code>" and <var>urlString</var> contains U+002F (/), then:</p>
-        <ol>
-         <li data-md>
-          <p><a data-link-type="dfn" href="https://console.spec.whatwg.org/#report-a-warning-to-the-console" id="ref-for-report-a-warning-to-the-console⑨">Report a warning to the console</a> that built-in module specifiers must not contain slashes.</p>
-         <li data-md>
-          <p>Return null.</p>
-        </ol>
-       <li data-md>
-        <p>Return <var>urlString</var>.</p>
-      </ol>
+      <p>If <var>url</var> is not null, then return the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer" id="ref-for-concept-url-serializer②">serialization</a> of <var>url</var>.</p>
      <li data-md>
       <p>Return <var>specifierKey</var>.</p>
     </ol>
@@ -2078,7 +2056,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      <li data-md>
       <p>If <var>url</var> is failure, then return null.</p>
      <li data-md>
-      <p>If <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme③">scheme</a> is either a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#fetch-scheme" id="ref-for-fetch-scheme①">fetch scheme</a> or "<code>std</code>", then return <var>url</var>.</p>
+      <p>If <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme①">scheme</a> is either a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#fetch-scheme" id="ref-for-fetch-scheme①">fetch scheme</a> or "<code>std</code>", then return <var>url</var>.</p>
      <li data-md>
       <p>Return null.</p>
     </ol>
@@ -2106,11 +2084,11 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      <li data-md>
       <p>Let <var>moduleMap</var> be <var>settingsObject</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-module-map" id="ref-for-concept-settings-object-module-map">module map</a>.</p>
      <li data-md>
-      <p>Let <var>baseURLString</var> be <var>baseURL</var>, <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer" id="ref-for-concept-url-serializer④">serialized</a>.</p>
+      <p>Let <var>baseURLString</var> be <var>baseURL</var>, <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer" id="ref-for-concept-url-serializer③">serialized</a>.</p>
      <li data-md>
       <p>Let <var>asURL</var> be the result of <a data-link-type="dfn" href="#parse-a-url-like-import-specifier" id="ref-for-parse-a-url-like-import-specifier②">parsing a URL-like import specifier</a> given <var>specifier</var> and <var>baseURL</var>.</p>
      <li data-md>
-      <p>Let <var>normalizedSpecifier</var> be the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer" id="ref-for-concept-url-serializer⑤">serialization</a> of <var>asURL</var>, if <var>asURL</var> is non-null; otherwise, <var>specifier</var>.</p>
+      <p>Let <var>normalizedSpecifier</var> be the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer" id="ref-for-concept-url-serializer④">serialization</a> of <var>asURL</var>, if <var>asURL</var> is non-null; otherwise, <var>specifier</var>.</p>
      <li data-md>
       <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-iterate" id="ref-for-map-iterate③">For each</a> <var>scopePrefix</var> → <var>scopeImports</var> of <var>importMap</var>’s <a data-link-type="dfn" href="#import-map-scopes" id="ref-for-import-map-scopes⑦">scopes</a>,</p>
       <ol>
@@ -2170,12 +2148,12 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
            <li data-md>
             <p>Let <var>singleAddress</var> be <var>addresses</var>[0].</p>
            <li data-md>
-            <p>If <var>singleAddress</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme④">scheme</a> is "<code>std</code>", and <var>moduleMap</var>[<var>singleAddress</var>] does not <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-exists" id="ref-for-map-exists②">exist</a>, then throw a <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#exceptiondef-typeerror" id="ref-for-exceptiondef-typeerror⑥">TypeError</a></code> indicating that the requested built-in module is not implemented.</p>
+            <p>If <var>singleAddress</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme②">scheme</a> is "<code>std</code>", and <var>moduleMap</var>[<var>singleAddress</var>] does not <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-exists" id="ref-for-map-exists②">exist</a>, then throw a <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#exceptiondef-typeerror" id="ref-for-exceptiondef-typeerror⑥">TypeError</a></code> indicating that the requested built-in module is not implemented.</p>
            <li data-md>
             <p>Return <var>singleAddress</var>.</p>
           </ol>
          <li data-md>
-          <p>If <var>addresses</var>’s <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-size" id="ref-for-list-size②">size</a> is 2, and <var>addresses</var>[0]'s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme⑤">scheme</a> is "<code>std</code>", and <var>addresses</var>[1]'s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme⑥">scheme</a> is <em>not</em> "<code>std</code>", then:</p>
+          <p>If <var>addresses</var>’s <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-size" id="ref-for-list-size②">size</a> is 2, and <var>addresses</var>[0]'s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme③">scheme</a> is "<code>std</code>", and <var>addresses</var>[1]'s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme④">scheme</a> is <em>not</em> "<code>std</code>", then:</p>
           <ol>
            <li data-md>
             <p>Return <var>addresses</var>[0], if <var>moduleMap</var>[<var>addresses</var>[0]] <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-exists" id="ref-for-map-exists③">exists</a>; otherwise, return <var>addresses</var>[1].</p>
@@ -2194,14 +2172,32 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
            <li data-md>
             <p>Let <var>afterPrefix</var> be the portion of <var>normalizedSpecifier</var> after the initial <var>specifierKey</var> prefix.</p>
            <li data-md>
-            <p>Let <var>url</var> be the result of <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-parser" id="ref-for-concept-url-parser③">parsing</a> <var>afterPrefix</var> relative to <var>addresses</var>[0].</p>
+            <p class="assertion">Assert: <var>afterPrefix</var> ends with "<code>/</code>", as enforced during <a data-link-type="dfn" href="#parse-an-import-map-string" id="ref-for-parse-an-import-map-string①">parsing</a>.</p>
            <li data-md>
-            <p>If <var>url</var> is failure, throw a <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#exceptiondef-typeerror" id="ref-for-exceptiondef-typeerror⑨">TypeError</a></code>, implicating <var>normalizedSpecifier</var> (and in particular the <var>afterPrefix</var> portion).</p>
+            <p>Let <var>url</var> be the result of <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-parser" id="ref-for-concept-url-parser③">parsing</a> the concatenation of the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer" id="ref-for-concept-url-serializer⑤">serialization</a> of <var>addresses</var>[0] with <var>afterPrefix</var>.</p>
+            <p class="note" role="note">We <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-parser" id="ref-for-concept-url-parser④">parse</a> the concatenation, instead of parsing <var>afterPrefix</var> relative to <var>addresses</var>[0], due to cases such as an <var>afterPrefix</var> of "<code>switch</code>" and an <var>addresses</var>[0] of "<code>std:elements/</code>". </p>
+           <li data-md>
+            <p class="assertion">Assert: <var>url</var> is not failure, since <var>addresses</var>[0] was a URL, and appending after the trailing "<code>/</code>" will not make it unparseable.</p>
            <li data-md>
             <p>Return <var>url</var>.</p>
           </ol>
          <li data-md>
-          <p>Otherwise, <span class="advisement">we have no specification for more complicated fallbacks yet; throw a <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#exceptiondef-typeerror" id="ref-for-exceptiondef-typeerror①⓪">TypeError</a></code> indicating this is not yet supported</span>.</p>
+          <p>If <var>addresses</var>’s <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-size" id="ref-for-list-size⑤">size</a> is 2, and <var>addresses</var>[0]'s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme⑤">scheme</a> is "<code>std</code>", and <var>addresses</var>[1]'s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme⑥">scheme</a> is <em>not</em> "<code>std</code>", then:</p>
+          <ol>
+           <li data-md>
+            <p>Let <var>afterPrefix</var> be the portion of <var>normalizedSpecifier</var> after the initial <var>specifierKey</var> prefix.</p>
+           <li data-md>
+            <p class="assertion">Assert: <var>afterPrefix</var> ends with "<code>/</code>", as enforced during <a data-link-type="dfn" href="#parse-an-import-map-string" id="ref-for-parse-an-import-map-string②">parsing</a>.</p>
+           <li data-md>
+            <p>Let <var>url0</var> be the result of <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-parser" id="ref-for-concept-url-parser⑤">parsing</a> the concatenation of the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer" id="ref-for-concept-url-serializer⑥">serialization</a> of <var>addresses</var>[0] with <var>afterPrefix</var>; similarly, let <var>url1</var> be the result of <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-parser" id="ref-for-concept-url-parser⑥">parsing</a> the concatenation of the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer" id="ref-for-concept-url-serializer⑦">serialization</a> of <var>addresses</var>[1] with <var>afterPrefix</var>.</p>
+            <p class="note" role="note">As above, we parse the concatenation to deal with built-in module cases. </p>
+           <li data-md>
+            <p class="assertion">Assert: neither <var>url0</var> nor <var>url1</var> are failure, since <var>addresses</var>[0] and <var>addresses</var>[1] were URLs, and appending after their trailing "<code>/</code>" will not make them unparseable.</p>
+           <li data-md>
+            <p>Return <var>url0</var>, if <var>moduleMap</var>[<var>url0</var>] <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-exists" id="ref-for-map-exists④">exists</a>; otherwise, return <var>url1</var>.</p>
+          </ol>
+         <li data-md>
+          <p>Otherwise, <span class="advisement">we have no specification for more complicated fallbacks yet; throw a <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#exceptiondef-typeerror" id="ref-for-exceptiondef-typeerror⑨">TypeError</a></code> indicating this is not yet supported</span>.</p>
         </ol>
       </ol>
      <li data-md>
@@ -2215,17 +2211,15 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
       <p>If <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme⑦">scheme</a> is "<code>std</code>", then:</p>
       <ol>
        <li data-md>
-        <p>If the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer" id="ref-for-concept-url-serializer⑥">serialization</a> of <var>url</var> contains U+002F (/), then throw a <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#exceptiondef-typeerror" id="ref-for-exceptiondef-typeerror①①">TypeError</a></code> indicating that <var>url</var> is a malformed built-in URL.</p>
-       <li data-md>
         <p>Let <var>moduleMap</var> be <var>settings object</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-module-map" id="ref-for-concept-settings-object-module-map①">module map</a>.</p>
        <li data-md>
-        <p>If <var>moduleMap</var>[<var>url</var>] does not <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-exists" id="ref-for-map-exists④">exist</a>, then throw a <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#exceptiondef-typeerror" id="ref-for-exceptiondef-typeerror①②">TypeError</a></code> indicating that the requested built-in module is not implemented.</p>
-        <p class="note" role="note">This condition is added to ensure that <var>moduleMap</var>[<var>url</var>] does not <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-exists" id="ref-for-map-exists⑤">exist</a> for unimplemented built-ins. Without this condition, <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#fetch-a-single-module-script" id="ref-for-fetch-a-single-module-script①">fetch a single module script</a> might be called and <var>moduleMap</var>[<var>url</var>] can be set to null, which might complicates the spec around built-ins.</p>
+        <p>If <var>moduleMap</var>[<var>url</var>] does not <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-exists" id="ref-for-map-exists⑤">exist</a>, then throw a <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#exceptiondef-typeerror" id="ref-for-exceptiondef-typeerror①⓪">TypeError</a></code> indicating that the requested built-in module is not implemented.</p>
+        <p class="note" role="note">This condition is added to ensure that <var>moduleMap</var>[<var>url</var>] does not <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-exists" id="ref-for-map-exists⑥">exist</a> for unimplemented built-ins. Without this condition, <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#fetch-a-single-module-script" id="ref-for-fetch-a-single-module-script①">fetch a single module script</a> might be called and <var>moduleMap</var>[<var>url</var>] can be set to null, which might complicates the spec around built-ins.</p>
        <li data-md>
         <p>Return.</p>
       </ol>
      <li data-md>
-      <p>If <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme⑧">scheme</a> is not a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#fetch-scheme" id="ref-for-fetch-scheme②">fetch scheme</a>, then throw a <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#exceptiondef-typeerror" id="ref-for-exceptiondef-typeerror①③">TypeError</a></code> indicating that <var>url</var> is not a fetch scheme.</p>
+      <p>If <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme⑧">scheme</a> is not a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#fetch-scheme" id="ref-for-fetch-scheme②">fetch scheme</a>, then throw a <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#exceptiondef-typeerror" id="ref-for-exceptiondef-typeerror①①">TypeError</a></code> indicating that <var>url</var> is not a fetch scheme.</p>
     </ol>
     <div class="note" role="note">
       This algorithm provides a convenient place for implementations to insert other useful behaviors, as long as they are not observable to web content. For example, Chromium might insert the following step at the beginning of the algorithm: 
@@ -2245,7 +2239,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
     <li data-md>
      <p><a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#fetch-an-import()-module-script-graph" id="ref-for-fetch-an-import()-module-script-graph①">Fetch an import() module script graph</a> will also need to take a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-script" id="ref-for-concept-script⑥">script</a> instead of a base URL.</p>
    </ul>
-   <p>Call sites will also need to be updated to account for <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier⑤">resolve a module specifier</a> now throwing exceptions, instead of returning failure. (Previously most call sites just turned failures into <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#exceptiondef-typeerror" id="ref-for-exceptiondef-typeerror①④">TypeError</a></code>s manually, so this is straightforward.)</p>
+   <p>Call sites will also need to be updated to account for <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier⑤">resolve a module specifier</a> now throwing exceptions, instead of returning failure. (Previously most call sites just turned failures into <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#exceptiondef-typeerror" id="ref-for-exceptiondef-typeerror①②">TypeError</a></code>s manually, so this is straightforward.)</p>
    <hr>
    <p>In addition to the call sites for <a data-link-type="dfn" href="#validate-the-module-script-url" id="ref-for-validate-the-module-script-url④">validate a module script URL</a> explicitly added within this spec, insert the following at the beginning of <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#fetch-a-single-module-script" id="ref-for-fetch-a-single-module-script②">fetch a single module script</a>:</p>
    <div class="algorithm" data-algorithm="check-access-snippet">
@@ -2444,7 +2438,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
   <aside class="dfn-panel" data-for="term-for-report-a-warning-to-the-console">
    <a href="https://console.spec.whatwg.org/#report-a-warning-to-the-console">https://console.spec.whatwg.org/#report-a-warning-to-the-console</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-report-a-warning-to-the-console">3. Parsing import maps</a> <a href="#ref-for-report-a-warning-to-the-console①">(2)</a> <a href="#ref-for-report-a-warning-to-the-console②">(3)</a> <a href="#ref-for-report-a-warning-to-the-console③">(4)</a> <a href="#ref-for-report-a-warning-to-the-console④">(5)</a> <a href="#ref-for-report-a-warning-to-the-console⑤">(6)</a> <a href="#ref-for-report-a-warning-to-the-console⑥">(7)</a> <a href="#ref-for-report-a-warning-to-the-console⑦">(8)</a> <a href="#ref-for-report-a-warning-to-the-console⑧">(9)</a> <a href="#ref-for-report-a-warning-to-the-console⑨">(10)</a>
+    <li><a href="#ref-for-report-a-warning-to-the-console">3. Parsing import maps</a> <a href="#ref-for-report-a-warning-to-the-console①">(2)</a> <a href="#ref-for-report-a-warning-to-the-console②">(3)</a> <a href="#ref-for-report-a-warning-to-the-console③">(4)</a> <a href="#ref-for-report-a-warning-to-the-console④">(5)</a> <a href="#ref-for-report-a-warning-to-the-console⑤">(6)</a> <a href="#ref-for-report-a-warning-to-the-console⑥">(7)</a> <a href="#ref-for-report-a-warning-to-the-console⑦">(8)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-document">
@@ -2848,7 +2842,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
   <aside class="dfn-panel" data-for="term-for-iteration-continue">
    <a href="https://infra.spec.whatwg.org/#iteration-continue">https://infra.spec.whatwg.org/#iteration-continue</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-iteration-continue">3. Parsing import maps</a> <a href="#ref-for-iteration-continue①">(2)</a> <a href="#ref-for-iteration-continue②">(3)</a> <a href="#ref-for-iteration-continue③">(4)</a> <a href="#ref-for-iteration-continue④">(5)</a> <a href="#ref-for-iteration-continue⑤">(6)</a> <a href="#ref-for-iteration-continue⑥">(7)</a>
+    <li><a href="#ref-for-iteration-continue">3. Parsing import maps</a> <a href="#ref-for-iteration-continue①">(2)</a> <a href="#ref-for-iteration-continue②">(3)</a> <a href="#ref-for-iteration-continue③">(4)</a> <a href="#ref-for-iteration-continue④">(5)</a> <a href="#ref-for-iteration-continue⑤">(6)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-map-entry">
@@ -2861,7 +2855,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <a href="https://infra.spec.whatwg.org/#map-exists">https://infra.spec.whatwg.org/#map-exists</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-map-exists">3. Parsing import maps</a> <a href="#ref-for-map-exists①">(2)</a>
-    <li><a href="#ref-for-map-exists②">4.1. New "resolve a module specifier"</a> <a href="#ref-for-map-exists③">(2)</a> <a href="#ref-for-map-exists④">(3)</a> <a href="#ref-for-map-exists⑤">(4)</a>
+    <li><a href="#ref-for-map-exists②">4.1. New "resolve a module specifier"</a> <a href="#ref-for-map-exists③">(2)</a> <a href="#ref-for-map-exists④">(3)</a> <a href="#ref-for-map-exists⑤">(4)</a> <a href="#ref-for-map-exists⑥">(5)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-map-iterate">
@@ -2941,7 +2935,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
   <aside class="dfn-panel" data-for="term-for-list-size">
    <a href="https://infra.spec.whatwg.org/#list-size">https://infra.spec.whatwg.org/#list-size</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-list-size">4.1. New "resolve a module specifier"</a> <a href="#ref-for-list-size①">(2)</a> <a href="#ref-for-list-size②">(3)</a> <a href="#ref-for-list-size③">(4)</a> <a href="#ref-for-list-size④">(5)</a>
+    <li><a href="#ref-for-list-size">4.1. New "resolve a module specifier"</a> <a href="#ref-for-list-size①">(2)</a> <a href="#ref-for-list-size②">(3)</a> <a href="#ref-for-list-size③">(4)</a> <a href="#ref-for-list-size④">(5)</a> <a href="#ref-for-list-size⑤">(6)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-map-sort-in-ascending-order">
@@ -2982,8 +2976,8 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
   <aside class="dfn-panel" data-for="term-for-concept-url-scheme">
    <a href="https://url.spec.whatwg.org/#concept-url-scheme">https://url.spec.whatwg.org/#concept-url-scheme</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-url-scheme">3. Parsing import maps</a> <a href="#ref-for-concept-url-scheme①">(2)</a> <a href="#ref-for-concept-url-scheme②">(3)</a> <a href="#ref-for-concept-url-scheme③">(4)</a>
-    <li><a href="#ref-for-concept-url-scheme④">4.1. New "resolve a module specifier"</a> <a href="#ref-for-concept-url-scheme⑤">(2)</a> <a href="#ref-for-concept-url-scheme⑥">(3)</a> <a href="#ref-for-concept-url-scheme⑦">(4)</a> <a href="#ref-for-concept-url-scheme⑧">(5)</a> <a href="#ref-for-concept-url-scheme⑨">(6)</a> <a href="#ref-for-concept-url-scheme①⓪">(7)</a>
+    <li><a href="#ref-for-concept-url-scheme">3. Parsing import maps</a> <a href="#ref-for-concept-url-scheme①">(2)</a>
+    <li><a href="#ref-for-concept-url-scheme②">4.1. New "resolve a module specifier"</a> <a href="#ref-for-concept-url-scheme③">(2)</a> <a href="#ref-for-concept-url-scheme④">(3)</a> <a href="#ref-for-concept-url-scheme⑤">(4)</a> <a href="#ref-for-concept-url-scheme⑥">(5)</a> <a href="#ref-for-concept-url-scheme⑦">(6)</a> <a href="#ref-for-concept-url-scheme⑧">(7)</a> <a href="#ref-for-concept-url-scheme⑨">(8)</a> <a href="#ref-for-concept-url-scheme①⓪">(9)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-url">
@@ -2998,22 +2992,22 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <a href="https://url.spec.whatwg.org/#concept-url-parser">https://url.spec.whatwg.org/#concept-url-parser</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-concept-url-parser">3. Parsing import maps</a> <a href="#ref-for-concept-url-parser①">(2)</a> <a href="#ref-for-concept-url-parser②">(3)</a>
-    <li><a href="#ref-for-concept-url-parser③">4.1. New "resolve a module specifier"</a>
+    <li><a href="#ref-for-concept-url-parser③">4.1. New "resolve a module specifier"</a> <a href="#ref-for-concept-url-parser④">(2)</a> <a href="#ref-for-concept-url-parser⑤">(3)</a> <a href="#ref-for-concept-url-parser⑥">(4)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-url-serializer">
    <a href="https://url.spec.whatwg.org/#concept-url-serializer">https://url.spec.whatwg.org/#concept-url-serializer</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-url-serializer">3. Parsing import maps</a> <a href="#ref-for-concept-url-serializer①">(2)</a> <a href="#ref-for-concept-url-serializer②">(3)</a> <a href="#ref-for-concept-url-serializer③">(4)</a>
-    <li><a href="#ref-for-concept-url-serializer④">4.1. New "resolve a module specifier"</a> <a href="#ref-for-concept-url-serializer⑤">(2)</a> <a href="#ref-for-concept-url-serializer⑥">(3)</a>
+    <li><a href="#ref-for-concept-url-serializer">3. Parsing import maps</a> <a href="#ref-for-concept-url-serializer①">(2)</a> <a href="#ref-for-concept-url-serializer②">(3)</a>
+    <li><a href="#ref-for-concept-url-serializer③">4.1. New "resolve a module specifier"</a> <a href="#ref-for-concept-url-serializer④">(2)</a> <a href="#ref-for-concept-url-serializer⑤">(3)</a> <a href="#ref-for-concept-url-serializer⑥">(4)</a> <a href="#ref-for-concept-url-serializer⑦">(5)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-exceptiondef-typeerror">
    <a href="https://heycam.github.io/webidl/#exceptiondef-typeerror">https://heycam.github.io/webidl/#exceptiondef-typeerror</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-exceptiondef-typeerror">3. Parsing import maps</a> <a href="#ref-for-exceptiondef-typeerror①">(2)</a> <a href="#ref-for-exceptiondef-typeerror②">(3)</a> <a href="#ref-for-exceptiondef-typeerror③">(4)</a>
-    <li><a href="#ref-for-exceptiondef-typeerror④">4.1. New "resolve a module specifier"</a> <a href="#ref-for-exceptiondef-typeerror⑤">(2)</a> <a href="#ref-for-exceptiondef-typeerror⑥">(3)</a> <a href="#ref-for-exceptiondef-typeerror⑦">(4)</a> <a href="#ref-for-exceptiondef-typeerror⑧">(5)</a> <a href="#ref-for-exceptiondef-typeerror⑨">(6)</a> <a href="#ref-for-exceptiondef-typeerror①⓪">(7)</a> <a href="#ref-for-exceptiondef-typeerror①①">(8)</a> <a href="#ref-for-exceptiondef-typeerror①②">(9)</a> <a href="#ref-for-exceptiondef-typeerror①③">(10)</a>
-    <li><a href="#ref-for-exceptiondef-typeerror①④">4.2. Updates to other algorithms</a>
+    <li><a href="#ref-for-exceptiondef-typeerror④">4.1. New "resolve a module specifier"</a> <a href="#ref-for-exceptiondef-typeerror⑤">(2)</a> <a href="#ref-for-exceptiondef-typeerror⑥">(3)</a> <a href="#ref-for-exceptiondef-typeerror⑦">(4)</a> <a href="#ref-for-exceptiondef-typeerror⑧">(5)</a> <a href="#ref-for-exceptiondef-typeerror⑨">(6)</a> <a href="#ref-for-exceptiondef-typeerror①⓪">(7)</a> <a href="#ref-for-exceptiondef-typeerror①①">(8)</a>
+    <li><a href="#ref-for-exceptiondef-typeerror①②">4.2. Updates to other algorithms</a>
    </ul>
   </aside>
   <h3 class="no-num no-ref heading settled" id="index-defined-elsewhere"><span class="content">Terms defined by reference</span><a class="self-link" href="#index-defined-elsewhere"></a></h3>
@@ -3308,6 +3302,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <b><a href="#parse-an-import-map-string">#parse-an-import-map-string</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-parse-an-import-map-string">3. Parsing import maps</a>
+    <li><a href="#ref-for-parse-an-import-map-string①">4.1. New "resolve a module specifier"</a> <a href="#ref-for-parse-an-import-map-string②">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="create-an-import-map-parse-result">
