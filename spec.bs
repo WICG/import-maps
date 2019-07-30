@@ -596,14 +596,18 @@ This appendix provides the provisional registration of the [=MIME type=] <dfn ex
 : Fragment identifier considerations:
 :: N/A
 : Additional information:
-  : Deprecated alias names for this type:
-  :: N/A
-  : Magic number(s)
-  :: N/A
-  : File extension(s):
-  :: "importmap"
-  : Macintosh file type code:
-  :: Same as for `application/json` [[=JSON=]]
+  <dd>
+    <dl>
+      : Deprecated alias names for this type:
+      :: N/A
+      : Magic number(s)
+      :: N/A
+      : File extension(s):
+      :: "importmap"
+      : Macintosh file type code:
+      :: Same as for `application/json` [[JSON]]
+    </dl>
+  </dd>
 : Person & email address to contact for further information:
 :: Guy Bedford &lt;guybedford@gmail.com>.
 : Intended usage:
@@ -611,4 +615,4 @@ This appendix provides the provisional registration of the [=MIME type=] <dfn ex
 : Restrictions on usage:
 :: No restrictions apply.
 : Change controller:
-:: W3C
+:: WHATWG
