@@ -523,7 +523,6 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
   To <dfn lt="validate the module script URL|validate a module script URL">validate a module script URL</dfn>, given a [=URL=] |url|, an [=environment settings object=] |settings object|, and a [=URL=] |base URL|:
 
   1. If |url|'s [=url/scheme=] is "`std`", then:
-    1. If the [=URL serializer|serialization=] of |url| contains U+002F (/), then throw a {{TypeError}} indicating that |url| is a malformed built-in URL.
     1. Let |moduleMap| be |settings object|'s [=environment settings object/module map=].
     1. If |moduleMap|[|url|] does not [=map/exist=], then throw a {{TypeError}} indicating that the requested built-in module is not implemented.
        <p class="note">This condition is added to ensure that |moduleMap|[|url|] does not [=map/exist=] for unimplemented built-ins. Without this condition, <a spec="html">fetch a single module script</a> might be called and |moduleMap|[|url|] can be set to null, which might complicates the spec around built-ins.</p>
