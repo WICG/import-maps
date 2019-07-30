@@ -586,7 +586,7 @@ This appendix provides the provisional registration of the [=MIME type=] <dfn ex
 : Encoding considerations:
 :: 8bit (always UTF-8)
 : Security considerations:
-:: Since Import Maps have the ability to direct which module resolutions are to be provided to all ECMAScript module imports of a given JavaScript environment, control of the Import Map should be considered to be execution-level application access. Integration with existing policy systems, including for example CORS and CSP, can be used to mitigate and restrict unwanted target URLs from being executed. In addition, the specification states that only those Import Maps served to browsers with the `application/importmap+json` MIME type will be executed. [[FETCH]] [[CSP]]
+:: Since Import Maps have the ability to direct which module resolutions are to be provided to all module imports of a given JavaScript environment, control of the Import Map should be considered to be execution-level application access. Integration with existing policy systems, including for example CORS and CSP, can be used to mitigate and restrict unwanted target URLs from being executed. In addition, the specification states that only those Import Maps served to browsers with the `application/importmap+json` MIME type will be executed. [[FETCH]] [[CSP]]
 : Interoperability considerations:
 :: Backwards compatibility will be a necessity for any new features added to the format, and handling for this has been incorporated into the design of the specification.
 : Published specification:
