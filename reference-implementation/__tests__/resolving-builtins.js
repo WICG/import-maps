@@ -40,6 +40,24 @@ describe('Remapping built-in module specifiers', () => {
     expect(resolveUnderTest(NONE)).toMatchURL('https://example.com/app/none.mjs');
   });
 
+  it('should remap built-in modules with slashes', () => {
+    const resolveUnderTest = makeResolveUnderTest(`{
+      "imports": {
+        "${BLANK}/": "./blank-slash/",
+        "${BLANK}/foo": "./blank-foo.mjs",
+        "${NONE}/": "./none-slash/",
+        "${NONE}/foo": "./none-foo.mjs"
+      }
+    }`);
+
+    expect(resolveUnderTest(`${BLANK}/`)).toMatchURL('https://example.com/app/blank-slash/');
+    expect(resolveUnderTest(`${BLANK}/foo`)).toMatchURL('https://example.com/app/blank-foo.mjs');
+    expect(resolveUnderTest(`${BLANK}/bar`)).toMatchURL('https://example.com/app/blank-slash/bar');
+    expect(resolveUnderTest(`${NONE}/`)).toMatchURL('https://example.com/app/none-slash/');
+    expect(resolveUnderTest(`${NONE}/foo`)).toMatchURL('https://example.com/app/none-foo.mjs');
+    expect(resolveUnderTest(`${NONE}/bar`)).toMatchURL('https://example.com/app/none-slash/bar');
+  });
+
   it('should remap built-in modules with fallbacks', () => {
     const resolveUnderTest = makeResolveUnderTest(`{
       "imports": {
@@ -51,6 +69,31 @@ describe('Remapping built-in module specifiers', () => {
     expect(resolveUnderTest(BLANK)).toMatchURL(BLANK);
     expect(resolveUnderTest(NONE)).toMatchURL('https://example.com/app/none.mjs');
   });
+
+  it('should remap built-in modules with slashes and fallbacks', () => {
+    // NOTE: `${BLANK}/for-testing` is not per spec, just for these tests.
+    // See resolver.js.
+    const resolveUnderTest = makeResolveUnderTest(`{
+      "imports": {
+        "${BLANK}/": ["${BLANK}/", "./blank/"],
+        "${BLANK}/for-testing": ["${BLANK}/for-testing", "./blank-for-testing-special"],
+        "${NONE}/": ["${NONE}/", "./none/"],
+        "${NONE}/foo": ["${NONE}/foo", "./none-foo-special"]
+      }
+    }`);
+
+    // Built-in modules only resolve for exact matches, so this will trigger the fallback.
+    expect(resolveUnderTest(`${BLANK}/`)).toMatchURL('https://example.com/app/blank/');
+    expect(resolveUnderTest(`${BLANK}/foo`)).toMatchURL('https://example.com/app/blank/foo');
+
+    // This would fall back in a real implementation; it's only because we've gone against
+    // spec in the reference implementation (to make this testable) that this maps.
+    expect(resolveUnderTest(`${BLANK}/for-testing`)).toMatchURL(`${BLANK}/for-testing`);
+
+    expect(resolveUnderTest(`${NONE}/`)).toMatchURL('https://example.com/app/none/');
+    expect(resolveUnderTest(`${NONE}/bar`)).toMatchURL('https://example.com/app/none/bar');
+    expect(resolveUnderTest(`${NONE}/foo`)).toMatchURL('https://example.com/app/none-foo-special');
+  });
 });
 
 describe('Remapping to built-in modules', () => {
@@ -58,6 +101,8 @@ describe('Remapping to built-in modules', () => {
     "imports": {
       "blank": "${BLANK}",
       "/blank": "${BLANK}",
+      "/blank/": "${BLANK}/",
+      "/blank-for-testing": "${BLANK}/for-testing",
       "none": "${NONE}",
       "/none": "${NONE}"
     }
@@ -66,6 +111,15 @@ describe('Remapping to built-in modules', () => {
   it(`should remap to "${BLANK}"`, () => {
     expect(resolveUnderTest('blank')).toMatchURL(BLANK);
     expect(resolveUnderTest('/blank')).toMatchURL(BLANK);
+  });
+
+  it(`should fail when remapping to "${BLANK}/"`, () => {
+    expect(() => resolveUnderTest('/blank/')).toThrow(TypeError);
+  });
+
+  it(`should remap to "${BLANK}/for-testing"`, () => {
+    expect(resolveUnderTest('/blank/for-testing')).toMatchURL(`${BLANK}/for-testing`);
+    expect(resolveUnderTest('/blank-for-testing')).toMatchURL(`${BLANK}/for-testing`);
   });
 
   it(`should remap to "${BLANK}" for URL-like specifiers`, () => {

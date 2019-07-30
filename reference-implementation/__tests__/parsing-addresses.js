@@ -116,23 +116,19 @@ describe('Built-in module addresses', () => {
     );
   });
 
-  it('should ignore and warn on built-in module URLs that contain "/"', () => {
+  it('should allow built-in module URLs that contain "/" or "\\"', () => {
     expectSpecifierMap(
       `{
-        "bad1": "${BUILT_IN_MODULE_SCHEME}:foo/",
-        "bad2": "${BUILT_IN_MODULE_SCHEME}:foo/bar",
-        "good": "${BUILT_IN_MODULE_SCHEME}:foo\\\\baz"
+        "slashEnd": "${BUILT_IN_MODULE_SCHEME}:foo/",
+        "slashMiddle": "${BUILT_IN_MODULE_SCHEME}:foo/bar",
+        "backslash": "${BUILT_IN_MODULE_SCHEME}:foo\\\\baz"
       }`,
       'https://base.example/path1/path2/path3',
       {
-        bad1: [],
-        bad2: [],
-        good: [expect.toMatchURL(`${BUILT_IN_MODULE_SCHEME}:foo\\baz`)]
-      },
-      [
-        `Invalid address "${BUILT_IN_MODULE_SCHEME}:foo/". Built-in module URLs must not contain "/".`,
-        `Invalid address "${BUILT_IN_MODULE_SCHEME}:foo/bar". Built-in module URLs must not contain "/".`
-      ]
+        slashEnd: [expect.toMatchURL(`${BUILT_IN_MODULE_SCHEME}:foo/`)],
+        slashMiddle: [expect.toMatchURL(`${BUILT_IN_MODULE_SCHEME}:foo/bar`)],
+        backslash: [expect.toMatchURL(`${BUILT_IN_MODULE_SCHEME}:foo\\baz`)]
+      }
     );
   });
 });
@@ -285,39 +281,54 @@ describe('Failing addresses: mismatched trailing slashes', () => {
   it('should warn for the simple case', () => {
     expectSpecifierMap(
       `{
-        "trailer/": "/notrailer"
+        "trailer/": "/notrailer",
+        "${BUILT_IN_MODULE_SCHEME}:trailer/": "/bim-notrailer"
       }`,
       'https://base.example/path1/path2/path3',
       {
-        'trailer/': []
+        'trailer/': [],
+        [`${BUILT_IN_MODULE_SCHEME}:trailer/`]: []
       },
-      [`Invalid address "https://base.example/notrailer" for package specifier key "trailer/". Package addresses must end with "/".`]
+      [
+        `Invalid address "https://base.example/notrailer" for package specifier key "trailer/". Package addresses must end with "/".`,
+        `Invalid address "https://base.example/bim-notrailer" for package specifier key "${BUILT_IN_MODULE_SCHEME}:trailer/". Package addresses must end with "/".`
+      ]
     );
   });
 
   it('should warn for a mismatch alone in an array', () => {
     expectSpecifierMap(
       `{
-        "trailer/": ["/notrailer"]
+        "trailer/": ["/notrailer"],
+        "${BUILT_IN_MODULE_SCHEME}:trailer/": ["/bim-notrailer"]
       }`,
       'https://base.example/path1/path2/path3',
       {
-        'trailer/': []
+        'trailer/': [],
+        [`${BUILT_IN_MODULE_SCHEME}:trailer/`]: []
       },
-      [`Invalid address "https://base.example/notrailer" for package specifier key "trailer/". Package addresses must end with "/".`]
+      [
+        `Invalid address "https://base.example/notrailer" for package specifier key "trailer/". Package addresses must end with "/".`,
+        `Invalid address "https://base.example/bim-notrailer" for package specifier key "${BUILT_IN_MODULE_SCHEME}:trailer/". Package addresses must end with "/".`
+      ]
     );
   });
 
   it('should warn for a mismatch alongside non-mismatches in an array', () => {
     expectSpecifierMap(
       `{
-        "trailer/": ["/atrailer/", "/notrailer"]
+        "trailer/": ["/atrailer/", "/notrailer"],
+        "${BUILT_IN_MODULE_SCHEME}:trailer/": ["/bim-atrailer/", "/bim-notrailer"]
       }`,
       'https://base.example/path1/path2/path3',
       {
-        'trailer/': [expect.toMatchURL('https://base.example/atrailer/')]
+        'trailer/': [expect.toMatchURL('https://base.example/atrailer/')],
+        [`${BUILT_IN_MODULE_SCHEME}:trailer/`]: [expect.toMatchURL('https://base.example/bim-atrailer/')]
       },
-      [`Invalid address "https://base.example/notrailer" for package specifier key "trailer/". Package addresses must end with "/".`]
+      [
+        `Invalid address "https://base.example/notrailer" for package specifier key "trailer/". Package addresses must end with "/".`,
+        `Invalid address "https://base.example/bim-notrailer" for package specifier key "${BUILT_IN_MODULE_SCHEME}:trailer/". Package addresses must end with "/".`
+      ]
     );
   });
 });
