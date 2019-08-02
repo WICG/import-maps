@@ -23,6 +23,8 @@ spec: infra; type: dfn
   text: list
 spec: url; type: dfn; for: /; text: url
 spec: html; type: element; text: script
+spec: fetch; type: dfn; for: /; text: response
+spec: fetch; type: dfn; for: /; text: fetch
 </pre>
 <pre class="anchors">
 spec: html; type: dfn; urlPrefix: https://html.spec.whatwg.org/multipage/
@@ -568,3 +570,109 @@ Alternatively, we can add the snippet at the beginning of the following HTML spe
 </div>
 
 <p class="note">[=Validate a module script URL=] is applied to all module URLs before they start loading, even in paths where [=resolve a module specifier=] and import maps are not applied (e.g. `<script src="..." type="module">`).</p>
+
+<hr>
+
+<h2 id="full-featured">Appendix B: Full Featured Import Maps</h2>
+
+This section sketches full featured import maps that extends import maps outside module scripts.
+See also the issues with <a href="https://github.com/WICG/import-maps/milestone/4">Full Featured</a> label.
+
+We might want to
+
+- Introduce `import:` URLs ([[#import-urls]]),
+- Introduce `import:` URLs with optional clean up ([[#import-urls]] + [[#fetch-spec-only-resolution]]), or
+- Also support fallbacks from network protocols ([[#import-urls]] + [[#fetch-spec-only-resolution]] + [[#network-fallback]]).
+
+<h3 id="import-urls">B1. `import:` URLs</h3>
+
+We introduce `import:` URL scheme so that non-module-script APIs can use import maps by specifying `import:` URLs.
+Unlike resolving import maps for module specifiers in [=resolve a module specifier=] above, resolving import maps for `import:` URLs is done in the fetch spec, to cover all fetching in a simple way.
+
+<div algorithm>
+To <dfn>get the base URL for import map resolution</dfn> given [=/request=] |request|, run the following steps:
+
+1. Let |baseURL| be |request|'s [=request/referrer=].
+   <p class="note">The [=request/referrer=] is already post-processed to convert "`client`" into the actual client URL at Step 2.7 of <a spec="fetch">main fetch</a>.</p>
+1. If |baseURL| is not a [=URL=], then let |baseURL| be |request|'s [=request/client=]'s [=environment settings object/API base URL=].
+1. Return |baseURL|.
+
+<p class="note">
+Unlike in previous import map proposals, `import:` URLs no longer involve changes to the URL parser.
+Instead, we obtain a base URL consistent with the base URL used in [=resolve a module specifier=] using |request|'s [=request/referrer=].
+</p>
+<p class="issue">|baseURL| is affected by referrer policy and thus can be different from what is expected. For example, "`origin`" referrer policy strips paths from |baseURL|.</p>
+</div algorithm>
+
+<div algorithm>
+To <dfn>import-scheme fetch</dfn> given [=/request=] |request|, run the following steps:
+
+1. [=Wait for import maps=] given |request|'s [=request/client=].
+1. Assert: |request|'s [=request/current URL=]'s [=url/scheme=] is "`import`".
+1. Let |specifier| be |request|'s [=request/current URL=]'s [=url/path=].
+1. let |baseURL| be the result of [=get the base URL for import map resolution=].
+1. Let |underlyingURL| be the result of [=resolve a module specifier=] given |request|'s [=request/client=], |baseURL| and |specifier|.
+   We also modify [=resolve a module specifier=] to take <var ignore>settings object</var> and |baseURL| as its arguments, instead of calculating them from <var ignore>referringScript</var>.
+1. Do a request to |underlyingURL|.
+   <div class="issue">Details unclear; things to consider:
+     - Should we just change request's current URL?
+     - Should we make this behave like a redirect of some sort?
+     - Should we mandate all import:-based requests use CORS/etc.? In that case we'd probably recreate a request from scratch.
+     - Should we restrict to GETs like blob: does?
+   </div>
+
+</div>
+
+We insert a call to [=import-scheme fetch=] somewhere around <a spec="fetch">scheme fetch</a>. For example,
+
+- Add a "`import`" case in <a spec="fetch">scheme fetch</a> that calls [=import-scheme fetch=], or
+- Add <var ignore>request</var>'s [=request/current URL=] is "`import`" case in Step 5 of <a spec="fetch">main fetch</a> that calls [=import-scheme fetch=].
+
+<h3 id="fetch-spec-only-resolution">B2. Fetch-spec-only resolution</h3>
+
+We might want to centralize import map resolution to [=import-scheme fetch=] in the Fetch spec, by the following changes.
+
+In [=resolve a module specifier=], we simply map bare specifiers to `import:` URLs (e.g. `foo` to `import:foo`), and let [=import-scheme fetch=] resolve import maps later in Fetch spec.
+Import-map-related logic is removed from [=resolve a module specifier=].
+
+<p class="issue">
+This naively means that keys of module maps become `import:` URLs, i.e. URLs before import map resolution, while without this the keys are URLs after import map resolution.
+What kind of keys should be used for module maps?
+</p>
+
+<p class="issue">
+This causes errors around import maps to occur inside <a spec="fetch">fetch</a> and thus to be reported as fetch errors, while without this errors around import maps occur within [=resolve a module specifier=] and thus are reported as parse errors.
+See for example <a href="https://github.com/WICG/import-maps/issues/159">#159</a>.
+</p>
+
+<h3 id="network-fallback">B3. Network fallback</h3>
+
+Currently, fallbacks are only allowed from non-existent built-in modules, which can be checked synchronously.
+We might also want to support fallback from e.g. HTTPS, or other fallbacks that can't be checked synchronously.
+
+We resolve network fallbacks in [=import-scheme fetch with network fallbacks=], by fetching each candidate URL, and return the <a spec="fetch">response</a> of the first successful fetch.
+
+<div algorithm>
+To <dfn>import-scheme fetch with network fallbacks</dfn> given [=/request=] |request|, run the following steps:
+
+1. [=Wait for import maps=] given |request|'s [=request/client=].
+1. Assert: |request|'s [=request/current URL=]'s [=url/scheme=] is "`import`".
+1. Let |specifier| be |request|'s [=request/current URL=]'s [=url/path=].
+1. let |baseURL| be the result of [=get the base URL for import map resolution=].
+1. For each |url| in the result of import map resolution given |request|'s [=request/client=], |baseURL| and |specifier| (which returns a list of URLs):
+  1. Do a request to |url|. Wait until the algorithm asynchronously completes with |result|.
+  1. If one of the followings is true, then consider |url| as failure, and continue to the next URL. Otherwise, return |result|.
+    1. |result| is a <a>network error</a>.
+       <p class="note">This includes any failures caused in <a spec="fetch">fetch</a>, e.g. connection failures, CORS failures, CSP failures, and SRI failures.</p>
+    1. <p class="issue">What should constitute a failure that triggers fallback? How about HTTP 404, MIME types, etc?
+       See <a href="https://github.com/WICG/import-maps/issues/84">#84</a> and <a href="https://github.com/WICG/import-maps/issues/76">#76</a>.</p>
+1. Return a <a>network error</a>.
+
+<p class="issue">
+Perhaps we want to cache the resolution results. See e.g. <a href="https://github.com/WICG/import-maps/issues/84#issuecomment-446087331">#84's comment</a>.
+</p>
+</div>
+
+This requires [[#fetch-spec-only-resolution]].
+Without it, we have to invoke fetches from [=resolve a module specifier=] to resolve fallbacks, and find a successful fetch and resolve the specifier to the successful URL, and then invoke a fetch to the successful URL later in <a spec="html">fetch a single module script</a>, causing duplicated fetches.
+In [=import-scheme fetch with network fallbacks=], the successful fetch result is directly reused as the final fetch result.
