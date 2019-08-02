@@ -57,7 +57,7 @@ describe('Mismatching the specifier map schema', () => {
         }`,
         'https://base.example/',
         {
-          bar: [expect.toMatchURL('https://example.com/')]
+          bar: ['https://example.com/']
         },
         [
           `Invalid address ${invalid} for the specifier key "foo". ` +
@@ -74,7 +74,7 @@ describe('Mismatching the specifier map schema', () => {
       }`,
       'https://base.example/',
       {},
-      [`Invalid empty string specifier key.`]
+      [`Invalid empty string specifier.`]
     );
   });
 
@@ -87,8 +87,8 @@ describe('Mismatching the specifier map schema', () => {
         }`,
         'https://base.example/',
         {
-          foo: [expect.toMatchURL('https://example.com/')],
-          bar: [expect.toMatchURL('https://example.com/')]
+          foo: ['https://example.com/'],
+          bar: ['https://example.com/']
         },
         [
           `Invalid address ${invalid} inside the address array for the specifier key "foo". ` +
@@ -130,8 +130,8 @@ describe('Normalization', () => {
       }`,
       'https://base.example/',
       {
-        foo: [expect.toMatchURL('https://example.com/1')],
-        bar: [expect.toMatchURL('https://example.com/2')],
+        foo: ['https://example.com/1'],
+        bar: ['https://example.com/2'],
         baz: []
       }
     );

@@ -2,6 +2,10 @@
 const { URL } = require('url');
 const { parseFromString } = require('../lib/parser.js');
 const { resolve } = require('../lib/resolver.js');
+const { BUILT_IN_MODULE_SCHEME } = require('../lib/utils.js');
+
+const BLANK = `${BUILT_IN_MODULE_SCHEME}:blank`;
+const NONE = `${BUILT_IN_MODULE_SCHEME}:none`;
 
 const mapBaseURL = new URL('https://example.com/app/index.html');
 const scriptURL = new URL('https://example.com/js/app.mjs');
@@ -42,13 +46,6 @@ describe('Unmapped', () => {
     expect(resolveUnderTest('https://///example.com///')).toMatchURL('https://example.com///');
   });
 
-  it('should fail for absolute non-fetch-scheme URLs', () => {
-    expect(() => resolveUnderTest('mailto:bad')).toThrow(TypeError);
-    expect(() => resolveUnderTest('import:bad')).toThrow(TypeError);
-    expect(() => resolveUnderTest('javascript:bad')).toThrow(TypeError);
-    expect(() => resolveUnderTest('wss:bad')).toThrow(TypeError);
-  });
-
   it('should fail for strings not parseable as absolute URLs and not starting with ./ ../ or /', () => {
     expect(() => resolveUnderTest('foo')).toThrow(TypeError);
     expect(() => resolveUnderTest('\\foo')).toThrow(TypeError);
@@ -60,6 +57,53 @@ describe('Unmapped', () => {
     expect(() => resolveUnderTest('https://ex ample.org/')).toThrow(TypeError);
     expect(() => resolveUnderTest('https://example.com:demo')).toThrow(TypeError);
     expect(() => resolveUnderTest('http://[www.example.com]/')).toThrow(TypeError);
+  });
+});
+
+describe('the empty string', () => {
+  it('should fail for an unmapped empty string', () => {
+    const resolveUnderTest = makeResolveUnderTest(`{}`);
+    console.warn = () => {};
+    expect(() => resolveUnderTest('')).toThrow(TypeError);
+  });
+
+  it('should fail for a mapped empty string', () => {
+    console.warn = () => {};
+    const resolveUnderTest = makeResolveUnderTest(`{
+      "imports": {
+        "": "/",
+        "emptyString": "",
+        "emptyString/": ""
+      }
+    }`);
+    expect(() => resolveUnderTest('')).toThrow(TypeError);
+    expect(() => resolveUnderTest('emptyString')).toThrow(TypeError);
+    expect(() => resolveUnderTest('emptyString/a')).toThrow(TypeError);
+  });
+});
+
+describe('non-fetch-schemes', () => {
+  it('should fail for absolute non-fetch-scheme URLs', () => {
+    const resolveUnderTest = makeResolveUnderTest(`{}`);
+    expect(() => resolveUnderTest('mailto:bad')).toThrow(TypeError);
+    expect(() => resolveUnderTest('import:bad')).toThrow(TypeError);
+    expect(() => resolveUnderTest('javascript:bad')).toThrow(TypeError);
+    expect(() => resolveUnderTest('wss:bad')).toThrow(TypeError);
+  });
+
+  it('should allow remapping module specifiers that are non-fetch-scheme URLs', () => {
+    const resolveUnderTest = makeResolveUnderTest(`{
+      "imports": {
+        "mailto:bad": "/",
+        "import:bad": "/",
+        "javascript:bad": "/",
+        "wss:bad": "/"
+      }
+    }`);
+    expect(resolveUnderTest('mailto:bad')).toMatchURL('https://example.com/');
+    expect(resolveUnderTest('import:bad')).toMatchURL('https://example.com/');
+    expect(resolveUnderTest('javascript:bad')).toMatchURL('https://example.com/');
+    expect(resolveUnderTest('wss:bad')).toMatchURL('https://example.com/');
   });
 });
 
@@ -85,7 +129,8 @@ describe('Mapped using the "imports" key only (no scopes)', () => {
         "lodash-dot/": "./node_modules/lodash-es/",
         "lodash-dotdot": "../node_modules/lodash-es/lodash.js",
         "lodash-dotdot/": "../node_modules/lodash-es/",
-        "nowhere/": []
+        "nowhere/": [],
+        "not-a-url/": "a/"
       }
     }`);
 
@@ -113,6 +158,15 @@ describe('Mapped using the "imports" key only (no scopes)', () => {
 
     it('should fail for package submodules that map to nowhere', () => {
       expect(() => resolveUnderTest('nowhere/foo')).toThrow(TypeError);
+    });
+
+    it('should not allow breaking out of a package', () => {
+      expect(resolveUnderTest(`moment/${BLANK}`)).toMatchURL(`https://example.com/node_modules/moment/src/${BLANK}`);
+      expect(resolveUnderTest(`moment/${NONE}`)).toMatchURL(`https://example.com/node_modules/moment/src/${NONE}`);
+      expect(resolveUnderTest('moment/https://example.org/')).toMatchURL('https://example.com/node_modules/moment/src/https://example.org/');
+      expect(() => resolveUnderTest('nowhere/https://example.org/')).toThrow(TypeError);
+      expect(resolveUnderTest('moment/http://[www.example.com]/')).toMatchURL('https://example.com/node_modules/moment/src/http://[www.example.com]/');
+      expect(() => resolveUnderTest('not-a-url/a')).toThrow(TypeError);
     });
   });
 
@@ -143,6 +197,69 @@ describe('Mapped using the "imports" key only (no scopes)', () => {
 
     it('should fail for attempting to get a submodule of something not declared with a trailing slash', () => {
       expect(() => resolveUnderTest('not-a-package/foo')).toThrow(TypeError);
+    });
+  });
+
+  describe('percent-encoding', () => {
+    it('should not try to resolve percent-encoded path-based URLs (in keys)', () => {
+      const resolveUnderTest = makeResolveUnderTest(`{
+        "imports": {
+          "%2E/": "/dotSlash1/",
+          ".%2F": "/dotSlash2/",
+          "%2E%2F": "/dotSlash3/",
+          ".%2E/": "/dotDotSlash1/",
+          "%2E./": "/dotDotSlash2/",
+          "%2E%2E/": "/dotDotSlash3/",
+          "%2E%2E%2F": "/dotDotSlash4/",
+          "%2F": "/slash1/"
+        }
+      }`);
+      expect(resolveUnderTest('/')).toMatchURL('https://example.com/');
+      expect(resolveUnderTest('./')).toMatchURL('https://example.com/js/');
+      expect(resolveUnderTest('../')).toMatchURL('https://example.com/');
+      expect(resolveUnderTest('%2F')).toMatchURL('https://example.com/slash1/');
+      expect(resolveUnderTest('%2E/')).toMatchURL('https://example.com/dotSlash1/');
+      expect(resolveUnderTest('.%2F')).toMatchURL('https://example.com/dotSlash2/');
+      expect(resolveUnderTest('%2E%2F')).toMatchURL('https://example.com/dotSlash3/');
+      expect(resolveUnderTest('.%2E/')).toMatchURL('https://example.com/dotDotSlash1/');
+      expect(resolveUnderTest('%2E./')).toMatchURL('https://example.com/dotDotSlash2/');
+      expect(resolveUnderTest('%2E%2E/')).toMatchURL('https://example.com/dotDotSlash3/');
+      expect(resolveUnderTest('%2E%2E%2F')).toMatchURL('https://example.com/dotDotSlash4/');
+    });
+
+    it('should not try to resolve percent-encoded path-based URLs (in values)', () => {
+      const resolveUnderTest = makeResolveUnderTest(`{
+        "imports": {
+          "slash1": "%2F",
+          "dotSlash1": "%2E/",
+          "dotSlash2": ".%2F",
+          "dotSlash3": "%2E%2F",
+          "dotDotSlash1": ".%2E/",
+          "dotDotSlash2": "%2E./",
+          "dotDotSlash3": "%2E%2E/",
+          "dotDotSlash4": "%2E%2E%2F"
+        }
+      }`);
+      expect(() => resolveUnderTest('slash1')).toThrow(TypeError);
+      expect(() => resolveUnderTest('dotSlash1')).toThrow(TypeError);
+      expect(() => resolveUnderTest('dotSlash2')).toThrow(TypeError);
+      expect(() => resolveUnderTest('dotSlash3')).toThrow(TypeError);
+      expect(() => resolveUnderTest('dotDotSlash1')).toThrow(TypeError);
+      expect(() => resolveUnderTest('dotDotSlash2')).toThrow(TypeError);
+      expect(() => resolveUnderTest('dotDotSlash3')).toThrow(TypeError);
+      expect(() => resolveUnderTest('dotDotSlash4')).toThrow(TypeError);
+    });
+
+    it('should not try to resolve percent-encoded built-in modules', () => {
+      const resolveUnderTest = makeResolveUnderTest(`{
+        "imports": {
+          "blank": "${BLANK.replace(/:/g, '%3A')}"
+        }
+      }`);
+
+      expect(() => resolveUnderTest('blank')).toThrow(TypeError);
+      expect(resolveUnderTest(BLANK)).toMatchURL(BLANK);
+      expect(() => resolveUnderTest(BLANK.replace(/:/g, '%3A'))).toThrow(TypeError);
     });
   });
 

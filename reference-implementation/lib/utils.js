@@ -19,23 +19,56 @@ exports.tryURLParse = (string, baseURL) => {
 };
 
 exports.tryURLLikeSpecifierParse = (specifier, baseURL) => {
+  if (specifier === '') {
+    console.warn(`Invalid empty string specifier.`);
+    return { type: 'invalid' };
+  }
+
   if (specifier.startsWith('/') || specifier.startsWith('./') || specifier.startsWith('../')) {
-    return exports.tryURLParse(specifier, baseURL);
+    if (baseURL.protocol === 'data:') {
+      console.warn(`Path-based module specifier ${JSON.stringify(specifier)} cannot be used ` +
+        'with a base URL that uses the "data:" scheme.');
+      return { type: 'invalid' };
+    }
+    return { type: 'url', specifier: new URL(specifier, baseURL).href, isBuiltin: false };
   }
 
   const url = exports.tryURLParse(specifier);
 
   if (url === null) {
-    return null;
+    return { type: 'nonURL', specifier };
   }
 
-  if (exports.hasFetchScheme(url) || url.protocol === exports.BUILT_IN_MODULE_PROTOCOL) {
-    return url;
+  if (exports.hasFetchScheme(url)) {
+    return { type: 'url', specifier: url.href, isBuiltin: false };
   }
 
-  return null;
+  if (url.protocol === exports.BUILT_IN_MODULE_PROTOCOL) {
+    return { type: 'url', specifier: url.href, isBuiltin: true };
+  }
+
+  return { type: 'nonURL', specifier };
 };
 
 exports.hasFetchScheme = url => {
   return FETCH_SCHEMES.has(url.protocol.slice(0, -1));
 };
+
+exports.sortObjectKeysByLongestFirst = obj => {
+  const sortedEntries = Object.entries(obj).sort((a, b) => longerLengthThenCodeUnitOrder(a[0], b[0]));
+  return Object.fromEntries(sortedEntries);
+};
+
+function longerLengthThenCodeUnitOrder(a, b) {
+  return compare(b.length, a.length) || compare(a, b);
+}
+
+function compare(a, b) {
+  if (a > b) {
+    return 1;
+  }
+  if (b > a) {
+    return -1;
+  }
+  return 0;
+}

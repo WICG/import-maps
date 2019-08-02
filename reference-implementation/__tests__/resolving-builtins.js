@@ -144,6 +144,19 @@ describe('Fallbacks with built-in module addresses', () => {
       "none": [
         "${NONE}",
         "./none-fallback.mjs"
+      ],
+      "twoGoodBuiltins": [
+        "${BLANK}",
+        "${BLANK}"
+      ],
+      "oneGoodBuiltinTwoURLs": [
+        "${BLANK}",
+        "/bad2-1.mjs",
+        "/bad2-2.mjs"
+      ],
+      "twoURLs": [
+        "/bad3-1.mjs",
+        "/bad3-2.mjs"
       ]
     }
   }`);
@@ -154,5 +167,17 @@ describe('Fallbacks with built-in module addresses', () => {
 
   it(`should fall back past "${NONE}"`, () => {
     expect(resolveUnderTest('none')).toMatchURL('https://example.com/app/none-fallback.mjs');
+  });
+
+  it('should fall back for [built-in, built-in]', () => {
+    expect(resolveUnderTest('twoGoodBuiltins')).toMatchURL(BLANK);
+  });
+
+  it('should fail for [built-in, fetch scheme, fetch scheme]', () => {
+    expect(resolveUnderTest('oneGoodBuiltinTwoURLs')).toMatchURL(BLANK);
+  });
+
+  it('should fail for [fetch scheme, fetch scheme]', () => {
+    expect(resolveUnderTest('twoURLs')).toMatchURL('https://example.com/bad3-1.mjs');
   });
 });

@@ -1,7 +1,12 @@
 'use strict';
 const { URL } = require('url');
 const assert = require('assert');
-const { tryURLLikeSpecifierParse, BUILT_IN_MODULE_SCHEME, BUILT_IN_MODULE_PROTOCOL } = require('./utils.js');
+const {
+  tryURLParse,
+  tryURLLikeSpecifierParse,
+  BUILT_IN_MODULE_SCHEME,
+  BUILT_IN_MODULE_PROTOCOL
+} = require('./utils.js');
 
 // TODO: clean up by allowing caller (and thus tests) to choose the list of built-ins?
 const supportedBuiltInModules = new Set([
@@ -9,92 +14,71 @@ const supportedBuiltInModules = new Set([
   `${BUILT_IN_MODULE_SCHEME}:blank/for-testing` // NOTE: not in the spec.
 ]);
 
-exports.resolve = (specifier, parsedImportMap, scriptURL) => {
-  const asURL = tryURLLikeSpecifierParse(specifier, scriptURL);
-  const normalizedSpecifier = asURL ? asURL.href : specifier;
-  const scriptURLString = scriptURL.href;
+exports.resolve = (specifier, parsedImportMap, scriptURLparameter) => {
+  const scriptURL = new URL(scriptURLparameter);
 
-  for (const [scopePrefix, scopeImports] of Object.entries(parsedImportMap.scopes)) {
-    if (scopePrefix === scriptURLString ||
-        (scopePrefix.endsWith('/') && scriptURLString.startsWith(scopePrefix))) {
-      const scopeImportsMatch = resolveImportsMatch(normalizedSpecifier, scopeImports);
+  const taggedSpecifier = tryURLLikeSpecifierParse(specifier, scriptURL);
+  if (taggedSpecifier.type === 'invalid') {
+    throw new TypeError('Attempting to resolve invalid specifier.');
+  }
+
+  const scopeEntries = Object.entries(parsedImportMap.scopes)
+    .concat([[scriptURL.href, parsedImportMap.imports]]);
+  for (const [scopePrefix, scopeImports] of scopeEntries) {
+    if (scopePrefix === scriptURL.href ||
+        (scopePrefix.endsWith('/') && scriptURL.href.startsWith(scopePrefix))) {
+      const scopeImportsMatch = resolveImportsMatch(taggedSpecifier.specifier, scopeImports, scriptURL);
       if (scopeImportsMatch !== null) {
         return scopeImportsMatch;
       }
     }
   }
 
-  const topLevelImportsMatch = resolveImportsMatch(normalizedSpecifier, parsedImportMap.imports);
-  if (topLevelImportsMatch !== null) {
-    return topLevelImportsMatch;
+  if (taggedSpecifier.type !== 'url') {
+    throw new TypeError(`Unmapped bare specifier "${specifier}"`);
   }
 
-  // The specifier was able to be turned into a URL, but wasn't remapped into anything.
-  if (asURL) {
-    if (asURL.protocol === BUILT_IN_MODULE_PROTOCOL && !supportedBuiltInModules.has(asURL.href)) {
-      throw new TypeError(`The "${asURL.href}" built-in module is not implemented.`);
-    }
-    return asURL;
+  if (taggedSpecifier.isBuiltin && !supportedBuiltInModules.has(taggedSpecifier.specifier)) {
+    throw new TypeError(`The "${taggedSpecifier.specifier}" built-in module is not implemented.`);
   }
 
-  throw new TypeError(`Unmapped bare specifier "${specifier}"`);
+  return new URL(taggedSpecifier.specifier);
 };
 
-function resolveImportsMatch(normalizedSpecifier, specifierMap) {
+function resolveImportsMatch(normalizedSpecifier, specifierMap, scriptURL) {
   for (const [specifierKey, addresses] of Object.entries(specifierMap)) {
-    // Exact-match case
     if (specifierKey === normalizedSpecifier) {
-      if (addresses.length === 0) {
-        throw new TypeError(`Specifier "${normalizedSpecifier}" was mapped to no addresses.`);
-      } else if (addresses.length === 1) {
-        const singleAddress = addresses[0];
-        if (singleAddress.protocol === BUILT_IN_MODULE_PROTOCOL && !supportedBuiltInModules.has(singleAddress.href)) {
-          throw new TypeError(`The "${singleAddress.href}" built-in module is not implemented.`);
+      // Exact-match case
+      for (const address of addresses) {
+        const taggedSpecifierValue = tryURLLikeSpecifierParse(address, scriptURL);
+        if (taggedSpecifierValue.type !== 'url') {
+          throw new TypeError(`The specifier ${JSON.stringify(normalizedSpecifier)} was resolved to ` +
+            `non-URL ${JSON.stringify(address)}.`);
         }
-        return singleAddress;
-      } else if (addresses.length === 2 &&
-                 addresses[0].protocol === BUILT_IN_MODULE_PROTOCOL &&
-                 addresses[1].protocol !== BUILT_IN_MODULE_PROTOCOL) {
-        return supportedBuiltInModules.has(addresses[0].href) ? addresses[0] : addresses[1];
-      } else {
-        throw new Error('The reference implementation for multi-address fallbacks that are not ' +
-                        '[built-in module, fetch-scheme URL] is not yet implemented.');
+        if (!taggedSpecifierValue.isBuiltin || supportedBuiltInModules.has(taggedSpecifierValue.specifier)) {
+          return new URL(taggedSpecifierValue.specifier);
+        }
       }
-    }
-
-    // Package prefix-match case
-    if (specifierKey.endsWith('/') && normalizedSpecifier.startsWith(specifierKey)) {
-      if (addresses.length === 0) {
-        throw new TypeError(`Specifier "${normalizedSpecifier}" was mapped to no addresses ` +
-                            `(via prefix specifier key "${specifierKey}").`);
-      } else if (addresses.length === 1) {
-        const afterPrefix = normalizedSpecifier.substring(specifierKey.length);
-
+      throw new TypeError(`The specifier ${JSON.stringify(normalizedSpecifier)} could not be resolved.`);
+    } else if (specifierKey.endsWith('/') && normalizedSpecifier.startsWith(specifierKey)) {
+      // Package prefix-match case
+      const afterPrefix = normalizedSpecifier.substring(specifierKey.length);
+      for (const address of addresses) {
         // Enforced by parsing
-        assert(addresses[0].href.endsWith('/'));
+        assert(address.endsWith('/'));
 
-        // Cannot use URL resolution directly. E.g. "switch" relative to "std:elements/" is a
-        // parsing failure.
-        return new URL(addresses[0] + afterPrefix);
-      } else if (addresses.length === 2 &&
-                 addresses[0].protocol === BUILT_IN_MODULE_PROTOCOL &&
-                 addresses[1].protocol !== BUILT_IN_MODULE_PROTOCOL) {
-        const afterPrefix = normalizedSpecifier.substring(specifierKey.length);
-
-        // Enforced by parsing
-        assert(addresses[0].href.endsWith('/'));
-        assert(addresses[1].href.endsWith('/'));
-
-        // Cannot use URL resolution directly. E.g. "switch" relative to "std:elements/" is a
-        // parsing failure.
-        const url0 = new URL(addresses[0] + afterPrefix);
-        const url1 = new URL(addresses[1] + afterPrefix);
-        return supportedBuiltInModules.has(url0.href) ? url0 : url1;
-      } else {
-        throw new Error('The reference implementation for multi-address fallbacks that are not ' +
-                        '[built-in module, fetch-scheme URL] is not yet implemented.');
+        const resolved = tryURLParse(`${address}${afterPrefix}`);
+        if (resolved === null) {
+          throw new TypeError(`The specifier ${JSON.stringify(normalizedSpecifier)} was resolved to ` +
+            `non-URL ${JSON.stringify(address)}.`);
+        }
+        if (resolved.protocol !== BUILT_IN_MODULE_PROTOCOL || supportedBuiltInModules.has(resolved.href)) {
+          return resolved;
+        }
       }
+      throw new TypeError(`The specifier ${JSON.stringify(normalizedSpecifier)} could not be resolved.`);
     }
   }
+
   return null;
 }

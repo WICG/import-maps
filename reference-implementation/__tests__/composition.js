@@ -235,5 +235,27 @@ describe('Composition', () => {
       }
     });
   });
+
+  it('should produce maps with scopes in sorted order', () => {
+    expect(Object.keys(composeMaps([
+      {
+        imports: {},
+        scopes: {
+          'https://example.com/x/': { 'https://c/': 'https://f/' }
+        }
+      },
+      {
+        imports: {},
+        scopes: {
+          'https://example.com/x/y/': { 'https://a/': 'https://b/' },
+          'https://example.com/x/y/z': { 'https://c/': 'https://d/' }
+        }
+      }
+    ]).scopes)).toStrictEqual([
+      'https://example.com/x/y/z',
+      'https://example.com/x/y/',
+      'https://example.com/x/'
+    ]);
+  });
 });
 

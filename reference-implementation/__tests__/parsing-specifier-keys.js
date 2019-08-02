@@ -14,9 +14,9 @@ describe('Relative URL-like specifier keys', () => {
       }`,
       'https://base.example/path1/path2/path3',
       {
-        'https://base.example/path1/path2/foo': [expect.toMatchURL('https://base.example/dotslash')],
-        'https://base.example/path1/foo': [expect.toMatchURL('https://base.example/dotdotslash')],
-        'https://base.example/foo': [expect.toMatchURL('https://base.example/slash')]
+        'https://base.example/path1/path2/foo': ['https://base.example/dotslash'],
+        'https://base.example/path1/foo': ['https://base.example/dotdotslash'],
+        'https://base.example/foo': ['https://base.example/slash']
       }
     );
   });
@@ -29,11 +29,12 @@ describe('Relative URL-like specifier keys', () => {
         "/foo": "https://example.com/slash"
       }`,
       'data:text/html,test',
-      {
-        './foo': [expect.toMatchURL('https://example.com/dotslash')],
-        '../foo': [expect.toMatchURL('https://example.com/dotdotslash')],
-        '/foo': [expect.toMatchURL('https://example.com/slash')]
-      }
+      {},
+      [
+        'Path-based module specifier "./foo" cannot be used with a base URL that uses the "data:" scheme.',
+        'Path-based module specifier "../foo" cannot be used with a base URL that uses the "data:" scheme.',
+        'Path-based module specifier "/foo" cannot be used with a base URL that uses the "data:" scheme.'
+      ]
     );
   });
 
@@ -46,9 +47,9 @@ describe('Relative URL-like specifier keys', () => {
       }`,
       'https://base.example/path1/path2/path3',
       {
-        'https://base.example/path1/path2/': [expect.toMatchURL('https://base.example/dotslash/')],
-        'https://base.example/path1/': [expect.toMatchURL('https://base.example/dotdotslash/')],
-        'https://base.example/': [expect.toMatchURL('https://base.example/slash/')]
+        'https://base.example/path1/path2/': ['https://base.example/dotslash/'],
+        'https://base.example/path1/': ['https://base.example/dotdotslash/'],
+        'https://base.example/': ['https://base.example/slash/']
       }
     );
   });
@@ -66,13 +67,13 @@ describe('Relative URL-like specifier keys', () => {
       }`,
       'https://base.example/path1/path2/path3',
       {
-        '%2E/': [expect.toMatchURL('https://base.example/dotSlash1/')],
-        '%2E%2E/': [expect.toMatchURL('https://base.example/dotDotSlash1/')],
-        '.%2F': [expect.toMatchURL('https://base.example/dotSlash2')],
-        '..%2F': [expect.toMatchURL('https://base.example/dotDotSlash2')],
-        '%2F': [expect.toMatchURL('https://base.example/slash2')],
-        '%2E%2F': [expect.toMatchURL('https://base.example/dotSlash3')],
-        '%2E%2E%2F': [expect.toMatchURL('https://base.example/dotDotSlash3')]
+        '%2E/': ['https://base.example/dotSlash1/'],
+        '%2E%2E/': ['https://base.example/dotDotSlash1/'],
+        '.%2F': ['https://base.example/dotSlash2'],
+        '..%2F': ['https://base.example/dotDotSlash2'],
+        '%2F': ['https://base.example/slash2'],
+        '%2E%2F': ['https://base.example/dotSlash3'],
+        '%2E%2E%2F': ['https://base.example/dotDotSlash3']
       }
     );
   });
@@ -97,18 +98,18 @@ describe('Absolute URL specifier keys', () => {
       }`,
       'https://base.example/path1/path2/path3',
       {
-        'about:good': [expect.toMatchURL('https://base.example/about')],
-        'blob:good': [expect.toMatchURL('https://base.example/blob')],
-        'data:good': [expect.toMatchURL('https://base.example/data')],
-        'file:///good': [expect.toMatchURL('https://base.example/file')],
-        'filesystem:good': [expect.toMatchURL('https://base.example/filesystem')],
-        'http://good/': [expect.toMatchURL('https://base.example/http/')],
-        'https://good/': [expect.toMatchURL('https://base.example/https/')],
-        'ftp://good/': [expect.toMatchURL('https://base.example/ftp/')],
-        'import:bad': [expect.toMatchURL('https://base.example/import')],
-        'mailto:bad': [expect.toMatchURL('https://base.example/mailto')],
-        'javascript:bad': [expect.toMatchURL('https://base.example/javascript')],
-        'wss:bad': [expect.toMatchURL('https://base.example/wss')]
+        'about:good': ['https://base.example/about'],
+        'blob:good': ['https://base.example/blob'],
+        'data:good': ['https://base.example/data'],
+        'file:///good': ['https://base.example/file'],
+        'filesystem:good': ['https://base.example/filesystem'],
+        'http://good/': ['https://base.example/http/'],
+        'https://good/': ['https://base.example/https/'],
+        'ftp://good/': ['https://base.example/ftp/'],
+        'import:bad': ['https://base.example/import'],
+        'mailto:bad': ['https://base.example/mailto'],
+        'javascript:bad': ['https://base.example/javascript'],
+        'wss:bad': ['https://base.example/wss']
       }
     );
   });
@@ -127,14 +128,14 @@ describe('Absolute URL specifier keys', () => {
       }`,
       'https://base.example/path1/path2/path3',
       {
-        'https://ex ample.org/': [expect.toMatchURL('https://base.example/unparseable1/')],
-        'https://example.com:demo': [expect.toMatchURL('https://base.example/unparseable2')],
-        'http://[www.example.com]/': [expect.toMatchURL('https://base.example/unparseable3/')],
-        'https://example.org/': [expect.toMatchURL('https://base.example/invalidButParseable1/')],
-        'https://example.com///': [expect.toMatchURL('https://base.example/invalidButParseable2/')],
-        'https://example.net/': [expect.toMatchURL('https://base.example/prettyNormal/')],
-        'https://example.com/': [expect.toMatchURL('https://base.example/percentDecoding/')],
-        'https://example.com/%41': [expect.toMatchURL('https://base.example/noPercentDecoding')]
+        'https://ex ample.org/': ['https://base.example/unparseable1/'],
+        'https://example.com:demo': ['https://base.example/unparseable2'],
+        'http://[www.example.com]/': ['https://base.example/unparseable3/'],
+        'https://example.org/': ['https://base.example/invalidButParseable1/'],
+        'https://example.com///': ['https://base.example/invalidButParseable2/'],
+        'https://example.net/': ['https://base.example/prettyNormal/'],
+        'https://example.com/': ['https://base.example/percentDecoding/'],
+        'https://example.com/%41': ['https://base.example/noPercentDecoding']
       }
     );
   });
@@ -149,10 +150,10 @@ describe('Absolute URL specifier keys', () => {
       }`,
       'https://base.example/path1/path2/path3',
       {
-        [BLANK]: [expect.toMatchURL('https://base.example/blank')],
-        [`${BLANK}/`]: [expect.toMatchURL('https://base.example/blank/')],
-        [`${BLANK}/foo`]: [expect.toMatchURL('https://base.example/blank/foo')],
-        [`${BLANK}\\foo`]: [expect.toMatchURL('https://base.example/blank/backslashfoo')]
+        [BLANK]: ['https://base.example/blank'],
+        [`${BLANK}/`]: ['https://base.example/blank/'],
+        [`${BLANK}/foo`]: ['https://base.example/blank/foo'],
+        [`${BLANK}\\foo`]: ['https://base.example/blank/backslashfoo']
       }
     );
   });

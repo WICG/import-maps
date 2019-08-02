@@ -5,7 +5,6 @@ node_js:
 before_install:
   - cd reference-implementation
 script:
-  - npm run lint
   - npm test
   - cd .. && bash ./deploy.sh
 

@@ -1,8 +1,9 @@
 'use strict';
 const assert = require('assert');
-const { tryURLParse, hasFetchScheme, tryURLLikeSpecifierParse } = require('./utils.js');
+const { tryURLParse, hasFetchScheme, tryURLLikeSpecifierParse, sortObjectKeysByLongestFirst } = require('./utils.js');
 
-exports.parseFromString = (input, baseURL) => {
+exports.parseFromString = (input, baseURLparameter) => {
+  const baseURL = new URL(baseURLparameter);
   const parsed = JSON.parse(input);
 
   if (!isJSONObject(parsed)) {
@@ -45,17 +46,17 @@ function sortAndNormalizeSpecifierMap(obj, baseURL) {
   // Normalize all entries into arrays
   const normalized = {};
   for (const [specifierKey, value] of Object.entries(obj)) {
-    const normalizedSpecifierKey = normalizeSpecifierKey(specifierKey, baseURL);
-    if (normalizedSpecifierKey === null) {
+    const taggedSpecifierKey = tryURLLikeSpecifierParse(specifierKey, baseURL);
+    if (taggedSpecifierKey.type === 'invalid') {
       continue;
     }
 
     if (typeof value === 'string') {
-      normalized[normalizedSpecifierKey] = [value];
+      normalized[taggedSpecifierKey.specifier] = [value];
     } else if (value === null) {
-      normalized[normalizedSpecifierKey] = [];
+      normalized[taggedSpecifierKey.specifier] = [];
     } else if (Array.isArray(value)) {
-      normalized[normalizedSpecifierKey] = obj[specifierKey];
+      normalized[taggedSpecifierKey.specifier] = obj[specifierKey];
     } else {
       console.warn(`Invalid address ${JSON.stringify(value)} for the specifier key "${specifierKey}". ` +
           `Addresses must be strings, arrays, or null.`);
@@ -74,30 +75,23 @@ function sortAndNormalizeSpecifierMap(obj, baseURL) {
         continue;
       }
 
-      const addressURL = tryURLLikeSpecifierParse(potentialAddress, baseURL);
-      if (addressURL === null) {
-        console.warn(`Invalid address "${potentialAddress}" for the specifier key "${specifierKey}".`);
+      const taggedSpecifier = tryURLLikeSpecifierParse(potentialAddress, baseURL);
+      if (taggedSpecifier.type === 'invalid') {
         continue;
       }
 
-      if (specifierKey.endsWith('/') && !addressURL.href.endsWith('/')) {
-        console.warn(`Invalid address "${addressURL.href}" for package specifier key "${specifierKey}". ` +
+      if (specifierKey.endsWith('/') && !taggedSpecifier.specifier.endsWith('/')) {
+        console.warn(`Invalid address "${taggedSpecifier.specifier}" for package specifier key "${specifierKey}". ` +
             `Package addresses must end with "/".`);
         continue;
       }
 
-      validNormalizedAddresses.push(addressURL);
+      validNormalizedAddresses.push(taggedSpecifier.specifier);
     }
     normalized[specifierKey] = validNormalizedAddresses;
   }
 
-  const sortedAndNormalized = {};
-  const sortedKeys = Object.keys(normalized).sort(longerLengthThenCodeUnitOrder);
-  for (const key of sortedKeys) {
-    sortedAndNormalized[key] = normalized[key];
-  }
-
-  return sortedAndNormalized;
+  return sortObjectKeysByLongestFirst(normalized);
 }
 
 function sortAndNormalizeScopes(obj, baseURL) {
@@ -122,44 +116,9 @@ function sortAndNormalizeScopes(obj, baseURL) {
     normalized[normalizedScopePrefix] = sortAndNormalizeSpecifierMap(potentialSpecifierMap, baseURL);
   }
 
-  const sortedAndNormalized = {};
-  const sortedKeys = Object.keys(normalized).sort(longerLengthThenCodeUnitOrder);
-  for (const key of sortedKeys) {
-    sortedAndNormalized[key] = normalized[key];
-  }
-
-  return sortedAndNormalized;
-}
-
-function normalizeSpecifierKey(specifierKey, baseURL) {
-  // Ignore attempts to use the empty string as a specifier key
-  if (specifierKey === '') {
-    console.warn(`Invalid empty string specifier key.`);
-    return null;
-  }
-
-  const url = tryURLLikeSpecifierParse(specifierKey, baseURL);
-  if (url !== null) {
-    return url.href;
-  }
-
-  return specifierKey;
+  return sortObjectKeysByLongestFirst(normalized);
 }
 
 function isJSONObject(value) {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-function longerLengthThenCodeUnitOrder(a, b) {
-  return compare(b.length, a.length) || compare(a, b);
-}
-
-function compare(a, b) {
-  if (a > b) {
-    return 1;
-  }
-  if (b > a) {
-    return -1;
-  }
-  return 0;
 }

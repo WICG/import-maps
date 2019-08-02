@@ -1,9 +1,10 @@
 'use strict';
+const { sortObjectKeysByLongestFirst } = require('./utils.js');
 
 exports.appendMap = (baseMap, newMap) => {
   return {
     imports: joinHelper(baseMap.imports, [baseMap.imports], newMap.imports),
-    scopes: Object.fromEntries([
+    scopes: sortObjectKeysByLongestFirst(Object.fromEntries([
       ...Object.entries(baseMap.scopes)
         .map(([scopePrefix, scopeMapping]) => [scopePrefix, joinHelper(scopeMapping, [], {})]),
       ...Object.entries(newMap.scopes).map(([scopePrefix, scopeMapping]) => [
@@ -14,7 +15,7 @@ exports.appendMap = (baseMap, newMap) => {
           scopeMapping
         )
       ])
-    ])
+    ]))
   };
 };
 
@@ -38,20 +39,5 @@ function applyCascadeWithContexts(moduleSpecifier, applicableMapContexts) {
 function scopesMatchingPrefix(prefix, scopesObject) {
   return Object.keys(scopesObject)
     .filter(scopePrefix => scopePrefix === prefix || (scopePrefix.endsWith('/') && prefix.startsWith(scopePrefix)))
-    .sort(shorterLengthThenCodeUnitOrder)
     .map(s => scopesObject[s]);
-}
-
-function shorterLengthThenCodeUnitOrder(a, b) {
-  return compare(a.length, b.length) || compare(a, b);
-}
-
-function compare(a, b) {
-  if (a > b) {
-    return 1;
-  }
-  if (b > a) {
-    return -1;
-  }
-  return 0;
 }
