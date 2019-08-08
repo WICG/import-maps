@@ -1,43 +1,38 @@
 'use strict';
+const { getFallbacks } = require('./resolver.js');
 const { sortObjectKeysByLongestFirst } = require('./utils.js');
 
 exports.appendMap = (baseMap, newMap) => {
   return {
-    imports: joinHelper(baseMap.imports, [baseMap.imports], newMap.imports),
-    scopes: sortObjectKeysByLongestFirst(Object.fromEntries([
-      ...Object.entries(baseMap.scopes)
-        .map(([scopePrefix, scopeMapping]) => [scopePrefix, joinHelper(scopeMapping, [], {})]),
-      ...Object.entries(newMap.scopes).map(([scopePrefix, scopeMapping]) => [
-        scopePrefix,
-        joinHelper(
-          baseMap.scopes[scopePrefix],
-          [baseMap.imports, ...scopesMatchingPrefix(scopePrefix, baseMap.scopes)],
-          scopeMapping
-        )
-      ])
-    ]))
+    imports: joinHelper(baseMap, baseMap.imports, newMap.imports, null),
+    scopes: sortObjectKeysByLongestFirst(Object.assign(
+      cloneScopes(baseMap.scopes),
+      mapValues(newMap.scopes, (scopePrefix, scopeMapping) => joinHelper(
+        baseMap,
+        baseMap.scopes[scopePrefix] || {},
+        scopeMapping,
+        scopePrefix
+      ))
+    ))
   };
 };
 
-function joinHelper(oldMapping = {}, applicableContexts, newMapping) {
-  return Object.fromEntries([
-    ...Object.entries(oldMapping).map(([moduleSpecifier, fallbacks]) => [moduleSpecifier, [...fallbacks]]),
-    ...Object.entries(newMapping).map(([moduleSpecifier, fallbacks]) =>
-      [moduleSpecifier, fallbacks.flatMap(fallback => applyCascadeWithContexts(fallback, applicableContexts))])
-  ]);
+function joinHelper(baseMap, oldSpecifierMap, newSpecifierMap, resolutionContext) {
+  const resolvedNewSpecifierMap = mapValues(
+    newSpecifierMap,
+    (moduleSpecifier, fallbacks) => fallbacks.flatMap(fallback => getFallbacks(fallback, baseMap, resolutionContext))
+  );
+  return Object.assign(cloneSpecifierMap(oldSpecifierMap), resolvedNewSpecifierMap);
 }
 
-// string -> Array<Map<string, Array<string>>> -> Array<string>
-function applyCascadeWithContexts(moduleSpecifier, applicableMapContexts) {
-  if (applicableMapContexts.length < 1) {
-    return [moduleSpecifier];
-  }
-  const [head, ...tail] = applicableMapContexts;
-  return moduleSpecifier in head ? head[moduleSpecifier] : applyCascadeWithContexts(moduleSpecifier, tail);
+function cloneSpecifierMap(specifierMap) {
+  return mapValues(specifierMap, (moduleSpecifier, fallbacks) => [...fallbacks]);
 }
 
-function scopesMatchingPrefix(prefix, scopesObject) {
-  return Object.keys(scopesObject)
-    .filter(scopePrefix => scopePrefix === prefix || (scopePrefix.endsWith('/') && prefix.startsWith(scopePrefix)))
-    .map(s => scopesObject[s]);
+function cloneScopes(scopeObject) {
+  return mapValues(scopeObject, (scopePrefix, specifierMap) => cloneSpecifierMap(specifierMap));
+}
+
+function mapValues(obj, fn) {
+  return Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, fn(k, v)]));
 }

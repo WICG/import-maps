@@ -202,22 +202,30 @@ describe('Absolute URL addresses', () => {
         "unparseable1": "https://ex ample.org/",
         "unparseable2": "https://example.com:demo",
         "unparseable3": "http://[www.example.com]/",
+        "unparseable4": "-https://測試.com/測試",
+        "unparseable5": "-HTTPS://example.com",
         "invalidButParseable1": "https:example.org",
         "invalidButParseable2": "https://///example.com///",
         "prettyNormal": "https://example.net",
         "percentDecoding": "https://ex%41mple.com/",
-        "noPercentDecoding": "https://example.com/%41"
+        "noPercentDecoding": "https://example.com/%41",
+        "nonAscii": "https://測試.com/測試",
+        "uppercase": "HTTPS://example.com"
       }`,
       'https://base.example/path1/path2/path3',
       {
         unparseable1: ['https://ex ample.org/'],
         unparseable2: ['https://example.com:demo'],
         unparseable3: ['http://[www.example.com]/'],
+        unparseable4: ['-https://測試.com/測試'],
+        unparseable5: ['-HTTPS://example.com'],
         invalidButParseable1: ['https://example.org/'],
         invalidButParseable2: ['https://example.com///'],
         prettyNormal: ['https://example.net/'],
         percentDecoding: ['https://example.com/'],
-        noPercentDecoding: ['https://example.com/%41']
+        noPercentDecoding: ['https://example.com/%41'],
+        nonAscii: ['https://xn--g6w251d.com/%E6%B8%AC%E8%A9%A6'],
+        uppercase: ['https://example.com/']
       },
       []
     );

@@ -236,6 +236,112 @@ describe('Composition', () => {
     });
   });
 
+  it('should perform package-prefix-relative composition', () => {
+    expect(composeMaps([
+      {
+        imports: {
+          'moment/': '/node_modules/moment/src/'
+        },
+        scopes: {}
+      },
+      {
+        imports: {
+          'utils/': 'moment/lib/utils/',
+          'is-date': 'moment/lib/utils/is-date.js'
+        },
+        scopes: {}
+      },
+      {
+        imports: {
+          'is-number': 'utils/is-number.js'
+        }
+      }
+    ])).toStrictEqual({
+      imports: {
+        'moment/': ['https://example.com/node_modules/moment/src/'],
+        'utils/': ['https://example.com/node_modules/moment/src/lib/utils/'],
+        'is-date': ['https://example.com/node_modules/moment/src/lib/utils/is-date.js'],
+        'is-number': ['https://example.com/node_modules/moment/src/lib/utils/is-number.js']
+      },
+      scopes: {}
+    });
+  });
+
+  it('should url normalize things which have composed into URLs', () => {
+    expect(composeMaps([
+      {
+        imports: {
+          'a/': 'https://example.com/x/'
+        },
+        scopes: {}
+      },
+      {
+        imports: {
+          'dot-test': 'a/測試'
+        }
+      }
+    ])).toStrictEqual({
+      imports: {
+        'a/': ['https://example.com/x/'],
+        'dot-test': ['https://example.com/x/%E6%B8%AC%E8%A9%A6']
+      },
+      scopes: {}
+    });
+  });
+
+  it('should compose according to the most specific applicable scope', () => {
+    expect(composeMaps([
+      {
+        imports: {
+          a: 'https://b/'
+        },
+        scopes: {
+          'x/': { a: 'https://c/' },
+          'x/y/': { a: 'https://d/' },
+          'x/y/z/': { a: 'https://e/' }
+        }
+      },
+      {
+        imports: {},
+        scopes: {
+          'x/': {
+            'a-x': 'a'
+          },
+          'x/y/': {
+            'a-y': 'a'
+          },
+          'x/y/z/': {
+            'a-z': 'a'
+          },
+          'x/y/w/': {
+            'a-w': 'a'
+          }
+        }
+      }
+    ])).toStrictEqual({
+      imports: {
+        a: ['https://b/']
+      },
+      scopes: {
+        'https://example.com/app/x/': {
+          a: ['https://c/'],
+          'a-x': ['https://c/']
+        },
+        'https://example.com/app/x/y/': {
+          a: ['https://d/'],
+          'a-y': ['https://d/']
+        },
+        'https://example.com/app/x/y/z/': {
+          a: ['https://e/'],
+          'a-z': ['https://e/']
+        },
+        'https://example.com/app/x/y/w/': {
+          'a-w': ['https://d/']
+        }
+      }
+    });
+  });
+
   it('should produce maps with scopes in sorted order', () => {
     expect(Object.keys(composeMaps([
       {
