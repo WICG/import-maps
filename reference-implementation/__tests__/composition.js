@@ -170,6 +170,76 @@ describe('Composition', () => {
     });
   });
 
+  it('should compose equivalent scopes by merging', () => {
+    expect(composeMaps([
+      `{
+        "imports": {},
+        "scopes": {
+          "/x/": {
+            "/a": "/b",
+            "/c": "/d"
+          }
+        }
+      }`,
+      `{
+        "imports": {},
+        "scopes": {
+          "/x/": {
+            "/c": "/z",
+            "/e": "/f"
+          }
+        }
+      }`
+    ])).toStrictEqual({
+      imports: {},
+      scopes: {
+        'https://example.com/x/': {
+          'https://example.com/a': ['https://example.com/b'],
+          'https://example.com/c': ['https://example.com/z'],
+          'https://example.com/e': ['https://example.com/f']
+        }
+      }
+    });
+  });
+
+  it('should not be confused by different representations of URLs', () => {
+    expect(composeMaps([
+      `{
+        "imports": {
+          "/a": "/b",
+          "/c": "/d",
+          "/e": "/f",
+          "/g": "/h",
+          "/i": "/j"
+        }
+      }`,
+      `{
+        "imports": {
+          "/v": "/%61",
+          "/w": "/useless/../c",
+          "/x": "../../../../../e",
+          "/y": "./useless%2F..%2F..%2F/g",
+          "/z": "https://example.com/i"
+        }
+      }`
+    ])).toStrictEqual({
+      imports: {
+        'https://example.com/a': ['https://example.com/b'],
+        'https://example.com/c': ['https://example.com/d'],
+        'https://example.com/e': ['https://example.com/f'],
+        'https://example.com/g': ['https://example.com/h'],
+        'https://example.com/i': ['https://example.com/j'],
+
+        'https://example.com/v': ['https://example.com/%61'],
+        'https://example.com/w': ['https://example.com/d'],
+        'https://example.com/x': ['https://example.com/f'],
+        'https://example.com/y': ['https://example.com/app/useless%2F..%2F..%2F/g'],
+        'https://example.com/z': ['https://example.com/j']
+      },
+      scopes: {}
+    });
+  });
+
   it('should compose "nested" scopes', () => {
     expect(composeMaps([
       `{
