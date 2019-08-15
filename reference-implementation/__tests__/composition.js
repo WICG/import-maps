@@ -5,13 +5,14 @@ const { appendMap } = require('../lib/composer.js');
 
 const mapBaseURL = new URL('https://example.com/app/index.html');
 
-function composeMaps(mapLikes) {
+// a convenience function for folding composition over a list of maps
+function composeMaps(mapLikes, baseURL = mapBaseURL) {
   if (!Array.isArray(mapLikes) || mapLikes.length < 1) {
     throw new Error('composeMaps must be given a non-empty array of mapLikes');
   }
-  let map = parseFromString(mapLikes.shift(), mapBaseURL);
+  let map = parseFromString(mapLikes.shift(), baseURL);
   for (const mapLike of mapLikes) {
-    const newMap = parseFromString(mapLike, mapBaseURL);
+    const newMap = parseFromString(mapLike, baseURL);
     map = appendMap(map, newMap);
   }
   return map;
