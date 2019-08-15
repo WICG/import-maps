@@ -12,8 +12,7 @@ const supportedBuiltInModules = new Set([
   `${BUILT_IN_MODULE_SCHEME}:blank/for-testing` // NOTE: not in the spec.
 ]);
 
-exports.resolve = (specifier, parsedImportMap, scriptURLparameter) => {
-  const scriptURL = new URL(scriptURLparameter);
+exports.resolve = (specifier, parsedImportMap, scriptURL) => {
   const taggedSpecifier = tryURLLikeSpecifierParse(specifier, scriptURL);
   if (taggedSpecifier.type === 'invalid') {
     throw new TypeError(taggedSpecifier.message);
