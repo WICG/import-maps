@@ -16,7 +16,7 @@ exports.resolve = (specifier, parsedImportMap, scriptURLparameter) => {
   const scriptURL = new URL(scriptURLparameter);
   const taggedSpecifier = tryURLLikeSpecifierParse(specifier, scriptURL);
   if (taggedSpecifier.type === 'invalid') {
-    throw new TypeError('Attempting to resolve invalid specifier.');
+    throw new TypeError(taggedSpecifier.message);
   }
   const fallbacks = exports.getFallbacks(taggedSpecifier.specifier, parsedImportMap, scriptURL.href);
   for (const address of fallbacks) {

@@ -48,6 +48,7 @@ function sortAndNormalizeSpecifierMap(obj, baseURL) {
   for (const [specifierKey, value] of Object.entries(obj)) {
     const taggedSpecifierKey = tryURLLikeSpecifierParse(specifierKey, baseURL);
     if (taggedSpecifierKey.type === 'invalid') {
+      console.warn(taggedSpecifierKey.message);
       continue;
     }
 
@@ -77,6 +78,7 @@ function sortAndNormalizeSpecifierMap(obj, baseURL) {
 
       const taggedSpecifier = tryURLLikeSpecifierParse(potentialAddress, baseURL);
       if (taggedSpecifier.type === 'invalid') {
+        console.warn(taggedSpecifier.message);
         continue;
       }
 

@@ -20,15 +20,13 @@ exports.tryURLParse = (string, baseURL) => {
 
 exports.tryURLLikeSpecifierParse = (specifier, baseURL) => {
   if (specifier === '') {
-    console.warn(`Invalid empty string specifier.`);
-    return { type: 'invalid' };
+    return { type: 'invalid', message: 'Invalid empty string specifier.' };
   }
 
   if (specifier.startsWith('/') || specifier.startsWith('./') || specifier.startsWith('../')) {
     if (baseURL.protocol === 'data:') {
-      console.warn(`Path-based module specifier ${JSON.stringify(specifier)} cannot be used ` +
-        'with a base URL that uses the "data:" scheme.');
-      return { type: 'invalid' };
+      return { type: 'invalid', message: `Path-based module specifier ${JSON.stringify(specifier)} ` +
+        'cannot be used with a base URL that uses the "data:" scheme.' };
     }
     return { type: 'url', specifier: new URL(specifier, baseURL).href, isBuiltin: false };
   }
