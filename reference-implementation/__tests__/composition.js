@@ -267,7 +267,7 @@ describe('Composition', () => {
     });
   });
 
-  it('should url normalize things which have composed into URLs', () => {
+  it('should URL-normalize things which have composed into URLs', () => {
     expect(composeMaps([
       {
         imports: {
