@@ -14,7 +14,7 @@ function composeMaps(mapLikes) {
     const newMap = parseFromString(JSON.stringify(mapLike), mapBaseURL);
     map = appendMap(map, newMap);
   }
-  return JSON.parse(JSON.stringify(map));
+  return map;
 }
 
 describe('Composition', () => {
