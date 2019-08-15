@@ -3,6 +3,7 @@ const { URL } = require('url');
 const { parseFromString } = require('../lib/parser.js');
 const { resolve } = require('../lib/resolver.js');
 const { BUILT_IN_MODULE_SCHEME } = require('../lib/utils.js');
+const { testWarningHandler } = require('./helpers/parsing.js');
 
 const BLANK = `${BUILT_IN_MODULE_SCHEME}:blank`;
 const NONE = `${BUILT_IN_MODULE_SCHEME}:none`;
@@ -63,12 +64,15 @@ describe('Unmapped', () => {
 describe('the empty string', () => {
   it('should fail for an unmapped empty string', () => {
     const resolveUnderTest = makeResolveUnderTest(`{}`);
-    console.warn = () => {};
     expect(() => resolveUnderTest('')).toThrow(TypeError);
   });
 
   it('should fail for a mapped empty string', () => {
-    console.warn = () => {};
+    const assertWarnings = testWarningHandler([
+      'Invalid empty string specifier.',
+      'Invalid empty string specifier.',
+      'Invalid empty string specifier.'
+    ]);
     const resolveUnderTest = makeResolveUnderTest(`{
       "imports": {
         "": "/",
@@ -79,6 +83,7 @@ describe('the empty string', () => {
     expect(() => resolveUnderTest('')).toThrow(TypeError);
     expect(() => resolveUnderTest('emptyString')).toThrow(TypeError);
     expect(() => resolveUnderTest('emptyString/a')).toThrow(TypeError);
+    assertWarnings();
   });
 });
 

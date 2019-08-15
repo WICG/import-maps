@@ -2,14 +2,14 @@
 const { parseFromString } = require('../../lib/parser.js');
 
 exports.expectSpecifierMap = (input, baseURL, output, warnings = []) => {
-  const checkWarnings1 = testWarningHandler(warnings);
+  const checkWarnings1 = exports.testWarningHandler(warnings);
 
   expect(parseFromString(`{ "imports": ${input} }`, baseURL))
     .toEqual({ imports: output, scopes: {} });
 
   checkWarnings1();
 
-  const checkWarnings2 = testWarningHandler(warnings);
+  const checkWarnings2 = exports.testWarningHandler(warnings);
 
   expect(parseFromString(`{ "scopes": { "https://scope.example/":  ${input} } }`, baseURL))
     .toEqual({ imports: {}, scopes: { 'https://scope.example/': output } });
@@ -18,7 +18,7 @@ exports.expectSpecifierMap = (input, baseURL, output, warnings = []) => {
 };
 
 exports.expectScopes = (inputArray, baseURL, outputArray, warnings = []) => {
-  const checkWarnings = testWarningHandler(warnings);
+  const checkWarnings = exports.testWarningHandler(warnings);
 
   const inputScopesAsStrings = inputArray.map(scopePrefix => `${JSON.stringify(scopePrefix)}: {}`);
   const inputString = `{ "scopes": { ${inputScopesAsStrings.join(', ')} } }`;
@@ -34,19 +34,19 @@ exports.expectScopes = (inputArray, baseURL, outputArray, warnings = []) => {
 };
 
 exports.expectBad = (input, baseURL, warnings = []) => {
-  const checkWarnings = testWarningHandler(warnings);
+  const checkWarnings = exports.testWarningHandler(warnings);
   expect(() => parseFromString(input, baseURL)).toThrow(TypeError);
   checkWarnings();
 };
 
 exports.expectWarnings = (input, baseURL, output, warnings = []) => {
-  const checkWarnings = testWarningHandler(warnings);
+  const checkWarnings = exports.testWarningHandler(warnings);
   expect(parseFromString(input, baseURL)).toEqual(output);
 
   checkWarnings();
 };
 
-function testWarningHandler(expectedWarnings) {
+exports.testWarningHandler = expectedWarnings => {
   const warnings = [];
   const { warn } = console;
   console.warn = warning => {
@@ -56,4 +56,4 @@ function testWarningHandler(expectedWarnings) {
     console.warn = warn;
     expect(warnings).toEqual(expectedWarnings);
   };
-}
+};
