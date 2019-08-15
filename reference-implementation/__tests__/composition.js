@@ -127,7 +127,7 @@ describe('Composition', () => {
     });
   });
 
-  it('should compose maps that are using the virtualisation patterns we expect to see in the wild', () => {
+  it('should compose maps that are using the virtualization patterns we expect to see in the wild', () => {
     expect(composeMaps([
       {
         imports: {
