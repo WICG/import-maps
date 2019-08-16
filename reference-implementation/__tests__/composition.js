@@ -202,6 +202,46 @@ describe('Composition', () => {
     });
   });
 
+  it('should use the merge-within-scopes strategy', () => {
+    expect(composeMaps([
+      `{
+        "imports": {
+          "a": "/a-1.mjs",
+          "b": "/b-1.mjs",
+          "std:kv-storage": ["std:kv-storage", "/kvs-1.mjs"]
+        },
+        "scopes": {
+          "/scope1/": {
+            "a": "/a-2.mjs"
+          }
+        }
+      }`,
+      `{
+        "imports": {
+          "b": null,
+          "std:kv-storage": "kvs-2.mjs"
+        },
+        "scopes": {
+          "/scope1/": {
+            "b": "/b-2.mjs"
+          }
+        }
+      }`
+    ])).toStrictEqual({
+      imports: {
+        a: ['https://example.com/a-1.mjs'],
+        b: [],
+        'std:kv-storage': ['kvs-2.mjs']
+      },
+      scopes: {
+        'https://example.com/scope1/': {
+          a: ['https://example.com/a-2.mjs'],
+          b: ['https://example.com/b-2.mjs']
+        }
+      }
+    });
+  });
+
   it('should not be confused by different representations of URLs', () => {
     expect(composeMaps([
       `{
