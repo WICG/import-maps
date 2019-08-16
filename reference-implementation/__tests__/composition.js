@@ -307,6 +307,29 @@ describe('Composition', () => {
     });
   });
 
+  it('composition does not result in a map cascading to itself even for package-prefix-relative resolution', () => {
+    expect(composeMaps([
+      `{
+        "imports": {
+          "moment/": "/node_modules/moment/src/"
+        }
+      }`,
+      `{
+        "imports": {
+          "utils/": "moment/",
+          "foo": "utils/foo.js"
+        }
+      }`
+    ])).toStrictEqual({
+      imports: {
+        'moment/': ['https://example.com/node_modules/moment/src/'],
+        'utils/': ['https://example.com/node_modules/moment/src/'],
+        foo: ['utils/foo.js']
+      },
+      scopes: {}
+    });
+  });
+
   it('should perform package-prefix-relative composition', () => {
     expect(composeMaps([
       `{
