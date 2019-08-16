@@ -317,14 +317,14 @@ describe('Failing addresses: mismatched trailing slashes', () => {
 
 describe('Other invalid addresses', () => {
   it('should treat unprefixed strings that are not absolute URLs as non-URLs', () => {
-    for (const bad of ['bar', '\\bar', '~bar', '#bar', '?bar']) {
+    for (const nonURL of ['bar', '\\bar', '~bar', '#bar', '?bar']) {
       expectSpecifierMap(
         `{
-          "foo": ${JSON.stringify(bad)}
+          "foo": ${JSON.stringify(nonURL)}
         }`,
         'https://base.example/path1/path2/path3',
         {
-          foo: [bad]
+          foo: [nonURL]
         },
         []
       );
