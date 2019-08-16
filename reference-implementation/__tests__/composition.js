@@ -245,6 +245,29 @@ describe('Composition', () => {
 
   it('should strip bare specifiers on the RHS and warn', () => {
     const assertWarnings = testWarningHandler([
+      'Non-URL specifier "b" is not allowed to be the target of an import mapping following composition.',
+      'Non-URL specifier "d" is not allowed to be the target of an import mapping following composition.'
+    ]);
+    expect(composeMaps([
+      `{}`,
+      `{
+        "imports": {
+          "a": "b",
+          "c": ["d", "/"]
+        }
+      }`
+    ])).toStrictEqual({
+      imports: {
+        a: [],
+        c: ['https://example.com/']
+      },
+      scopes: {}
+    });
+    assertWarnings();
+  });
+
+  it('should strip bare specifiers on the RHS and warn', () => {
+    const assertWarnings = testWarningHandler([
       'Non-URL specifier "d" is not allowed to be ' +
       'the target of an import mapping following composition.'
     ]);
