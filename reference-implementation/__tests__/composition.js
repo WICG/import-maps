@@ -2,6 +2,7 @@
 const { URL } = require('url');
 const { parseFromString } = require('../lib/parser.js');
 const { appendMap } = require('../lib/composer.js');
+const { testWarningHandler } = require('./helpers/parsing.js');
 
 const mapBaseURL = new URL('https://example.com/app/index.html');
 
@@ -219,7 +220,7 @@ describe('Composition', () => {
       `{
         "imports": {
           "b": null,
-          "std:kv-storage": "kvs-2.mjs"
+          "std:kv-storage": "/kvs-2.mjs"
         },
         "scopes": {
           "/scope1/": {
@@ -231,7 +232,7 @@ describe('Composition', () => {
       imports: {
         a: ['https://example.com/a-1.mjs'],
         b: [],
-        'std:kv-storage': ['kvs-2.mjs']
+        'std:kv-storage': ['https://example.com/kvs-2.mjs']
       },
       scopes: {
         'https://example.com/scope1/': {
@@ -240,6 +241,34 @@ describe('Composition', () => {
         }
       }
     });
+  });
+
+  it('should strip bare specifiers on the RHS and warn', () => {
+    const assertWarnings = testWarningHandler([
+      'Non-URL specifier "d" is not allowed to be ' +
+      'the target of an import mapping following composition.'
+    ]);
+    expect(composeMaps([
+      `{
+        "imports": {
+          "a": "/a.mjs"
+        }
+      }`,
+      `{
+        "imports": {
+          "b": "a",
+          "c": "d"
+        }
+      }`
+    ])).toStrictEqual({
+      imports: {
+        a: ['https://example.com/a.mjs'],
+        b: ['https://example.com/a.mjs'],
+        c: []
+      },
+      scopes: {}
+    });
+    assertWarnings();
   });
 
   it('should not be confused by different representations of URLs', () => {
@@ -348,6 +377,10 @@ describe('Composition', () => {
   });
 
   it('composition does not result in a map cascading to itself even for package-prefix-relative resolution', () => {
+    const assertWarnings = testWarningHandler([
+      'Non-URL specifier "utils/foo.js" is not allowed to be ' +
+      'the target of an import mapping following composition.'
+    ]);
     expect(composeMaps([
       `{
         "imports": {
@@ -364,10 +397,11 @@ describe('Composition', () => {
       imports: {
         'moment/': ['https://example.com/node_modules/moment/src/'],
         'utils/': ['https://example.com/node_modules/moment/src/'],
-        foo: ['utils/foo.js']
+        foo: []
       },
       scopes: {}
     });
+    assertWarnings();
   });
 
   it('should perform package-prefix-relative composition', () => {

@@ -1,6 +1,6 @@
 'use strict';
 const { getFallbacks } = require('./resolver.js');
-const { sortObjectKeysByLongestFirst } = require('./utils.js');
+const { tryURLLikeSpecifierParse, sortObjectKeysByLongestFirst } = require('./utils.js');
 
 exports.appendMap = (baseMap, newMap) => {
   return {
@@ -20,7 +20,15 @@ exports.appendMap = (baseMap, newMap) => {
 function joinHelper(baseMap, oldSpecifierMap, newSpecifierMap, resolutionContext) {
   const resolvedNewSpecifierMap = mapValues(
     newSpecifierMap,
-    (moduleSpecifier, fallbacks) => fallbacks.flatMap(fallback => getFallbacks(fallback, baseMap, resolutionContext))
+    (moduleSpecifier, fallbacks) => fallbacks.flatMap(fallback =>
+      getFallbacks(fallback, baseMap, resolutionContext).filter(fb => {
+        if (tryURLLikeSpecifierParse(fb).type !== 'url') {
+          console.warn(`Non-URL specifier ${JSON.stringify(fb)} is not allowed to be ` +
+            'the target of an import mapping following composition.');
+          return false;
+        }
+        return true;
+      }))
   );
   return Object.assign(cloneSpecifierMap(oldSpecifierMap), resolvedNewSpecifierMap);
 }
