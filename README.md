@@ -16,6 +16,7 @@ _Or, how to control the behavior of JavaScript imports_
     - ["Packages" via trailing slashes](#packages-via-trailing-slashes)
     - [General URL-like specifier remapping](#general-url-like-specifier-remapping)
     - [Extension-less imports](#extension-less-imports)
+    - [Mapping away hashes in script filenames](#mapping-away-hashes-in-script-filenames)
   - [Fallback examples](#fallback-examples)
     - [For user-supplied packages](#for-user-supplied-packages)
     - [For built-in modules, in module-import-map-supporting browsers](#for-built-in-modules-in-module-import-map-supporting-browsers)
@@ -256,6 +257,46 @@ Although this example shows how it is _possible_ to allow extension-less imports
 This bloat is especially problematic if you need to allow extension-less imports within a package. In that case you will need an import map entry for every file in the package, not just the top-level entry points. For example, to allow `import "./fp"` from within the `/node_modules/lodash-es/lodash.js` file, you would need an import entry mapping `/node_modules/lodash-es/fp` to `/node_modules/lodash-es/fp.js`. Now imagine repeating this for every file referenced without an extension.
 
 As such, we recommend caution when employing patterns like this in your import maps, or writing modules. It will be simpler for the ecosystem if we don't rely on import maps to patch up file-extension related mismatches.
+
+#### Mapping away hashes in script filenames
+
+Script files are often given a unique hash in their filename, to improve cachability. See [this general discussion of the technique](https://jakearchibald.com/2016/caching-best-practices/), or [this more JavaScript- and webpack-focused discussion](https://developers.google.com/web/fundamentals/performance/webpack/use-long-term-caching).
+
+With module graphs, this technique can be problematic:
+
+* Consider a simple module graph, with `app.mjs` depending on `dep.mjs` which depends on `sub-dep.mjs`. Normally, if you upgrade or change `sub-dep.mjs`, `app.mjs` and `dep.mjs` can remain cached, requiring only transferring the new `sub-dep.mjs` over the network.
+
+* Now consider the same module graph, using hashed filenames for production. There we have our build process generating `app-8e0d62a03.mjs`, `dep-16f9d819a.mjs`, and `sub-dep-7be2aa47f.mjs` from the original three files.
+
+  If we upgrade or change `sub-dep.mjs`, our build process will re-generate a new filename for the production version, say `sub-dep-5f47101dc.mjs`. But this means we need to change the `import` statement in the production version of `dep.mjs`. That changes its contents, which means the production version of `dep.mjs` itself needs a new filename. But then this means we need to update the `import` statement in the production version of `app.mjs`...
+
+That is, with module graphs and `import` statements containing hased-filename script files, updates to any part of the graph become viral to all its dependencies, losing all the cachability benefits.
+
+Import maps provide a way out of this dillema, by decoupling the module specifiers that appear in `import` statements from the URLs on the server. For example, our site could start out with an import map like
+
+```json
+{
+  "imports": {
+    "app.mjs": "app-8e0d62a03.mjs",
+    "dep.mjs": "dep-16f9d819a.mjs",
+    "sub-dep.mjs": "sub-dep-7be2aa47f.mjs"
+  }
+}
+```
+
+and with import statements that are of the form `import "./sub-dep.mjs"` instead of `import "./sub-dep-7be2aa47f.mjs"`. Now, if we change `sub-dep.mjs`, we simply update our import map:
+
+```json
+{
+  "imports": {
+    "app.mjs": "app-8e0d62a03.mjs",
+    "dep.mjs": "dep-16f9d819a.mjs",
+    "sub-dep.mjs": "sub-dep-5f47101dc.mjs"
+  }
+}
+```
+
+and leave the `import "./sub-dep.mjs"` statement alone. This means the contents of `dep.mjs` don't change, and so it stays cached; the same for `app.mjs`.
 
 ### Fallback examples
 
