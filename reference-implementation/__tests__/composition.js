@@ -243,7 +243,7 @@ describe('Composition', () => {
     });
   });
 
-  it('should strip bare specifiers on the RHS and warn', () => {
+  it('should strip bare specifiers on the RHS and warn (empty first map)', () => {
     const assertWarnings = testWarningHandler([
       'Non-URL specifier "b" is not allowed to be the target of an import mapping following composition.',
       'Non-URL specifier "d" is not allowed to be the target of an import mapping following composition.'
@@ -266,7 +266,7 @@ describe('Composition', () => {
     assertWarnings();
   });
 
-  it('should strip bare specifiers on the RHS and warn', () => {
+  it('should strip bare specifiers on the RHS and warn (non-empty first map)', () => {
     const assertWarnings = testWarningHandler([
       'Non-URL specifier "d" is not allowed to be ' +
       'the target of an import mapping following composition.'
