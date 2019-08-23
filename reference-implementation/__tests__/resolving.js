@@ -271,8 +271,6 @@ describe('Mapped using the "imports" key only (no scopes)', () => {
   describe('URL-like specifiers', () => {
     const resolveUnderTest = makeResolveUnderTest(`{
       "imports": {
-        "/node_modules/als-polyfill/index.mjs": "std:kv-storage",
-
         "/lib/foo.mjs": "./more/bar.mjs",
         "./dotrelative/foo.mjs": "/lib/dot.mjs",
         "../dotdotrelative/foo.mjs": "/lib/dotdot.mjs",

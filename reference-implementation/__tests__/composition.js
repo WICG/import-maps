@@ -2,6 +2,7 @@
 const { URL } = require('url');
 const { parseFromString } = require('../lib/parser.js');
 const { appendMap } = require('../lib/composer.js');
+const { BUILT_IN_MODULE_SCHEME } = require('../lib/utils.js');
 const { testWarningHandler } = require('./helpers/parsing.js');
 
 const mapBaseURL = new URL('https://example.com/app/index.html');
@@ -133,40 +134,40 @@ describe('Composition', () => {
     expect(composeMaps([
       `{
         "imports": {
-          "std:built-in": "https://built-in-enhancement-1/"
+          "${BUILT_IN_MODULE_SCHEME}:blank": "https://built-in-enhancement-1/"
         },
         "scopes": {
           "https://built-in-enhancement-1/": {
-            "std:built-in": "std:built-in"
+            "${BUILT_IN_MODULE_SCHEME}:blank": "${BUILT_IN_MODULE_SCHEME}:blank"
           }
         }
       }`,
       `{
         "imports": {
-          "std:built-in": "https://built-in-enhancement-2/"
+          "${BUILT_IN_MODULE_SCHEME}:blank": "https://built-in-enhancement-2/"
         },
         "scopes": {
           "https://built-in-enhancement-2/": {
-            "std:built-in": "std:built-in"
+            "${BUILT_IN_MODULE_SCHEME}:blank": "${BUILT_IN_MODULE_SCHEME}:blank"
           }
         }
       }`,
       `{
         "imports": {
-          "std:built-in": "https://built-in-enhancement-3/"
+          "${BUILT_IN_MODULE_SCHEME}:blank": "https://built-in-enhancement-3/"
         },
         "scopes": {
           "https://built-in-enhancement-3/": {
-            "std:built-in": "std:built-in"
+            "${BUILT_IN_MODULE_SCHEME}:blank": "${BUILT_IN_MODULE_SCHEME}:blank"
           }
         }
       }`
     ])).toStrictEqual({
-      imports: { 'std:built-in': ['https://built-in-enhancement-3/'] },
+      imports: { [`${BUILT_IN_MODULE_SCHEME}:blank`]: ['https://built-in-enhancement-3/'] },
       scopes: {
-        'https://built-in-enhancement-1/': { 'std:built-in': ['std:built-in'] },
-        'https://built-in-enhancement-2/': { 'std:built-in': ['https://built-in-enhancement-1/'] },
-        'https://built-in-enhancement-3/': { 'std:built-in': ['https://built-in-enhancement-2/'] }
+        'https://built-in-enhancement-1/': { [`${BUILT_IN_MODULE_SCHEME}:blank`]: [`${BUILT_IN_MODULE_SCHEME}:blank`] },
+        'https://built-in-enhancement-2/': { [`${BUILT_IN_MODULE_SCHEME}:blank`]: ['https://built-in-enhancement-1/'] },
+        'https://built-in-enhancement-3/': { [`${BUILT_IN_MODULE_SCHEME}:blank`]: ['https://built-in-enhancement-2/'] }
       }
     });
   });
@@ -209,7 +210,7 @@ describe('Composition', () => {
         "imports": {
           "a": "/a-1.mjs",
           "b": "/b-1.mjs",
-          "std:kv-storage": ["std:kv-storage", "/kvs-1.mjs"]
+          "${BUILT_IN_MODULE_SCHEME}:blank": ["${BUILT_IN_MODULE_SCHEME}:blank", "/blank-1.mjs"]
         },
         "scopes": {
           "/scope1/": {
@@ -220,7 +221,7 @@ describe('Composition', () => {
       `{
         "imports": {
           "b": null,
-          "std:kv-storage": "/kvs-2.mjs"
+          "${BUILT_IN_MODULE_SCHEME}:blank": "/blank-2.mjs"
         },
         "scopes": {
           "/scope1/": {
@@ -232,7 +233,7 @@ describe('Composition', () => {
       imports: {
         a: ['https://example.com/a-1.mjs'],
         b: [],
-        'std:kv-storage': ['https://example.com/kvs-2.mjs']
+        [`${BUILT_IN_MODULE_SCHEME}:blank`]: ['https://example.com/blank-2.mjs']
       },
       scopes: {
         'https://example.com/scope1/': {
