@@ -31,27 +31,37 @@ exports.resolve = (specifier, parsedImportMap, scriptURL) => {
   throw new TypeError(`The specifier ${JSON.stringify(specifier)} could not be resolved.`);
 };
 
-exports.getFallbacks = (normalizedSpecifier, parsedImportMap, resolutionContext) => {
-  const applicableSpecifierMaps = resolutionContext === null ?
-    [parsedImportMap.imports] :
-    Object.keys(parsedImportMap.scopes)
-      .filter(scopePrefix =>
-        scopePrefix === resolutionContext || (scopePrefix.endsWith('/') && resolutionContext.startsWith(scopePrefix)))
-      .map(scopePrefix => parsedImportMap.scopes[scopePrefix])
-      .concat([parsedImportMap.imports]);
+exports.getFallbacks = (normalizedSpecifier, importMap, contextURLString) => {
+  const applicableSpecifierMaps = [];
+  if (contextURLString !== null) {
+    for (const [scopePrefix, scopeSpecifierMap] of Object.entries(importMap.scopes)) {
+      if (scopePrefix === contextURLString || (scopePrefix.endsWith('/') && contextURLString.startsWith(scopePrefix))) {
+        applicableSpecifierMaps.push(scopeSpecifierMap);
+      }
+    }
+  }
+  applicableSpecifierMaps.push(importMap.imports);
+
   for (const specifierMap of applicableSpecifierMaps) {
-    for (const [specifierKey, fallbacks] of Object.entries(specifierMap)) {
+    for (const [specifierKey, addresses] of Object.entries(specifierMap)) {
       if (specifierKey === normalizedSpecifier) {
         // Exact-match case
-        return fallbacks;
-      } else if (specifierKey.endsWith('/') && normalizedSpecifier.startsWith(specifierKey)) {
+        return addresses;
+      }
+      if (specifierKey.endsWith('/') && normalizedSpecifier.startsWith(specifierKey)) {
         // Package prefix-match case
         const afterPrefix = normalizedSpecifier.substring(specifierKey.length);
-        fallbacks.forEach(fallback => {
+        const fallbacks = [];
+        for (const address of addresses) {
           // Enforced by parsing
-          assert(fallback.endsWith('/'));
-        });
-        return fallbacks.map(fallback => parseSpecifier(fallback + afterPrefix).specifier);
+          assert(address.endsWith('/'));
+
+          const parseResult = parseSpecifier(address + afterPrefix);
+          assert(parseResult.specifier !== null);
+
+          fallbacks.push(parseResult.specifier);
+        }
+        return fallbacks;
       }
     }
   }

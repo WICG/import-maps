@@ -102,12 +102,6 @@ TODO: move to Infra.
   1. Return |concatenatedSpecifierMap|.
 </div>
 
-<div algorithm>
-  To <dfn lt="get the fallbacks|getting the fallbacks">get the fallbacks</dfn> for a [=string=] |normalizedSpecifier|, given an [=/import map=] |importMap| and a [=string=] |contextURLString|:
-
-  1. TODO... |normalizedSpecifier| |importMap| |contextURLString|.
-</div>
-
 <div class="example" id="example-merging">
   [=import map/Concatenating=] an import map TODO explain the mental model, with a good example or three...
 </div>
@@ -425,7 +419,7 @@ A <dfn>specifier parse result</dfn> is a [=struct=] with two [=struct/items=]:
 * a <dfn for="specifier parse result">is built-in</dfn>, a boolean (defaults to false).
 
 <div algorithm>
-  To <dfn lt="parse an import specifier|parsing an import specifier">parse an import specifier</dfn>, given a [=string=] |specifier| and a [=URL=] |baseURL|:
+  To <dfn lt="parse an import specifier|parsing an import specifier|parse the import specifier|parsing the import specifier">parse an import specifier</dfn>, given a [=string=] |specifier| and a [=URL=] |baseURL|:
 
   1. If |specifier| is the empty string, then return a [=specifier parse result=] whose [=specifier parse result/type=] is "`invalid`".
   1. If |specifier| [=/starts with=] "`/`", "`./`", or "`../`", then:
@@ -511,6 +505,29 @@ A <dfn>specifier parse result</dfn> is a [=struct=] with two [=struct/items=]:
         1. Return |url0|, if |moduleMap|[|url0|] [=map/exists=]; otherwise, return |url1|.
       1. Otherwise, <span class="advisement">we have no specification for more complicated fallbacks yet; throw a {{TypeError}} indicating this is not yet supported</span>.
   1. Return null.
+</div>
+
+<div algorithm>
+  To <dfn lt="get the fallbacks|getting the fallbacks">get the fallbacks</dfn> for a [=string=] |normalizedSpecifier|, given an [=/import map=] |importMap| and a [=string=] or null |contextURLString|:
+
+  1. Let |applicableSpecifierMaps| be a new empty [=list=].
+  1. If |contextURLString| is not null, then [=map/for each=] |scopePrefix| → |scopeSpecifierMap| of |importMap|'s [=import map/scopes=]:
+    1. If |scopePrefix| equals |contextURLString|, or |scopePrefix| ends with U+002F (/) and |contextURLString| [=/starts with=] |scopePrefix|, then [=list/append=] |scopeSpecifierMap| to |applicableSpecifierMaps|.
+  1. [=list/Append=] |importMap|'s [=import map/imports=] to |applicableSpecifierMaps|.
+  1. [=list/For each=] |specifierMap| of |applicableSpecifierMaps|:
+    1. [=map/For each=] |specifierKey| → |addresses| of |specifierMap|:
+      1. If |specifierKey| equals |normalizedSpecifier|:
+        1. Return |addresses|.
+      1. If |specifierKey| ends with U+002F (/) and |normalizedSpecifier| [=/starts with=] |specifierKey|:
+        1. Let |afterPrefix| be the portion of |normalizedSpecifier| after the initial |specifierKey| prefix.
+        1. Let |fallbacks| be a new empty [=list=].
+        1. [=list/For each=] |address| of |addresses|:
+          1. Assert: |address| ends with "`/`", as enforced during [=parse an import map string|parsing=].
+          1. Let |parseResult| be the result of [=parsing the import specifier=] given by the concatenation of |address| with |afterPrefix|.
+          1. Assert: |parseResult|'s [=specifier parse result/specifier=] is not null.
+          1. [=list/Append=] |parseResult|'s [=specifier parse result/specifier=] to |fallbacks|.
+        1. Return |fallbacks|.
+  1. Return « |normalizedSpecifier| ».
 </div>
 
 <div algorithm>
