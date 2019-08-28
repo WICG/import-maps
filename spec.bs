@@ -53,7 +53,7 @@ summary {
 
 <h2 id="definitions">Definitions</h2>
 
-A <dfn>specifier map</dfn> is an [=ordered map=] from [=strings=] to [=lists=] of [=URLs=].
+A <dfn>specifier map</dfn> is an [=ordered map=] from [=strings=] to [=lists=] of [=strings=].
 
 A <dfn>import map</dfn> is a [=struct=] with two [=struct/items=]:
 
@@ -62,68 +62,54 @@ A <dfn>import map</dfn> is a [=struct=] with two [=struct/items=]:
 
 An <dfn>empty import map</dfn> is an [=/import map=] with its [=import map/imports=] and [=import map/scopes=] both being empty maps.
 
-<div algorithm>
-  To <dfn>update an import map</dfn> |importMap| with a second [=/import map=] |newImportMap|:
+<h2 id="composing">Composing import maps</h2>
 
-  1. For each |specifier| → |addresses| of |newImportMap|'s [=import map/imports=], [=map/set=] |importMap|'s [=import map/imports=][|specifier|] to |addresses|.
-  1. For each |url| → |specifierMap| of |newImportMap|'s [=import map/scopes=], [=map/set=] |importMap|'s [=import map/scopes=][|url|] to |specifierMap|.
-  1. Set |importMap|'s [=import map/imports=] to the result of [=map/sorting=] |importMap|'s [=import map/imports=], with an entry |a| being less than an entry |b| if |a|'s [=map/key=] is [=longer or code unit less than=] |b|'s [=map/key=].
-  1. Set |importMap|'s [=import map/scopes=] to the result of [=map/sorting=] |importMap|'s [=import map/scopes=], with an entry |a| being less than an entry |b| if |a|'s [=map/key=] is [=longer or code unit less than=] |b|'s [=map/key=].
+<div algorithm="concatenate an import map">
+  To <dfn for="import map" lt="concatenate|concatenation">concatenate an import map</dfn> |baseImportMap| with a second [=/import map=] |newImportMap|:
+
+  1. Let |concatenatedImportMap| be a new [=empty import map=].
+  1. Let |concatenatedImportMap|'s [=import map/imports=] be the [=specifier map/concatenation=] of |baseImportMap|'s [=import map/imports=] and |newImportMap|'s [=import map/imports=], given |baseImportMap| and null.
+  1. Set |concatenatedImportMap|'s [=import map/scopes=] to a [=map/clone=] of |baseImportMap|'s [=import map/scopes=].
+  1. [=map/For each=] |scopePrefix| → |newScopeSpecifierMap| of |newImportMap|'s [=import map/scopes=]:
+    1. Let |baseScoperSpecifierMap| be |baseImportMap|'s [=import map/scopes=][|scopePrefix|], if it [=map/exists=], or a new empty [=map=] otherwise.
+    1. Set |concatenatedImportMap|'s [=import map/scopes=][|scopePrefix|] to the [=specifier map/concatenation=] of |baseScoperSpecifierMap| and |newScopeSpecifierMap|, given |baseImportMap| and |scopePrefix|.
+  1. Set |concatenatedImportMap|'s [=import map/scopes=] to the result of [=map/sorting=] |concatenatedImportMap|'s [=import map/scopes=], with an entry |a| being less than an entry |b| if |a|'s [=map/key=] is [=longer or code unit less than=] |b|'s [=map/key=].
+  1. Return |concatenatedImportMap|.
+</div>
+
+<div algorithm>
+  To <dfn for="map,ordered map">clone</dfn> an [=ordered map=] |map| is to create a new [=ordered map=] |clone|, and for each |key| → |value| of |map|, [=map/set=] |clone|[|key|] to |value|.
+
+TODO: move to Infra.
+</div>
+
+<div algorithm="concatenate a specifier map">
+  To <dfn for="specifier map" lt="concatenate|concatenation">concatenate a specifier map</dfn> |baseSpecifierMap| with a second [=specifier map=] |newSpecifierMap|, given an [=/import map=] |contextImportMap| and a [=string=] |scopePrefix|:
+
+  1. Let |concatenatedSpecifierMap| be a [=map/clone=] of |baseSpecifierMap|
+  1. [=map/For each=] |specifier| → |addresses| of |newSpecifierMap|:
+    1. Let |newAddresses| be a new empty [=list=].
+    1. [=list/For each=] |address| of |addresses|:
+      1. Let |fallbacks| be the result of [=getting the fallbacks=] for |address|, given |contextImportMap| and |scopePrefix|.
+      1. [=list/For each=] |fallback| of |fallbacks|:
+        1. Let |fallbackResult| be the result of [=parsing a URL-like import specifier=] given |fallback|.
+        1. If |fallbackResult|'s [=specifier parse result/type=] is not "`URL`", then:
+          1. [=Report a warning to the console=] stating that |fallback|, as a non-URL specifier, cannot be the ultimate target of an import mapping.
+          1. [=Continue=].
+        1. [=list/Append=] |fallback| to |newAddresses|.
+    1. Set |concatenatedSpecifierMap|[|specifier|] to |newAddresses|.
+  1. Set |concatenatedSpecifierMap| to the result of [=map/sorting=] |concatenatedSpecifierMap|, with an entry |a| being less than an entry |b| if |a|'s [=map/key=] is [=longer or code unit less than=] |b|'s [=map/key=].
+  1. Return |concatenatedSpecifierMap|.
+</div>
+
+<div algorithm>
+  To <dfn lt="get the fallbacks|getting the fallbacks">get the fallbacks</dfn> for a [=string=] |normalizedSpecifier|, given an [=/import map=] |importMap| and a [=string=] |contextURLString|:
+
+  1. TODO... |normalizedSpecifier| |importMap| |contextURLString|.
 </div>
 
 <div class="example" id="example-merging">
-  [=Update an import map=] merges the two import maps in a very simple way, not performing any deep merging beyond the top level of the "`imports`" and "`scopes`" keys. For example,
-
-  <xmp highlight="html">
-    <script type="importmap">
-    {
-      "imports": {
-        "a": "/a-1.mjs",
-        "b": "/b-1.mjs",
-        "std:kv-storage": ["std:kv-storage", "/kvs-1.mjs"]
-      },
-      "scopes": {
-        "/scope1/": {
-          "a": "/a-2.mjs"
-        }
-      }
-    }
-    </script>
-    <script type="importmap">
-    {
-      "imports": {
-        "b": null,
-        "std:kv-storage": "kvs-2.mjs"
-      },
-      "scopes": {
-        "/scope1/": {
-          "b": "/b-2.mjs"
-        }
-      }
-    }
-    </script>
-  </xmp>
-
-  is equivalent to
-
-  <xmp highlight="html">
-    <script type="importmap">
-    {
-      "imports": {
-        "a": "/a-1.mjs",
-        "b": null,
-        "std:kv-storage": "kvs-2.mjs"
-      },
-      "scopes": {
-        "/scope1/": {
-          "b": "/b-2.mjs"
-        }
-      }
-    }
-    </script>
-  </xmp>
-
-  Notice how the definition for "`/scope1/`" was completely overridden, so there is no longer a redirection for the "`a`" module specifier within that scope.
+  [=import map/Concatenating=] an import map TODO explain the mental model, with a good example or three...
 </div>
 
 <h2 id="acquiring">Acquiring import maps</h2>
@@ -304,7 +290,7 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
   1. <a spec="html">Report the exception</a> given |import map parse result|'s [=import map parse result/error to rethrow=].
      <p class="issue">There are no relevant [=script=], because [=import map parse result=] isn't a [=script=]. This needs to wait for <a href="https://github.com/whatwg/html/issues/958">whatwg/html#958</a> before it is fixable.</p>
   1. Return.
-1. [=update an import map|Update=] |element|'s [=node document=]'s [=Document/import map=] with |import map parse result|'s [=import map parse result/import map=].
+1. Set |element|'s [=node document=]'s [=Document/import map=] to the result of [=import map/concatenating=] |element|'s [=node document=]'s [=Document/import map=] with the |import map parse result|'s [=import map parse result/import map=].
 1. If |element| is <a spec="html">from an external file</a>, then [=fire an event=] named `load` at |element|.
 
 <p class="note">
@@ -433,8 +419,9 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
 </div>
 
 <div algorithm>
-  To <dfn lt="parse a URL-like import specifier|parsing a URL-like import specifier">parse a URL-like import specifier</dfn>, given a [=string=] |specifier| and a [=URL=] |baseURL|:
+  To <dfn lt="parse an import specifier|parsing an import specifier">parse an import specifier</dfn>, given a [=string=] |specifier| and a [=URL=] |baseURL|:
 
+  1. If |specifier| is the empty string, then return a [=specifier parse result=] whose [=specifier parse result/type=] is "`invalid`" and whose [=specifier parse result/specifier=] is null.
   1. If |specifier| [=/starts with=] "`/`", "`./`", or "`../`", then:
     1. Let |url| be the result of [=URL parser|parsing=] |specifier| with |baseURL| as the base URL.
     1. If |url| is failure, then return null.
@@ -444,6 +431,11 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
   1. If |url| is failure, then return null.
   1. If |url|'s [=url/scheme=] is either a [=fetch scheme=] or "`std`", then return |url|.
   1. Return null.
+
+  A <dfn export>specifier parse result</dfn> is a [=struct=] with two [=struct/items=]:
+
+  * a <dfn for="specifier parse result">type</dfn>, one of "`invalid`", "`URL`", or "`non-URL`",
+  * a <dfn for="specifier parse result">specifier</dfn>, a [=string=] or null.
 </div>
 
 <div algorithm>

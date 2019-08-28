@@ -31,9 +31,9 @@ describe('Relative URL-like specifier keys', () => {
       'data:text/html,test',
       {},
       [
-        'Path-based module specifier "./foo" cannot be used with a base URL that uses the "data:" scheme.',
-        'Path-based module specifier "../foo" cannot be used with a base URL that uses the "data:" scheme.',
-        'Path-based module specifier "/foo" cannot be used with a base URL that uses the "data:" scheme.'
+        'Path-based module specifier "./foo" cannot be parsed against the base URL "data:text/html,test".',
+        'Path-based module specifier "../foo" cannot be parsed against the base URL "data:text/html,test".',
+        'Path-based module specifier "/foo" cannot be parsed against the base URL "data:text/html,test".'
       ]
     );
   });

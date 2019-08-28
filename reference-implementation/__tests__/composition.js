@@ -1,7 +1,7 @@
 'use strict';
 const { URL } = require('url');
 const { parseFromString } = require('../lib/parser.js');
-const { appendMap } = require('../lib/composer.js');
+const { concatMaps } = require('../lib/composer.js');
 const { BUILT_IN_MODULE_SCHEME } = require('../lib/utils.js');
 const { testWarningHandler } = require('./helpers/parsing.js');
 
@@ -15,7 +15,7 @@ function composeMaps(mapLikes, baseURL = mapBaseURL) {
   let map = parseFromString(mapLikes.shift(), baseURL);
   for (const mapLike of mapLikes) {
     const newMap = parseFromString(mapLike, baseURL);
-    map = appendMap(map, newMap);
+    map = concatMaps(map, newMap);
   }
   return map;
 }
@@ -29,17 +29,9 @@ describe('Composition', () => {
       }
     }`, mapBaseURL);
 
-    const resultMap = appendMap(parseFromString('{}', mapBaseURL), map);
+    const resultMap = concatMaps(parseFromString('{}', mapBaseURL), map);
 
     expect(resultMap).toStrictEqual(map);
-    expect(resultMap.imports).not.toBe(map.imports);
-    Object.entries(resultMap.imports).forEach(([k, v]) => {
-      expect(v).not.toBe(map.imports[k]);
-    });
-    expect(resultMap.scopes).not.toBe(map.scopes);
-    Object.entries(resultMap.scopes).forEach(([k, v]) => {
-      expect(v).not.toBe(map.scopes[k]);
-    });
   });
 
   it('should compose with the empty map on the right', () => {
@@ -50,17 +42,9 @@ describe('Composition', () => {
       }
     }`, mapBaseURL);
 
-    const resultMap = appendMap(map, parseFromString('{}', mapBaseURL));
+    const resultMap = concatMaps(map, parseFromString('{}', mapBaseURL));
 
     expect(resultMap).toStrictEqual(map);
-    expect(resultMap.imports).not.toBe(map.imports);
-    Object.entries(resultMap.imports).forEach(([k, v]) => {
-      expect(v).not.toBe(map.imports[k]);
-    });
-    expect(resultMap.scopes).not.toBe(map.scopes);
-    Object.entries(resultMap.scopes).forEach(([k, v]) => {
-      expect(v).not.toBe(map.scopes[k]);
-    });
   });
 
   it('should compose maps that do not interact in any way', () => {

@@ -2,7 +2,7 @@
 const { URL } = require('url');
 const assert = require('assert');
 const {
-  tryURLLikeSpecifierParse,
+  parseSpecifier,
   BUILT_IN_MODULE_SCHEME
 } = require('./utils.js');
 
@@ -13,14 +13,14 @@ const supportedBuiltInModules = new Set([
 ]);
 
 exports.resolve = (specifier, parsedImportMap, scriptURL) => {
-  const taggedSpecifier = tryURLLikeSpecifierParse(specifier, scriptURL);
+  const taggedSpecifier = parseSpecifier(specifier, scriptURL);
   if (taggedSpecifier.type === 'invalid') {
     throw new TypeError(taggedSpecifier.message);
   }
   const fallbacks = exports.getFallbacks(taggedSpecifier.specifier, parsedImportMap, scriptURL.href);
   for (const address of fallbacks) {
-    const taggedSpecifierValue = tryURLLikeSpecifierParse(address, scriptURL);
-    if (taggedSpecifierValue.type !== 'url') {
+    const taggedSpecifierValue = parseSpecifier(address, scriptURL);
+    if (taggedSpecifierValue.type !== 'URL') {
       throw new TypeError(`The specifier ${JSON.stringify(specifier)} was resolved to ` +
         `non-URL ${JSON.stringify(address)}.`);
     }
@@ -51,7 +51,7 @@ exports.getFallbacks = (normalizedSpecifier, parsedImportMap, resolutionContext)
           // Enforced by parsing
           assert(fallback.endsWith('/'));
         });
-        return fallbacks.map(fallback => tryURLLikeSpecifierParse(fallback + afterPrefix).specifier);
+        return fallbacks.map(fallback => parseSpecifier(fallback + afterPrefix).specifier);
       }
     }
   }

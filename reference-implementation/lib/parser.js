@@ -1,6 +1,6 @@
 'use strict';
 const assert = require('assert');
-const { tryURLParse, hasFetchScheme, tryURLLikeSpecifierParse, sortObjectKeysByLongestFirst } = require('./utils.js');
+const { tryURLParse, hasFetchScheme, parseSpecifier, sortObjectKeysByLongestFirst } = require('./utils.js');
 
 exports.parseFromString = (input, baseURLparameter) => {
   const baseURL = new URL(baseURLparameter);
@@ -46,7 +46,7 @@ function sortAndNormalizeSpecifierMap(obj, baseURL) {
   // Normalize all entries into arrays
   const normalized = {};
   for (const [specifierKey, value] of Object.entries(obj)) {
-    const taggedSpecifierKey = tryURLLikeSpecifierParse(specifierKey, baseURL);
+    const taggedSpecifierKey = parseSpecifier(specifierKey, baseURL);
     if (taggedSpecifierKey.type === 'invalid') {
       console.warn(taggedSpecifierKey.message);
       continue;
@@ -76,7 +76,7 @@ function sortAndNormalizeSpecifierMap(obj, baseURL) {
         continue;
       }
 
-      const taggedSpecifier = tryURLLikeSpecifierParse(potentialAddress, baseURL);
+      const taggedSpecifier = parseSpecifier(potentialAddress, baseURL);
       if (taggedSpecifier.type === 'invalid') {
         console.warn(taggedSpecifier.message);
         continue;
