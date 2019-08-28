@@ -20,13 +20,14 @@ exports.tryURLParse = (string, baseURL) => {
 
 exports.parseSpecifier = (specifier, baseURL) => {
   if (specifier === '') {
-    return { type: 'invalid', message: 'Invalid empty string specifier.' };
+    return { type: 'invalid', specifier: null, isBuiltIn: false, message: 'Invalid empty string specifier.' };
   }
 
   if (specifier.startsWith('/') || specifier.startsWith('./') || specifier.startsWith('../')) {
     const parsedURL = exports.tryURLParse(specifier, baseURL);
     if (!parsedURL) {
-      return { type: 'invalid', message: `Path-based module specifier ${JSON.stringify(specifier)} ` +
+      return { type: 'invalid', specifier: null, isBuiltIn: false,
+        message: `Path-based module specifier ${JSON.stringify(specifier)} ` +
         `cannot be parsed against the base URL ${JSON.stringify(baseURL.href)}.` };
     }
     return { type: 'URL', specifier: parsedURL.href, isBuiltin: false };
@@ -35,7 +36,7 @@ exports.parseSpecifier = (specifier, baseURL) => {
   const url = exports.tryURLParse(specifier);
 
   if (url === null) {
-    return { type: 'nonURL', specifier };
+    return { type: 'non-URL', specifier, isBuiltIn: false };
   }
 
   if (exports.hasFetchScheme(url)) {
@@ -46,7 +47,7 @@ exports.parseSpecifier = (specifier, baseURL) => {
     return { type: 'URL', specifier: url.href, isBuiltin: true };
   }
 
-  return { type: 'nonURL', specifier };
+  return { type: 'non-URL', specifier, isBuiltIn: false };
 };
 
 exports.hasFetchScheme = url => {

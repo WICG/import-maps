@@ -92,7 +92,7 @@ TODO: move to Infra.
     1. [=list/For each=] |address| of |addresses|:
       1. Let |fallbacks| be the result of [=getting the fallbacks=] for |address|, given |contextImportMap| and |scopePrefix|.
       1. [=list/For each=] |fallback| of |fallbacks|:
-        1. Let |fallbackResult| be the result of [=parsing a URL-like import specifier=] given |fallback|.
+        1. Let |fallbackResult| be the result of [=parsing an import specifier=] given |fallback|.
         1. If |fallbackResult|'s [=specifier parse result/type=] is not "`URL`", then:
           1. [=Report a warning to the console=] stating that |fallback|, as a non-URL specifier, cannot be the ultimate target of an import mapping.
           1. [=Continue=].
@@ -377,7 +377,7 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
       1. If |potentialAddress| is not a [=string=], then:
         1. [=Report a warning to the console=] that the contents of address arrays must be strings.
         1. [=Continue=].
-      1. Let |addressURL| be the result of [=parsing a URL-like import specifier=] given |potentialAddress| and |baseURL|.
+      1. Let |addressURL| be the result of parsing a URL-like import specifier given |potentialAddress| and |baseURL|.
       1. If |addressURL| is null, then:
         1. [=Report a warning to the console=] that the address was invalid.
         1. [=Continue=].
@@ -413,29 +413,31 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
   1. If |specifierKey| is the empty string, then:
     1. [=Report a warning to the console=] that specifier keys cannot be the empty string.
     1. Return null.
-  1. Let |url| be the result of [=parsing a URL-like import specifier=], given |specifierKey| and |baseURL|.
+  1. Let |url| be the result of parsing a URL-like import specifier, given |specifierKey| and |baseURL|.
   1. If |url| is not null, then return the [=URL serializer|serialization=] of |url|.
   1. Return |specifierKey|.
 </div>
 
+A <dfn>specifier parse result</dfn> is a [=struct=] with two [=struct/items=]:
+
+* a <dfn for="specifier parse result">type</dfn>, one of "`invalid`", "`URL`", or "`non-URL`",
+* a <dfn for="specifier parse result">specifier</dfn>, a [=string=] or null (defaults to null), and
+* a <dfn for="specifier parse result">is built-in</dfn>, a boolean (defaults to false).
+
 <div algorithm>
   To <dfn lt="parse an import specifier|parsing an import specifier">parse an import specifier</dfn>, given a [=string=] |specifier| and a [=URL=] |baseURL|:
 
-  1. If |specifier| is the empty string, then return a [=specifier parse result=] whose [=specifier parse result/type=] is "`invalid`" and whose [=specifier parse result/specifier=] is null.
+  1. If |specifier| is the empty string, then return a [=specifier parse result=] whose [=specifier parse result/type=] is "`invalid`".
   1. If |specifier| [=/starts with=] "`/`", "`./`", or "`../`", then:
     1. Let |url| be the result of [=URL parser|parsing=] |specifier| with |baseURL| as the base URL.
-    1. If |url| is failure, then return null.
+    1. If |url| is failure, then return a [=specifier parse result=] whose [=specifier parse result/type=] is "`invalid`".
        <p class="example" id="example-bad-urllike-import-specifier">One way this could happen is if |specifier| is "`../foo`" and |baseURL| is a `data:` URL.</p>
-    1. Return |url|.
+    1. Return a [=specifier parse result=] whose [=specifier parse result/type=] is `"URL"` and [=specifier parse result/specifier=] is |url|, [=URL serializer|serialized=].
   1. Let |url| be the result of [=URL parser|parsing=] |specifier| (with no base URL).
-  1. If |url| is failure, then return null.
-  1. If |url|'s [=url/scheme=] is either a [=fetch scheme=] or "`std`", then return |url|.
-  1. Return null.
-
-  A <dfn export>specifier parse result</dfn> is a [=struct=] with two [=struct/items=]:
-
-  * a <dfn for="specifier parse result">type</dfn>, one of "`invalid`", "`URL`", or "`non-URL`",
-  * a <dfn for="specifier parse result">specifier</dfn>, a [=string=] or null.
+  1. If |url| is failure, then return a [=specifier parse result=] whose [=specifier parse result/type=] is `"non-URL"` and [=specifier parse result/specifier=] is |specifier|.
+  1. If |url|'s [=url/scheme=] is a [=fetch scheme=], then return a [=specifier parse result=] whose [=specifier parse result/type=] is `"URL"`, whose [=specifier parse result/specifier=] is |url|, [=URL serializer|serialized=].
+  1. If |url|'s [=url/scheme=] is a "`std`", then return a [=specifier parse result=] whose [=specifier parse result/type=] is `"URL"`, whose [=specifier parse result/specifier=] is |url|, [=URL serializer|serialized=], and whose [=specifier parse result/is built-in=] is true.
+  1. Return a [=specifier parse result=] whose [=specifier parse result/type=] is `"non-URL"` and [=specifier parse result/specifier=] is |specifier|.
 </div>
 
 <div algorithm>
@@ -457,7 +459,7 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
   1. Let |importMap| be |settingsObject|'s [=environment settings object/import map=].
   1. Let |moduleMap| be |settingsObject|'s [=environment settings object/module map=].
   1. Let |baseURLString| be |baseURL|, [=URL serializer|serialized=].
-  1. Let |asURL| be the result of [=parsing a URL-like import specifier=] given |specifier| and |baseURL|.
+  1. Let |asURL| be the result of parsing a URL-like import specifier given |specifier| and |baseURL|.
   1. Let |normalizedSpecifier| be the [=URL serializer|serialization=] of |asURL|, if |asURL| is non-null; otherwise, |specifier|.
   1. [=map/For each=] |scopePrefix| → |scopeImports| of |importMap|'s [=import map/scopes=],
     1. If |scopePrefix| is |baseURLString|, or if |scopePrefix| ends with U+002F (/) and |baseURLString| [=/starts with=] |scopePrefix|, then:
@@ -465,7 +467,7 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
       1. If |scopeImportsMatch| is not null, then:
         1. [=Validate the module script URL=] given |scopeImportsMatch|, |settingsObject|, and |baseURL|. <!-- TODO: when we simplify/centralize validation checks, remove this check. It can never fail. -->
         1. Return |scopeImportsMatch|.
-  1. Let |topLevelImportsMatch| be the reuslt of [=resolving an imports match=] given |normalizedSpecifier|, |importMap|'s [=import map/imports=], and |moduleMap|.
+  1. Let |topLevelImportsMatch| be the result of [=resolving an imports match=] given |normalizedSpecifier|, |importMap|'s [=import map/imports=], and |moduleMap|.
   1. If |topLevelImportsMatch| is not null, then:
     1. [=Validate the module script URL=] given |topLevelImportsMatch|, |settingsObject|, and |baseURL|. <!-- TODO: when we simplify/centralize validation checks, remove this check. It can never fail. -->
     1. Return |topLevelImportsMatch|.
