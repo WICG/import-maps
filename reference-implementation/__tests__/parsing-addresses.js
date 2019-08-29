@@ -2,6 +2,8 @@
 const { expectSpecifierMap } = require('./helpers/parsing.js');
 const { BUILT_IN_MODULE_SCHEME } = require('../lib/utils.js');
 
+const baseURL = new URL('https://base.example/path1/path2/path3');
+
 describe('Relative URL-like addresses', () => {
   it('should accept strings prefixed with ./, ../, or /', () => {
     expectSpecifierMap(
@@ -10,7 +12,7 @@ describe('Relative URL-like addresses', () => {
         "dotDotSlash": "../foo",
         "slash": "/foo"
       }`,
-      'https://base.example/path1/path2/path3',
+      baseURL,
       {
         dotSlash: ['https://base.example/path1/path2/foo'],
         dotDotSlash: ['https://base.example/path1/foo'],
@@ -26,7 +28,7 @@ describe('Relative URL-like addresses', () => {
         "dotDotSlash": "../foo",
         "slash": "/foo"
       }`,
-      'data:text/html,test',
+      new URL('data:text/html,test'),
       {
         dotSlash: [],
         dotDotSlash: [],
@@ -47,7 +49,7 @@ describe('Relative URL-like addresses', () => {
         "dotDotSlash": "../",
         "slash": "/"
       }`,
-      'https://base.example/path1/path2/path3',
+      baseURL,
       {
         dotSlash: ['https://base.example/path1/path2/'],
         dotDotSlash: ['https://base.example/path1/'],
@@ -67,7 +69,7 @@ describe('Relative URL-like addresses', () => {
         "dotSlash3": "%2E%2F",
         "dotDotSlash3": "%2E%2E%2F"
       }`,
-      'https://base.example/path1/path2/path3',
+      baseURL,
       {
         dotSlash1: ['%2E/'],
         dotDotSlash1: ['%2E%2E/'],
@@ -88,7 +90,7 @@ describe('Built-in module addresses', () => {
       `{
         "foo": "${BUILT_IN_MODULE_SCHEME}:foo"
       }`,
-      'https://base.example/path1/path2/path3',
+      baseURL,
       {
         foo: [`${BUILT_IN_MODULE_SCHEME}:foo`]
       }
@@ -100,7 +102,7 @@ describe('Built-in module addresses', () => {
       `{
         "foo": "${encodeURIComponent(BUILT_IN_MODULE_SCHEME + ':')}foo"
       }`,
-      'https://base.example/path1/path2/path3',
+      baseURL,
       {
         foo: [`${encodeURIComponent(BUILT_IN_MODULE_SCHEME + ':')}foo`]
       },
@@ -115,7 +117,7 @@ describe('Built-in module addresses', () => {
         "slashMiddle": "${BUILT_IN_MODULE_SCHEME}:foo/bar",
         "backslash": "${BUILT_IN_MODULE_SCHEME}:foo\\\\baz"
       }`,
-      'https://base.example/path1/path2/path3',
+      baseURL,
       {
         slashEnd: [`${BUILT_IN_MODULE_SCHEME}:foo/`],
         slashMiddle: [`${BUILT_IN_MODULE_SCHEME}:foo/bar`],
@@ -142,7 +144,7 @@ describe('Absolute URL addresses', () => {
         "javascript": "javascript:bad",
         "wss": "wss:bad"
       }`,
-      'https://base.example/path1/path2/path3',
+      baseURL,
       {
         about: ['about:good'],
         blob: ['blob:good'],
@@ -177,7 +179,7 @@ describe('Absolute URL addresses', () => {
         "javascript": ["javascript:bad"],
         "wss": ["wss:bad"]
       }`,
-      'https://base.example/path1/path2/path3',
+      baseURL,
       {
         about: ['about:good'],
         blob: ['blob:good'],
@@ -212,7 +214,7 @@ describe('Absolute URL addresses', () => {
         "nonAscii": "https://測試.com/測試",
         "uppercase": "HTTPS://example.com"
       }`,
-      'https://base.example/path1/path2/path3',
+      baseURL,
       {
         unparseable1: ['https://ex ample.org/'],
         unparseable2: ['https://example.com:demo'],
@@ -243,7 +245,7 @@ describe('Absolute URL addresses', () => {
         "percentDecoding": ["https://ex%41mple.com/"],
         "noPercentDecoding": ["https://example.com/%41"]
       }`,
-      'https://base.example/path1/path2/path3',
+      baseURL,
       {
         unparseable1: ['https://ex ample.org/'],
         unparseable2: ['https://example.com:demo'],
@@ -266,7 +268,7 @@ describe('Failing addresses: mismatched trailing slashes', () => {
         "trailer/": "/notrailer",
         "${BUILT_IN_MODULE_SCHEME}:trailer/": "/bim-notrailer"
       }`,
-      'https://base.example/path1/path2/path3',
+      baseURL,
       {
         'trailer/': [],
         [`${BUILT_IN_MODULE_SCHEME}:trailer/`]: []
@@ -284,7 +286,7 @@ describe('Failing addresses: mismatched trailing slashes', () => {
         "trailer/": ["/notrailer"],
         "${BUILT_IN_MODULE_SCHEME}:trailer/": ["/bim-notrailer"]
       }`,
-      'https://base.example/path1/path2/path3',
+      baseURL,
       {
         'trailer/': [],
         [`${BUILT_IN_MODULE_SCHEME}:trailer/`]: []
@@ -302,7 +304,7 @@ describe('Failing addresses: mismatched trailing slashes', () => {
         "trailer/": ["/atrailer/", "/notrailer"],
         "${BUILT_IN_MODULE_SCHEME}:trailer/": ["/bim-atrailer/", "/bim-notrailer"]
       }`,
-      'https://base.example/path1/path2/path3',
+      baseURL,
       {
         'trailer/': ['https://base.example/atrailer/'],
         [`${BUILT_IN_MODULE_SCHEME}:trailer/`]: ['https://base.example/bim-atrailer/']
@@ -322,7 +324,7 @@ describe('Other invalid addresses', () => {
         `{
           "foo": ${JSON.stringify(nonURL)}
         }`,
-        'https://base.example/path1/path2/path3',
+        baseURL,
         {
           foo: [nonURL]
         },

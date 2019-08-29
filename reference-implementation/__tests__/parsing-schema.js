@@ -2,28 +2,29 @@
 const { parseFromString } = require('../lib/parser.js');
 const { expectBad, expectWarnings, expectSpecifierMap } = require('./helpers/parsing.js');
 
+const baseURL = new URL('https://base.example/');
 const nonObjectStrings = ['null', 'true', '1', '"foo"', '[]'];
 
 test('Invalid JSON', () => {
-  expect(() => parseFromString('{ imports: {} }', 'https://base.example/')).toThrow(SyntaxError);
+  expect(() => parseFromString('{ imports: {} }', baseURL)).toThrow(SyntaxError);
 });
 
 describe('Mismatching the top-level schema', () => {
   it('should throw for top-level non-objects', () => {
     for (const nonObject of nonObjectStrings) {
-      expectBad(nonObject, 'https://base.example/');
+      expectBad(nonObject, baseURL);
     }
   });
 
   it('should throw if imports is a non-object', () => {
     for (const nonObject of nonObjectStrings) {
-      expectBad(`{ "imports": ${nonObject} }`, 'https://base.example/');
+      expectBad(`{ "imports": ${nonObject} }`, baseURL);
     }
   });
 
   it('should throw if scopes is a non-object', () => {
     for (const nonObject of nonObjectStrings) {
-      expectBad(`{ "scopes": ${nonObject} }`, 'https://base.example/');
+      expectBad(`{ "scopes": ${nonObject} }`, baseURL);
     }
   });
 
@@ -34,7 +35,7 @@ describe('Mismatching the top-level schema', () => {
         "new-feature": {},
         "scops": {}
       }`,
-      'https://base.example/',
+      baseURL,
       { imports: {}, scopes: {} },
       [
         `Invalid top-level key "new-feature". Only "imports" and "scopes" can be present.`,
@@ -55,7 +56,7 @@ describe('Mismatching the specifier map schema', () => {
           "foo": ${invalid},
           "bar": ["https://example.com/"]
         }`,
-        'https://base.example/',
+        baseURL,
         {
           bar: ['https://example.com/']
         },
@@ -72,7 +73,7 @@ describe('Mismatching the specifier map schema', () => {
       `{
         "": ["https://example.com/"]
       }`,
-      'https://base.example/',
+      baseURL,
       {},
       [`Invalid empty string specifier.`]
     );
@@ -85,7 +86,7 @@ describe('Mismatching the specifier map schema', () => {
           "foo": ["https://example.com/", ${invalid}],
           "bar": ["https://example.com/"]
         }`,
-        'https://base.example/',
+        baseURL,
         {
           foo: ['https://example.com/'],
           bar: ['https://example.com/']
@@ -100,24 +101,24 @@ describe('Mismatching the specifier map schema', () => {
 
   it('should throw if a scope\'s value is not an object', () => {
     for (const invalid of nonObjectStrings) {
-      expectBad(`{ "scopes": { "https://scope.example/": ${invalid} } }`, 'https://base.example/');
+      expectBad(`{ "scopes": { "https://scope.example/": ${invalid} } }`, baseURL);
     }
   });
 });
 
 describe('Normalization', () => {
   it('should normalize empty import maps to have imports and scopes keys', () => {
-    expect(parseFromString(`{}`, 'https://base.example/'))
+    expect(parseFromString(`{}`, baseURL))
       .toEqual({ imports: {}, scopes: {} });
   });
 
   it('should normalize an import map without imports to have imports', () => {
-    expect(parseFromString(`{ "scopes": {} }`, 'https://base.example/'))
+    expect(parseFromString(`{ "scopes": {} }`, baseURL))
       .toEqual({ imports: {}, scopes: {} });
   });
 
   it('should normalize an import map without scopes to have scopes', () => {
-    expect(parseFromString(`{ "imports": {} }`, 'https://base.example/'))
+    expect(parseFromString(`{ "imports": {} }`, baseURL))
       .toEqual({ imports: {}, scopes: {} });
   });
 
@@ -128,7 +129,7 @@ describe('Normalization', () => {
         "bar": ["https://example.com/2"],
         "baz": null
       }`,
-      'https://base.example/',
+      baseURL,
       {
         foo: ['https://example.com/1'],
         bar: ['https://example.com/2'],

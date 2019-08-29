@@ -2,8 +2,7 @@
 const assert = require('assert');
 const { tryURLParse, hasFetchScheme, parseSpecifier, sortObjectKeysByLongestFirst } = require('./utils.js');
 
-exports.parseFromString = (input, baseURLparameter) => {
-  const baseURL = new URL(baseURLparameter);
+exports.parseFromString = (input, baseURL) => {
   const parsed = JSON.parse(input);
 
   if (!isJSONObject(parsed)) {

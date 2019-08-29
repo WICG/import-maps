@@ -2,6 +2,7 @@
 const { expectSpecifierMap } = require('./helpers/parsing.js');
 const { BUILT_IN_MODULE_SCHEME } = require('../lib/utils.js');
 
+const baseURL = new URL('https://base.example/path1/path2/path3');
 const BLANK = `${BUILT_IN_MODULE_SCHEME}:blank`;
 
 describe('Relative URL-like specifier keys', () => {
@@ -12,7 +13,7 @@ describe('Relative URL-like specifier keys', () => {
         "../foo": "/dotdotslash",
         "/foo": "/slash"
       }`,
-      'https://base.example/path1/path2/path3',
+      baseURL,
       {
         'https://base.example/path1/path2/foo': ['https://base.example/dotslash'],
         'https://base.example/path1/foo': ['https://base.example/dotdotslash'],
@@ -28,7 +29,7 @@ describe('Relative URL-like specifier keys', () => {
         "../foo": "https://example.com/dotdotslash",
         "/foo": "https://example.com/slash"
       }`,
-      'data:text/html,test',
+      new URL('data:text/html,test'),
       {},
       [
         'Path-based module specifier "./foo" cannot be parsed against the base URL "data:text/html,test".',
@@ -45,7 +46,7 @@ describe('Relative URL-like specifier keys', () => {
         "../": "/dotdotslash/",
         "/": "/slash/"
       }`,
-      'https://base.example/path1/path2/path3',
+      baseURL,
       {
         'https://base.example/path1/path2/': ['https://base.example/dotslash/'],
         'https://base.example/path1/': ['https://base.example/dotdotslash/'],
@@ -65,7 +66,7 @@ describe('Relative URL-like specifier keys', () => {
         "%2E%2F": "/dotSlash3",
         "%2E%2E%2F": "/dotDotSlash3"
       }`,
-      'https://base.example/path1/path2/path3',
+      baseURL,
       {
         '%2E/': ['https://base.example/dotSlash1/'],
         '%2E%2E/': ['https://base.example/dotDotSlash1/'],
@@ -96,7 +97,7 @@ describe('Absolute URL specifier keys', () => {
         "javascript:bad": "/javascript",
         "wss:bad": "/wss"
       }`,
-      'https://base.example/path1/path2/path3',
+      baseURL,
       {
         'about:good': ['https://base.example/about'],
         'blob:good': ['https://base.example/blob'],
@@ -126,7 +127,7 @@ describe('Absolute URL specifier keys', () => {
         "https://ex%41mple.com/": "/percentDecoding/",
         "https://example.com/%41": "/noPercentDecoding"
       }`,
-      'https://base.example/path1/path2/path3',
+      baseURL,
       {
         'https://ex ample.org/': ['https://base.example/unparseable1/'],
         'https://example.com:demo': ['https://base.example/unparseable2'],
@@ -148,7 +149,7 @@ describe('Absolute URL specifier keys', () => {
         "${BLANK}/foo": "/blank/foo",
         "${BLANK}\\\\foo": "/blank/backslashfoo"
       }`,
-      'https://base.example/path1/path2/path3',
+      baseURL,
       {
         [BLANK]: ['https://base.example/blank'],
         [`${BLANK}/`]: ['https://base.example/blank/'],

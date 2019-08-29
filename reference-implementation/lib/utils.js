@@ -1,4 +1,5 @@
 'use strict';
+const assert = require('assert');
 const { URL } = require('url');
 
 // https://fetch.spec.whatwg.org/#fetch-scheme
@@ -11,6 +12,11 @@ exports.BUILT_IN_MODULE_SCHEME = 'std';
 exports.BUILT_IN_MODULE_PROTOCOL = `${exports.BUILT_IN_MODULE_SCHEME}:`;
 
 exports.tryURLParse = (string, baseURL) => {
+  if (baseURL !== undefined) {
+    // It's easy to accidentally conflate strings and URLs; make sure everything that reaches us was the right type.
+    assert.strictEqual(baseURL.constructor, URL);
+  }
+
   try {
     return new URL(string, baseURL);
   } catch (e) { // TODO remove useless binding when ESLint and Jest support that

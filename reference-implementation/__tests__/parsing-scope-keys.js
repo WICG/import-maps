@@ -1,11 +1,12 @@
 'use strict';
 const { expectScopes } = require('./helpers/parsing.js');
+const baseURL = new URL('https://base.example/path1/path2/path3');
 
 describe('Relative URL scope keys', () => {
   it('should work with no prefix', () => {
     expectScopes(
       ['foo'],
-      'https://base.example/path1/path2/path3',
+      baseURL,
       ['https://base.example/path1/path2/foo']
     );
   });
@@ -13,7 +14,7 @@ describe('Relative URL scope keys', () => {
   it('should work with ./, ../, and / prefixes', () => {
     expectScopes(
       ['./foo', '../foo', '/foo'],
-      'https://base.example/path1/path2/path3',
+      baseURL,
       [
         'https://base.example/path1/path2/foo',
         'https://base.example/path1/foo',
@@ -25,7 +26,7 @@ describe('Relative URL scope keys', () => {
   it('should work with /s, ?s, and #s', () => {
     expectScopes(
       ['foo/bar?baz#qux'],
-      'https://base.example/path1/path2/path3',
+      baseURL,
       ['https://base.example/path1/path2/foo/bar?baz#qux']
     );
   });
@@ -33,15 +34,15 @@ describe('Relative URL scope keys', () => {
   it('should work with an empty string scope key', () => {
     expectScopes(
       [''],
-      'https://base.example/path1/path2/path3',
-      ['https://base.example/path1/path2/path3']
+      baseURL,
+      [baseURL]
     );
   });
 
   it('should work with / suffixes', () => {
     expectScopes(
       ['foo/', './foo/', '../foo/', '/foo/', '/foo//'],
-      'https://base.example/path1/path2/path3',
+      baseURL,
       [
         'https://base.example/path1/path2/foo/',
         'https://base.example/path1/path2/foo/',
@@ -55,7 +56,7 @@ describe('Relative URL scope keys', () => {
   it('should deduplicate based on URL parsing rules', () => {
     expectScopes(
       ['foo/\\', 'foo//', 'foo\\\\'],
-      'https://base.example/path1/path2/path3',
+      baseURL,
       ['https://base.example/path1/path2/foo//']
     );
   });
@@ -78,7 +79,7 @@ describe('Absolute URL scope keys', () => {
         'javascript:bad',
         'wss:ba'
       ],
-      'https://base.example/path1/path2/path3',
+      baseURL,
       [
         'about:good',
         'blob:good',
@@ -110,7 +111,7 @@ describe('Absolute URL scope keys', () => {
         'https://ex%41mple.com/foo/',
         'https://example.com/%41'
       ],
-      'https://base.example/path1/path2/path3',
+      baseURL,
       [
         'https://base.example/path1/path2/example.org', // tricky case! remember we have a base URL
         'https://example.com///',
@@ -133,7 +134,7 @@ describe('Absolute URL scope keys', () => {
         '../foo',
         '/foo'
       ],
-      'data:text/html,test',
+      new URL('data:text/html,test'),
       [],
       [
         'Invalid scope "./foo" (parsed against base URL "data:text/html,test").',
