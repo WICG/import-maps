@@ -62,6 +62,28 @@ A <dfn>import map</dfn> is a [=struct=] with two [=struct/items=]:
 
 An <dfn>empty import map</dfn> is an [=/import map=] with its [=import map/imports=] and [=import map/scopes=] both being empty maps.
 
+<h2 id="parsing-specifiers">Parsing import specifiers</h2>
+
+A <dfn>specifier parse result</dfn> is a [=struct=] with two [=struct/items=]:
+
+* a <dfn for="specifier parse result">type</dfn>, one of "`invalid`", "`URL`", or "`non-URL`", and
+* a <dfn for="specifier parse result">specifier</dfn>, a [=string=] or null (defaults to null).
+
+<div algorithm>
+  To <dfn lt="parse an import specifier|parsing an import specifier|parse the import specifier|parsing the import specifier">parse an import specifier</dfn>, given a [=string=] |specifier| and a [=URL=] |baseURL|:
+
+  1. If |specifier| is the empty string, then return a [=specifier parse result=] whose [=specifier parse result/type=] is "`invalid`".
+  1. If |specifier| [=/starts with=] "`/`", "`./`", or "`../`", then:
+    1. Let |url| be the result of [=URL parser|parsing=] |specifier| with |baseURL| as the base URL.
+    1. If |url| is failure, then return a [=specifier parse result=] whose [=specifier parse result/type=] is "`invalid`".
+       <p class="example" id="example-bad-urllike-import-specifier">One way this could happen is if |specifier| is "`../foo`" and |baseURL| is a `data:` URL.</p>
+    1. Return a [=specifier parse result=] whose [=specifier parse result/type=] is `"URL"` and [=specifier parse result/specifier=] is |url|, [=URL serializer|serialized=].
+  1. Let |url| be the result of [=URL parser|parsing=] |specifier| (with no base URL).
+  1. If |url| is failure, then return a [=specifier parse result=] whose [=specifier parse result/type=] is `"non-URL"` and [=specifier parse result/specifier=] is |specifier|.
+  1. If |url|'s [=url/scheme=] is either a [=fetch scheme=] or "`std`", then return a [=specifier parse result=] whose [=specifier parse result/type=] is `"URL"`, whose [=specifier parse result/specifier=] is |url|, [=URL serializer|serialized=].
+  1. Return a [=specifier parse result=] whose [=specifier parse result/type=] is `"non-URL"` and [=specifier parse result/specifier=] is |specifier|.
+</div>
+
 <h2 id="acquiring">Acquiring import maps</h2>
 
 <h3 id="integration-environment-settings-object">New members of environment settings objects</h3>
@@ -252,6 +274,13 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
 <h2 id="parsing">Parsing import maps</h2>
 
 <div algorithm>
+  To <dfn>create an import map parse result</dfn>, given a [=string=] |input|, a [=URL=] |baseURL|, and an [=environment settings object=] |settings object|:
+
+  1. Let |import map| be the result of [=parse an import map string=] given |input| and |baseURL|. If this throws an exception, let |error to rethrow| be the exception. Otherwise, let |error to rethrow| be null.
+  1. Return an [=import map parse result=] with [=import map parse result/settings object=] is |settings object|, [=import map parse result/import map=] is |import map|, and [=import map parse result/error to rethrow=] is |error to rethrow|.
+</div>
+
+<div algorithm>
   To <dfn lt="parse an import map string|parsing an import map string">parse an import map string</dfn>, given a [=string=] |input| and a [=URL=] |baseURL|:
 
   1. Let |parsed| be the result of [=parse JSON into Infra values|parsing JSON into Infra values=] given |input|.
@@ -268,14 +297,6 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
      <p class="note">This can help detect typos. It is not an error, because that would prevent any future extensions from being added backward-compatibly.</p>
   1. Return the [=/import map=] whose [=import map/imports=] are |sortedAndNormalizedImports| and whose [=import map/scopes=] scopes are |sortedAndNormalizedScopes|.
 </div>
-
-<div algorithm>
-  To <dfn>create an import map parse result</dfn>, given a [=string=] |input|, a [=URL=] |baseURL|, and an [=environment settings object=] |settings object|:
-
-  1. Let |import map| be the result of [=parse an import map string=] given |input| and |baseURL|. If this throws an exception, let |error to rethrow| be the exception. Otherwise, let |error to rethrow| be null.
-  1. Return an [=import map parse result=] with [=import map parse result/settings object=] is |settings object|, [=import map parse result/import map=] is |import map|, and [=import map parse result/error to rethrow=] is |error to rethrow|.
-</div>
-
 
 <div class="example" id="parsing-example">
   The [=/import map=] is a highly normalized structure. For example, given a base URL of `<https://example.com/base/page.html>`, the input
@@ -297,11 +318,11 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
   <xmp>
   «[
     "https://example.com/app/helper" → «
-      <https://example.com/base/node_modules/helper/index.mjs>
+      "https://example.com/base/node_modules/helper/index.mjs"
     »,
     "std:kv-storage" → «
-      <std:kv-storage>,
-      <https://example.com/base/node_modules/kv-storage-polyfill/index.mjs>
+      "std:kv-storage",
+      "https://example.com/base/node_modules/kv-storage-polyfill/index.mjs"
     »
   ]»
   </xmp>
@@ -360,26 +381,6 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
   1. Return the result of [=map/sorting=] |normalized|, with an entry |a| being less than an entry |b| if |a|'s [=map/key=] is [=longer or code unit less than=] |b|'s [=map/key=].
 </div>
 
-A <dfn>specifier parse result</dfn> is a [=struct=] with two [=struct/items=]:
-
-* a <dfn for="specifier parse result">type</dfn>, one of "`invalid`", "`URL`", or "`non-URL`", and
-* a <dfn for="specifier parse result">specifier</dfn>, a [=string=] or null (defaults to null).
-
-<div algorithm>
-  To <dfn lt="parse an import specifier|parsing an import specifier|parse the import specifier|parsing the import specifier">parse an import specifier</dfn>, given a [=string=] |specifier| and a [=URL=] |baseURL|:
-
-  1. If |specifier| is the empty string, then return a [=specifier parse result=] whose [=specifier parse result/type=] is "`invalid`".
-  1. If |specifier| [=/starts with=] "`/`", "`./`", or "`../`", then:
-    1. Let |url| be the result of [=URL parser|parsing=] |specifier| with |baseURL| as the base URL.
-    1. If |url| is failure, then return a [=specifier parse result=] whose [=specifier parse result/type=] is "`invalid`".
-       <p class="example" id="example-bad-urllike-import-specifier">One way this could happen is if |specifier| is "`../foo`" and |baseURL| is a `data:` URL.</p>
-    1. Return a [=specifier parse result=] whose [=specifier parse result/type=] is `"URL"` and [=specifier parse result/specifier=] is |url|, [=URL serializer|serialized=].
-  1. Let |url| be the result of [=URL parser|parsing=] |specifier| (with no base URL).
-  1. If |url| is failure, then return a [=specifier parse result=] whose [=specifier parse result/type=] is `"non-URL"` and [=specifier parse result/specifier=] is |specifier|.
-  1. If |url|'s [=url/scheme=] is either a [=fetch scheme=] or "`std`", then return a [=specifier parse result=] whose [=specifier parse result/type=] is `"URL"`, whose [=specifier parse result/specifier=] is |url|, [=URL serializer|serialized=].
-  1. Return a [=specifier parse result=] whose [=specifier parse result/type=] is `"non-URL"` and [=specifier parse result/specifier=] is |specifier|.
-</div>
-
 <div algorithm>
   A [=string=] |a| is <dfn>longer or code unit less than</dfn> |b| if |a|'s [=string/length=] is greater than |b|'s [=string/length=], or if |a| is [=code unit less than=] |b|.
 </div>
@@ -399,12 +400,6 @@ A <dfn>specifier parse result</dfn> is a [=struct=] with two [=struct/items=]:
   1. Return |concatenatedImportMap|.
 </div>
 
-<div algorithm>
-  To <dfn for="map,ordered map">clone</dfn> an [=ordered map=] |map| is to create a new [=ordered map=] |clone|, and for each |key| → |value| of |map|, [=map/set=] |clone|[|key|] to |value|.
-
-TODO: move to Infra.
-</div>
-
 <div algorithm="concatenate a specifier map">
   To <dfn for="specifier map" lt="concatenate|concatenation">concatenate a specifier map</dfn> |baseSpecifierMap| with a second [=specifier map=] |newSpecifierMap|, given an [=/import map=] |contextImportMap| and a [=string=] |scopePrefix|:
 
@@ -422,6 +417,10 @@ TODO: move to Infra.
     1. Set |concatenatedSpecifierMap|[|specifier|] to |newAddresses|.
   1. Set |concatenatedSpecifierMap| to the result of [=map/sorting=] |concatenatedSpecifierMap|, with an entry |a| being less than an entry |b| if |a|'s [=map/key=] is [=longer or code unit less than=] |b|'s [=map/key=].
   1. Return |concatenatedSpecifierMap|.
+</div>
+
+<div algorithm>
+  To <dfn for="map,ordered map">clone</dfn>... TODO: delete when <a href="https://github.com/whatwg/infra/pull/265">whatwg/infra#265</a> gets merged.
 </div>
 
 <div class="example" id="example-merging">
