@@ -62,50 +62,6 @@ A <dfn>import map</dfn> is a [=struct=] with two [=struct/items=]:
 
 An <dfn>empty import map</dfn> is an [=/import map=] with its [=import map/imports=] and [=import map/scopes=] both being empty maps.
 
-<h2 id="composing">Composing import maps</h2>
-
-<div algorithm="concatenate an import map">
-  To <dfn for="import map" lt="concatenate|concatenation">concatenate an import map</dfn> |baseImportMap| with a second [=/import map=] |newImportMap|:
-
-  1. Let |concatenatedImportMap| be a new [=empty import map=].
-  1. Let |concatenatedImportMap|'s [=import map/imports=] be the [=specifier map/concatenation=] of |baseImportMap|'s [=import map/imports=] and |newImportMap|'s [=import map/imports=], given |baseImportMap| and null.
-  1. Set |concatenatedImportMap|'s [=import map/scopes=] to a [=map/clone=] of |baseImportMap|'s [=import map/scopes=].
-  1. [=map/For each=] |scopePrefix| → |newScopeSpecifierMap| of |newImportMap|'s [=import map/scopes=]:
-    1. Let |baseScoperSpecifierMap| be |baseImportMap|'s [=import map/scopes=][|scopePrefix|], if it [=map/exists=], or a new empty [=map=] otherwise.
-    1. Set |concatenatedImportMap|'s [=import map/scopes=][|scopePrefix|] to the [=specifier map/concatenation=] of |baseScoperSpecifierMap| and |newScopeSpecifierMap|, given |baseImportMap| and |scopePrefix|.
-  1. Set |concatenatedImportMap|'s [=import map/scopes=] to the result of [=map/sorting=] |concatenatedImportMap|'s [=import map/scopes=], with an entry |a| being less than an entry |b| if |a|'s [=map/key=] is [=longer or code unit less than=] |b|'s [=map/key=].
-  1. Return |concatenatedImportMap|.
-</div>
-
-<div algorithm>
-  To <dfn for="map,ordered map">clone</dfn> an [=ordered map=] |map| is to create a new [=ordered map=] |clone|, and for each |key| → |value| of |map|, [=map/set=] |clone|[|key|] to |value|.
-
-TODO: move to Infra.
-</div>
-
-<div algorithm="concatenate a specifier map">
-  To <dfn for="specifier map" lt="concatenate|concatenation">concatenate a specifier map</dfn> |baseSpecifierMap| with a second [=specifier map=] |newSpecifierMap|, given an [=/import map=] |contextImportMap| and a [=string=] |scopePrefix|:
-
-  1. Let |concatenatedSpecifierMap| be a [=map/clone=] of |baseSpecifierMap|
-  1. [=map/For each=] |specifier| → |addresses| of |newSpecifierMap|:
-    1. Let |newAddresses| be a new empty [=list=].
-    1. [=list/For each=] |address| of |addresses|:
-      1. Let |fallbacks| be the result of [=getting the fallbacks=] for |address|, given |contextImportMap| and |scopePrefix|.
-      1. [=list/For each=] |fallback| of |fallbacks|:
-        1. Let |fallbackResult| be the result of [=parsing an import specifier=] given |fallback|.
-        1. If |fallbackResult|'s [=specifier parse result/type=] is not "`URL`", then:
-          1. [=Report a warning to the console=] stating that |fallback|, as a non-URL specifier, cannot be the ultimate target of an import mapping.
-          1. [=Continue=].
-        1. [=list/Append=] |fallback| to |newAddresses|.
-    1. Set |concatenatedSpecifierMap|[|specifier|] to |newAddresses|.
-  1. Set |concatenatedSpecifierMap| to the result of [=map/sorting=] |concatenatedSpecifierMap|, with an entry |a| being less than an entry |b| if |a|'s [=map/key=] is [=longer or code unit less than=] |b|'s [=map/key=].
-  1. Return |concatenatedSpecifierMap|.
-</div>
-
-<div class="example" id="example-merging">
-  [=import map/Concatenating=] an import map TODO explain the mental model, with a good example or three...
-</div>
-
 <h2 id="acquiring">Acquiring import maps</h2>
 
 <h3 id="integration-environment-settings-object">New members of environment settings objects</h3>
@@ -426,6 +382,50 @@ A <dfn>specifier parse result</dfn> is a [=struct=] with two [=struct/items=]:
 
 <div algorithm>
   A [=string=] |a| is <dfn>longer or code unit less than</dfn> |b| if |a|'s [=string/length=] is greater than |b|'s [=string/length=], or if |a| is [=code unit less than=] |b|.
+</div>
+
+<h2 id="composing">Composing import maps</h2>
+
+<div algorithm="concatenate an import map">
+  To <dfn for="import map" lt="concatenate|concatenation">concatenate an import map</dfn> |baseImportMap| with a second [=/import map=] |newImportMap|:
+
+  1. Let |concatenatedImportMap| be a new [=empty import map=].
+  1. Let |concatenatedImportMap|'s [=import map/imports=] be the [=specifier map/concatenation=] of |baseImportMap|'s [=import map/imports=] and |newImportMap|'s [=import map/imports=], given |baseImportMap| and null.
+  1. Set |concatenatedImportMap|'s [=import map/scopes=] to a [=map/clone=] of |baseImportMap|'s [=import map/scopes=].
+  1. [=map/For each=] |scopePrefix| → |newScopeSpecifierMap| of |newImportMap|'s [=import map/scopes=]:
+    1. Let |baseScoperSpecifierMap| be |baseImportMap|'s [=import map/scopes=][|scopePrefix|], if it [=map/exists=], or a new empty [=map=] otherwise.
+    1. Set |concatenatedImportMap|'s [=import map/scopes=][|scopePrefix|] to the [=specifier map/concatenation=] of |baseScoperSpecifierMap| and |newScopeSpecifierMap|, given |baseImportMap| and |scopePrefix|.
+  1. Set |concatenatedImportMap|'s [=import map/scopes=] to the result of [=map/sorting=] |concatenatedImportMap|'s [=import map/scopes=], with an entry |a| being less than an entry |b| if |a|'s [=map/key=] is [=longer or code unit less than=] |b|'s [=map/key=].
+  1. Return |concatenatedImportMap|.
+</div>
+
+<div algorithm>
+  To <dfn for="map,ordered map">clone</dfn> an [=ordered map=] |map| is to create a new [=ordered map=] |clone|, and for each |key| → |value| of |map|, [=map/set=] |clone|[|key|] to |value|.
+
+TODO: move to Infra.
+</div>
+
+<div algorithm="concatenate a specifier map">
+  To <dfn for="specifier map" lt="concatenate|concatenation">concatenate a specifier map</dfn> |baseSpecifierMap| with a second [=specifier map=] |newSpecifierMap|, given an [=/import map=] |contextImportMap| and a [=string=] |scopePrefix|:
+
+  1. Let |concatenatedSpecifierMap| be a [=map/clone=] of |baseSpecifierMap|
+  1. [=map/For each=] |specifier| → |addresses| of |newSpecifierMap|:
+    1. Let |newAddresses| be a new empty [=list=].
+    1. [=list/For each=] |address| of |addresses|:
+      1. Let |fallbacks| be the result of [=getting the fallbacks=] for |address|, given |contextImportMap| and |scopePrefix|.
+      1. [=list/For each=] |fallback| of |fallbacks|:
+        1. Let |fallbackResult| be the result of [=parsing an import specifier=] given |fallback|.
+        1. If |fallbackResult|'s [=specifier parse result/type=] is not "`URL`", then:
+          1. [=Report a warning to the console=] stating that |fallback|, as a non-URL specifier, cannot be the ultimate target of an import mapping.
+          1. [=Continue=].
+        1. [=list/Append=] |fallback| to |newAddresses|.
+    1. Set |concatenatedSpecifierMap|[|specifier|] to |newAddresses|.
+  1. Set |concatenatedSpecifierMap| to the result of [=map/sorting=] |concatenatedSpecifierMap|, with an entry |a| being less than an entry |b| if |a|'s [=map/key=] is [=longer or code unit less than=] |b|'s [=map/key=].
+  1. Return |concatenatedSpecifierMap|.
+</div>
+
+<div class="example" id="example-merging">
+  [=import map/Concatenating=] an import map TODO explain the mental model, with a good example or three...
 </div>
 
 <h2 id="resolving">Resolving module specifiers</h2>
