@@ -20,34 +20,30 @@ exports.tryURLParse = (string, baseURL) => {
 
 exports.parseSpecifier = (specifier, baseURL) => {
   if (specifier === '') {
-    return { type: 'invalid', specifier: null, isBuiltIn: false, message: 'Invalid empty string specifier.' };
+    return { type: 'invalid', specifier: null, message: 'Invalid empty string specifier.' };
   }
 
   if (specifier.startsWith('/') || specifier.startsWith('./') || specifier.startsWith('../')) {
     const parsedURL = exports.tryURLParse(specifier, baseURL);
     if (!parsedURL) {
-      return { type: 'invalid', specifier: null, isBuiltIn: false,
+      return { type: 'invalid', specifier: null,
         message: `Path-based module specifier ${JSON.stringify(specifier)} ` +
         `cannot be parsed against the base URL ${JSON.stringify(baseURL.href)}.` };
     }
-    return { type: 'URL', specifier: parsedURL.href, isBuiltin: false };
+    return { type: 'URL', specifier: parsedURL.href };
   }
 
   const url = exports.tryURLParse(specifier);
 
   if (url === null) {
-    return { type: 'non-URL', specifier, isBuiltIn: false };
+    return { type: 'non-URL', specifier };
   }
 
-  if (exports.hasFetchScheme(url)) {
-    return { type: 'URL', specifier: url.href, isBuiltin: false };
+  if (exports.hasFetchScheme(url) || url.protocol === exports.BUILT_IN_MODULE_PROTOCOL) {
+    return { type: 'URL', specifier: url.href };
   }
 
-  if (url.protocol === exports.BUILT_IN_MODULE_PROTOCOL) {
-    return { type: 'URL', specifier: url.href, isBuiltin: true };
-  }
-
-  return { type: 'non-URL', specifier, isBuiltIn: false };
+  return { type: 'non-URL', specifier };
 };
 
 exports.hasFetchScheme = url => {

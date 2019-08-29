@@ -414,9 +414,8 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
 
 A <dfn>specifier parse result</dfn> is a [=struct=] with two [=struct/items=]:
 
-* a <dfn for="specifier parse result">type</dfn>, one of "`invalid`", "`URL`", or "`non-URL`",
-* a <dfn for="specifier parse result">specifier</dfn>, a [=string=] or null (defaults to null), and
-* a <dfn for="specifier parse result">is built-in</dfn>, a boolean (defaults to false).
+* a <dfn for="specifier parse result">type</dfn>, one of "`invalid`", "`URL`", or "`non-URL`", and
+* a <dfn for="specifier parse result">specifier</dfn>, a [=string=] or null (defaults to null).
 
 <div algorithm>
   To <dfn lt="parse an import specifier|parsing an import specifier|parse the import specifier|parsing the import specifier">parse an import specifier</dfn>, given a [=string=] |specifier| and a [=URL=] |baseURL|:
@@ -429,8 +428,7 @@ A <dfn>specifier parse result</dfn> is a [=struct=] with two [=struct/items=]:
     1. Return a [=specifier parse result=] whose [=specifier parse result/type=] is `"URL"` and [=specifier parse result/specifier=] is |url|, [=URL serializer|serialized=].
   1. Let |url| be the result of [=URL parser|parsing=] |specifier| (with no base URL).
   1. If |url| is failure, then return a [=specifier parse result=] whose [=specifier parse result/type=] is `"non-URL"` and [=specifier parse result/specifier=] is |specifier|.
-  1. If |url|'s [=url/scheme=] is a [=fetch scheme=], then return a [=specifier parse result=] whose [=specifier parse result/type=] is `"URL"`, whose [=specifier parse result/specifier=] is |url|, [=URL serializer|serialized=].
-  1. If |url|'s [=url/scheme=] is a "`std`", then return a [=specifier parse result=] whose [=specifier parse result/type=] is `"URL"`, whose [=specifier parse result/specifier=] is |url|, [=URL serializer|serialized=], and whose [=specifier parse result/is built-in=] is true.
+  1. If |url|'s [=url/scheme=] is either a [=fetch scheme=] or "`std`", then return a [=specifier parse result=] whose [=specifier parse result/type=] is `"URL"`, whose [=specifier parse result/specifier=] is |url|, [=URL serializer|serialized=].
   1. Return a [=specifier parse result=] whose [=specifier parse result/type=] is `"non-URL"` and [=specifier parse result/specifier=] is |specifier|.
 </div>
 
@@ -451,61 +449,18 @@ A <dfn>specifier parse result</dfn> is a [=struct=] with two [=struct/items=]:
     1. Set |settingsObject| to |referringScript|'s [=script/settings object=].
     1. Set |baseURL| to |referringScript|'s [=script/base URL=].
   1. Let |importMap| be |settingsObject|'s [=environment settings object/import map=].
-  1. Let |moduleMap| be |settingsObject|'s [=environment settings object/module map=].
-  1. Let |baseURLString| be |baseURL|, [=URL serializer|serialized=].
-  1. Let |asURL| be the result of parsing a URL-like import specifier given |specifier| and |baseURL|.
-  1. Let |normalizedSpecifier| be the [=URL serializer|serialization=] of |asURL|, if |asURL| is non-null; otherwise, |specifier|.
-  1. [=map/For each=] |scopePrefix| → |scopeImports| of |importMap|'s [=import map/scopes=],
-    1. If |scopePrefix| is |baseURLString|, or if |scopePrefix| ends with U+002F (/) and |baseURLString| [=/starts with=] |scopePrefix|, then:
-      1. Let |scopeImportsMatch| be the result of [=resolving an imports match=] given |normalizedSpecifier|, |scopeImports|, and |moduleMap|.
-      1. If |scopeImportsMatch| is not null, then:
-        1. [=Validate the module script URL=] given |scopeImportsMatch|, |settingsObject|, and |baseURL|. <!-- TODO: when we simplify/centralize validation checks, remove this check. It can never fail. -->
-        1. Return |scopeImportsMatch|.
-  1. Let |topLevelImportsMatch| be the result of [=resolving an imports match=] given |normalizedSpecifier|, |importMap|'s [=import map/imports=], and |moduleMap|.
-  1. If |topLevelImportsMatch| is not null, then:
-    1. [=Validate the module script URL=] given |topLevelImportsMatch|, |settingsObject|, and |baseURL|. <!-- TODO: when we simplify/centralize validation checks, remove this check. It can never fail. -->
-    1. Return |topLevelImportsMatch|.
-  1. <p class="note">At this point, the specifier was able to be turned in to a URL, but it wasn't remapped to anything by |importMap|.</p>
-    If |asURL| is not null, then:
-    1. [=Validate the module script URL=] given |asURL|, |settingsObject|, and |baseURL|.
-    1. Return |asURL|.
-  1. Throw a {{TypeError}} indicating that |specifier| was a bare specifier, but was not remapped to anything by |importMap|.
+  1. Let |parsedSpecifier| be the result of [=parsing an import specifier=] given |specifier| and |baseURL|.
+  1. If |parsedSpecifier|'s [=specifier parse result/type=] is "`invalid`", then throw a {{TypeError}} indicating the reason for the invalidity.
+  1. Let |fallbacks| be the result of [=getting the fallbacks=] given |parsedSpecifier|'s [=specifier parse result/specifier=], |importMap|, and |baseURL|, [=URL serializer|serialized=].
+  1. [=list/For each=] |address| of |fallbacks|:
+    1. Let |parsedFallback| be the result of [=parsing an import specifier=] given |address| and |baseURL|.
+    1. If |parsedFallback|'s [=specifier parse result/type=] is not "`URL`", then throw a {{TypeError}} indicating that the resolution ultimately did not resolve in a URL.
+    1. Let |url| be the result of [=URL parser|parsing=] |parsedFallback|'s [=specifier parse result/specifier=].
+    1. If |url| [=is a valid module script URL=], given |settingsObject| and |baseURL|, then return |url|.
+  1. Throw a new {{TypeError}} indicating that the specifier could not be resolved.
 </div>
 
 <p class="advisement">It seems possible that the return type could end up being a [=list=] of [=URLs=], not just a single URL, to support HTTPS → HTTPS fallback. But, we haven't gotten that far yet; for now let's assume it stays a single URL.</p>
-
-<div algorithm>
-  To <dfn lt="resolve an imports match|resolving an imports match">resolve an imports match</dfn>, given a [=string=] |normalizedSpecifier|, a [=specifier map=] |specifierMap|, and a [=module map=] |moduleMap|:
-
-  1. For each |specifierKey| → |addresses| of |specifierMap|,
-    1. If |specifierKey| is |normalizedSpecifier|, then:
-      1. If |addresses|'s [=list/size=] is 0, then throw a {{TypeError}} indicating that |normalizedSpecifier| was mapped to no addresses.
-      1. If |addresses|'s [=list/size=] is 1, then:
-        1. Let |singleAddress| be |addresses|[0].
-        1. If |singleAddress|'s [=url/scheme=] is "`std`", and |moduleMap|[|singleAddress|] does not [=map/exist=], then throw a {{TypeError}} indicating that the requested built-in module is not implemented.
-        1. Return |singleAddress|.
-      1. If |addresses|'s [=list/size=] is 2, and |addresses|[0]'s [=url/scheme=] is "`std`", and |addresses|[1]'s [=url/scheme=] is <em>not</em> "`std`", then:
-        1. Return |addresses|[0], if |moduleMap|[|addresses|[0]] [=map/exists=]; otherwise, return |addresses|[1].
-      1. Otherwise, <span class="advisement">we have no specification for more complicated fallbacks yet; throw a {{TypeError}} indicating this is not yet supported</span>.
-    1. If |specifierKey| ends with U+002F (/) and |normalizedSpecifier| [=/starts with=] |specifierKey|, then:
-      1. If |addresses|'s [=list/size=] is 0, then throw a {{TypeError}} indicating that |normalizedSpecifier| was mapped to no addresses.
-      1. If |addresses|'s [=list/size=] is 1, then:
-        1. Let |afterPrefix| be the portion of |normalizedSpecifier| after the initial |specifierKey| prefix.
-        1. Assert: |afterPrefix| ends with "`/`", as enforced during [=parse an import map string|parsing=].
-        1. Let |url| be the result of [=URL parser|parsing=] the concatenation of the [=URL serializer|serialization=] of |addresses|[0] with |afterPrefix|.
-           <p class="note">We [=URL parser|parse=] the concatenation, instead of parsing |afterPrefix| relative to |addresses|[0], due to cases such as an |afterPrefix| of "`switch`" and an |addresses|[0] of "`std:elements/`".
-        1. Assert: |url| is not failure, since |addresses|[0] was a URL, and appending after the trailing "`/`" will not make it unparseable.
-        1. Return |url|.
-      1. If |addresses|'s [=list/size=] is 2, and |addresses|[0]'s [=url/scheme=] is "`std`", and |addresses|[1]'s [=url/scheme=] is <em>not</em> "`std`", then:
-        1. Let |afterPrefix| be the portion of |normalizedSpecifier| after the initial |specifierKey| prefix.
-        1. Assert: |afterPrefix| ends with "`/`", as enforced during [=parse an import map string|parsing=].
-        1. Let |url0| be the result of [=URL parser|parsing=] the concatenation of the [=URL serializer|serialization=] of |addresses|[0] with |afterPrefix|; similarly, let |url1| be the result of [=URL parser|parsing=] the concatenation of the [=URL serializer|serialization=] of |addresses|[1] with |afterPrefix|.
-           <p class="note">As above, we parse the concatenation to deal with built-in module cases.
-        1. Assert: neither |url0| nor |url1| are failure, since |addresses|[0] and |addresses|[1] were URLs, and appending after their trailing "`/`" will not make them unparseable.
-        1. Return |url0|, if |moduleMap|[|url0|] [=map/exists=]; otherwise, return |url1|.
-      1. Otherwise, <span class="advisement">we have no specification for more complicated fallbacks yet; throw a {{TypeError}} indicating this is not yet supported</span>.
-  1. Return null.
-</div>
 
 <div algorithm>
   To <dfn lt="get the fallbacks|getting the fallbacks">get the fallbacks</dfn> for a [=string=] |normalizedSpecifier|, given an [=/import map=] |importMap| and a [=string=] or null |contextURLString|:
@@ -531,23 +486,22 @@ A <dfn>specifier parse result</dfn> is a [=struct=] with two [=struct/items=]:
 </div>
 
 <div algorithm>
-  To <dfn lt="validate the module script URL|validate a module script URL">validate a module script URL</dfn>, given a [=URL=] |url|, an [=environment settings object=] |settings object|, and a [=URL=] |base URL|:
+  A [=URL=] |url| <dfn lt="is a valid module script URL|is not a valid module script URL">is a valid module script URL</dfn>, given an [=environment settings object=] |settings object| and [=URL=] |baseURL|, if the following steps return true:
 
   1. If |url|'s [=url/scheme=] is "`std`", then:
     1. Let |moduleMap| be |settings object|'s [=environment settings object/module map=].
-    1. If |moduleMap|[|url|] does not [=map/exist=], then throw a {{TypeError}} indicating that the requested built-in module is not implemented.
+    1. If |moduleMap|[|url|] does not [=map/exist=], then return false.
        <p class="note">This condition is added to ensure that |moduleMap|[|url|] does not [=map/exist=] for unimplemented built-ins. Without this condition, <a spec="html">fetch a single module script</a> might be called and |moduleMap|[|url|] can be set to null, which might complicates the spec around built-ins.</p>
-    1. Return.
-  1. If |url|'s [=url/scheme=] is not a [=fetch scheme=], then throw a {{TypeError}} indicating that |url| is not a fetch scheme.
+  1. If |url|'s [=url/scheme=] is not a [=fetch scheme=], then return false.
 
   <div class="note">
     This algorithm provides a convenient place for implementations to insert other useful behaviors, as long as they are not observable to web content. For example, Chromium might insert the following step at the beginning of the algorithm:
 
-    0. If |url|'s [=url/scheme=] is "`std-internal`" and |base URL|'s [=url/scheme=] is "`std-internal`", then return.
+    0. If |url|'s [=url/scheme=] is "`std-internal`" and |baseURL|'s [=url/scheme=] is "`std-internal`", then return true.
 
     This introduces a type of internal built-in module that is only accessible to other internal built-in modules. Similar steps could be used to, for example, change how extension scripts access modules.
 
-    Since [=validate a module script URL=] is called before any module script fetches, such checks are reliable and can be used as a security mechanism.
+    Since [=is a valid module script URL=] is called before any module script fetches, such checks are reliable and can be used as a security mechanism.
   </div>
 </div>
 
@@ -562,14 +516,14 @@ Call sites will also need to be updated to account for [=resolve a module specif
 
 <hr>
 
-In addition to the call sites for [=validate a module script URL=] explicitly added within this spec, insert the following at the beginning of <a spec="html">fetch a single module script</a>:
+In addition to the call sites for [=is a valid module script URL=] explicitly added within this spec, insert the following at the beginning of <a spec="html">fetch a single module script</a>:
 
 <div algorithm="check-access-snippet">
-  1. [=Validate the module script URL=] given <var ignore>url</var>, |module map settings object|, and |module map settings object|'s [=environment settings object/API base URL=]. If this throws an error, then asynchronously complete this algorithm with null, and abort these steps.
+  1. If <var ignore>url</var> [=is not a valid module script URL=] given |module map settings object| and |module map settings object|'s [=environment settings object/API base URL=], then asynchronously complete this algorithm with null, and abort these steps.
 </div>
 
 <div class="note">
-This will call [=validate the module script URL=] twice for each non-toplevel script fetch, first in [=resolve a module specifier=], and then in <a spec="html">fetch a single module script</a>. The behavior of the two calls is identical.
+This will check [=is a valid module script URL=] twice for each non-toplevel script fetch, first in [=resolve a module specifier=], and then in <a spec="html">fetch a single module script</a>. The behavior of the two calls is identical.
 
 Alternatively, we can add the snippet at the beginning of the following HTML spec concepts (after [=wait for import maps=]), so that the validation is not done twice:
 
@@ -579,4 +533,4 @@ Alternatively, we can add the snippet at the beginning of the following HTML spe
 
 </div>
 
-<p class="note">[=Validate a module script URL=] is applied to all module URLs before they start loading, even in paths where [=resolve a module specifier=] and import maps are not applied (e.g. `<script src="..." type="module">`).</p>
+<p class="note">[=Is a valid module script URL=] is checked to all module URLs before they start loading, even in paths where [=resolve a module specifier=] and import maps are not applied (e.g. `<script src="..." type="module">`).</p>
