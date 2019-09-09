@@ -569,3 +569,50 @@ Alternatively, we can add the snippet at the beginning of the following HTML spe
 </div>
 
 <p class="note">[=Validate a module script URL=] is applied to all module URLs before they start loading, even in paths where [=resolve a module specifier=] and import maps are not applied (e.g. `<script src="..." type="module">`).</p>
+
+<hr>
+<h2 id="internet-media-type-registration">Appendix A: MIME type registration</h2>
+
+This appendix provides the provisional registration of the [=MIME type=] <dfn export>`application/importmap+json`</dfn> `application/importmap+json` in accordance with [[RFC6838]].
+
+: Type name:
+:: application
+: Subtype name:
+:: importmap+json
+: Required parameters:
+:: N/A
+: Optional parameters:
+:: N/A
+: Encoding considerations:
+:: 8bit (always UTF-8)
+: Security considerations:
+:: Since Import Maps have the ability to direct which module resolutions are to be provided to all module imports of a given JavaScript environment, control of the Import Map should be considered to be execution-level application access. Integration with existing policy systems, including for example CORS and CSP, can be used to mitigate and restrict unwanted target URLs from being executed. In addition, the specification states that only those Import Maps served to browsers with the `application/importmap+json` MIME type will be executed. [[FETCH]] [[CSP]]
+: Interoperability considerations:
+:: Backwards compatibility will be a necessity for any new features added to the format, and handling for this has been incorporated into the design of the specification.
+: Published specification:
+:: https://wicg.github.io/import-maps/
+: Applications that use this media type:
+:: This is a browser-specific MIME type but may also apply to other JavaScript environments.
+: Fragment identifier considerations:
+:: N/A
+: Additional information:
+  <dd>
+    <dl>
+      : Deprecated alias names for this type:
+      :: N/A
+      : Magic number(s)
+      :: N/A
+      : File extension(s):
+      :: "importmap"
+      : Macintosh file type code:
+      :: Same as for `application/json` [[JSON]]
+    </dl>
+  </dd>
+: Person & email address to contact for further information:
+:: Guy Bedford &lt;guybedford@gmail.com>.
+: Intended usage:
+:: Common
+: Restrictions on usage:
+:: No restrictions apply.
+: Change controller:
+:: WHATWG
