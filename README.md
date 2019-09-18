@@ -170,7 +170,7 @@ It is also common in the Node.js ecosystem to import files without including the
  }
 ```
 
-would allow not only `import fp from "lodash/fp.js"`, but also allow `import fp from "loadsh/fp"`.
+would allow not only `import fp from "lodash/fp.js"`, but also allow `import fp from "lodash/fp"`.
 
 Although this example shows how it is _possible_ to allow extension-less imports with import maps, it's not necessarily _desirable_. Doing so bloats the import map, and makes the package's interface less simple—both for humans and for tooling.
 
@@ -513,7 +513,7 @@ The challenge with this is that it makes module resolution effectively network-d
 
 The `import:` URL scheme is envisioned as providing a way to access the import specifier mappings in URL contexts, not just import specifier contexts. This allows haring the notion of "import specifiers" between JavaScript importing contexts and traditional URL contexts, such as `fetch()`, `<img src="">` or `<link href="">`, so that those APIs can also benefit from the mapping and package abstractions. See [this section of a previous revision of the explainer](https://github.com/WICG/import-maps/tree/93f94c6dfb268bde3009644b65580fb2fbb98fcf#import-urls) for more examples and use cases.
 
-The biggest challenge here is that this would require rearchitecturing the import maps specification to operate on the general level of fetches and URL resolutions. Whereas, currently import mpas only impact import specifier resolution, i.e., a specific phase of module script fetching. There are also challenges around the meaning of "relative `import:` URLs" such as `import:./a.mjs`, the origin of pages or workers loaded via `import:` URLs, and other interactions with loading infrastructure.
+The biggest challenge here is that this would require rearchitecturing the import maps specification to operate on the general level of fetches and URL resolutions. Whereas, currently import maps only impact import specifier resolution, i.e., a specific phase of module script fetching. There are also challenges around the meaning of "relative `import:` URLs" such as `import:./a.mjs`, the origin of pages or workers loaded via `import:` URLs, and other interactions with loading infrastructure.
 
 ### `import.meta.resolve()`
 
