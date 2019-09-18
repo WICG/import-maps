@@ -105,7 +105,7 @@ describe('Absolute URL addresses', () => {
         filesystem: expect.toMatchURL('filesystem:good'),
         http: expect.toMatchURL('http://good/'),
         https: expect.toMatchURL('https://good/'),
-        ftp: expect.toMatchURL('ftp://good/'),
+        ftp: expect.toMatchURL('ftp://good/')
       },
       [
         `Invalid address "import:bad" for the specifier key "import".`,
@@ -154,9 +154,7 @@ describe('Failing addresses: mismatched trailing slashes', () => {
       'https://base.example/path1/path2/path3',
       {
       },
-      [
-        `Invalid address "https://base.example/notrailer" for package specifier key "trailer/". Package addresses must end with "/".`,
-      ]
+      [`Invalid address "https://base.example/notrailer" for package specifier key "trailer/". Package addresses must end with "/".`]
     );
   });
 });

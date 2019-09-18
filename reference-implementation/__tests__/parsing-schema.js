@@ -58,9 +58,7 @@ describe('Mismatching the specifier map schema', () => {
         {
           bar: expect.toMatchURL('https://example.com/')
         },
-        [
-          `Invalid address ${invalid} for the specifier key "foo". Addresses must be strings.`
-        ]
+        [`Invalid address ${invalid} for the specifier key "foo". Addresses must be strings.`]
       );
     }
   });
