@@ -8,32 +8,17 @@ _Or, how to control the behavior of JavaScript imports_
 
 - [The basic idea](#the-basic-idea)
 - [Background](#background)
-  - [Bare specifiers](#bare-specifiers)
-  - [Built-in modules](#built-in-modules)
 - [The import map](#the-import-map)
   - [Specifier remapping examples](#specifier-remapping-examples)
     - [Bare specifiers for JavaScript modules](#bare-specifiers-for-javascript-modules)
     - ["Packages" via trailing slashes](#packages-via-trailing-slashes)
-    - [General URL-like specifier remapping](#general-url-like-specifier-remapping)
     - [Extension-less imports](#extension-less-imports)
+    - [General URL-like specifier remapping](#general-url-like-specifier-remapping)
     - [Mapping away hashes in script filenames](#mapping-away-hashes-in-script-filenames)
-  - [Fallback examples](#fallback-examples)
-    - [For user-supplied packages](#for-user-supplied-packages)
-    - [For built-in modules, in module-import-map-supporting browsers](#for-built-in-modules-in-module-import-map-supporting-browsers)
-    - [For built-in modules, in browsers without import maps](#for-built-in-modules-in-browsers-without-import-maps)
-      - [This doesn't work for `<script>`](#this-doesnt-work-for-script)
+    - [Remapping doesn't work for `<script>`](#remapping-doesnt-work-for-script)
   - [Scoping examples](#scoping-examples)
     - [Multiple versions of the same module](#multiple-versions-of-the-same-module)
     - [Scope inheritance](#scope-inheritance)
-  - [Virtualization examples](#virtualization-examples)
-    - [Denying access to a built-in module](#denying-access-to-a-built-in-module)
-    - [Selective denial](#selective-denial)
-    - [Wrapping a built-in module](#wrapping-a-built-in-module)
-    - [Extending a built-in module](#extending-a-built-in-module)
-- [`import:` URLs](#import-urls)
-  - [A widget package example](#a-widget-package-example)
-  - [A data file package example](#a-data-file-package-example)
-  - [URL resolution semantics](#url-resolution-semantics)
 - [Import map processing](#import-map-processing)
   - [Installation](#installation)
   - [Dynamic import map example](#dynamic-import-map-example)
@@ -46,12 +31,12 @@ _Or, how to control the behavior of JavaScript imports_
   - [A convention-based flat mapping](#a-convention-based-flat-mapping)
 - [Adjacent concepts](#adjacent-concepts)
   - [Supplying out-of-band metadata for each module](#supplying-out-of-band-metadata-for-each-module)
-  - [Alternating logic based on the presence of a built-in module](#alternating-logic-based-on-the-presence-of-a-built-in-module)
-- [Implementation notes](#implementation-notes)
-  - [`import:` URL staging](#import-url-staging)
-  - [Further implementation staging](#further-implementation-staging)
-  - [`import:` URL loads and origins](#import-url-loads-and-origins)
-  - [`import:` URL interaction with other loading infrastructure](#import-url-interaction-with-other-loading-infrastructure)
+- [Further work](#further-work)
+  - [Multiple import map support](#multiple-import-map-support)
+  - [Fallback support](#fallback-support)
+  - [`import:` URLs](#import-urls)
+  - [`import.meta.resolve()`](#importmetaresolve)
+  - [Built-in module remapping](#built-in-module-remapping)
 - [Community polyfills and tooling](#community-polyfills-and-tooling)
 - [Acknowledgments](#acknowledgments)
 
@@ -59,17 +44,9 @@ _Or, how to control the behavior of JavaScript imports_
 
 ## The basic idea
 
-This proposal allows control over what URLs get fetched by JavaScript `import` statements and `import()` expressions, and allows this mapping to be reused in non-import contexts. This solves a variety of important use cases, such as:
+This proposal allows control over what URLs get fetched by JavaScript `import` statements and `import()` expressions. This allows "bare import specifiers", such as `import moment from "moment"`, to work.
 
-- Allowing "bare import specifiers", such as `import moment from "moment"`, to work
-
-- Providing fallback resolution, so that `import $ from "jquery"` can try to go to a CDN first, but fall back to a local version if the CDN server is down
-
-- Enabling polyfilling of, or other control over, [built-in modules](https://github.com/tc39/proposal-javascript-standard-library/)
-
-- Sharing the notion of "import specifiers" between JavaScript importing contexts and traditional URL contexts, such as `fetch()`, `<img src="">` or `<link href="">`
-
-The mechanism for doing this is via an _import map_ which can be used to control the resolution of module specifiers generally, as well as an `import:` URL scheme to allow access to the same resolution logic in URL-accepting contexts such as HTML and CSS. As an introductory example, consider the code
+The mechanism for doing this is via an _import map_ which can be used to control the resolution of module specifiers generally. As an introductory example, consider the code
 
 ```js
 import moment from "moment";
@@ -96,17 +73,9 @@ import moment from "/node_modules/moment/src/moment.js";
 import { partition } from "/node_modules/lodash-es/lodash.js";
 ```
 
-You would also be able to use these mappings in other contexts via the `import:` URL scheme, e.g.
-
-```html
-<link rel="modulepreload" href="import:lodash">
-```
-
 For more on the new `"importmap"` value for `<script>`'s `type=""` attribute, see the [installation section](#installation). For now, we'll concentrate on the semantics of the mapping, deferring the installation discussion.
 
 ## Background
-
-### Bare specifiers
 
 Web developers with experience with pre-ES2015 module systems, such as CommonJS (either in Node or bundled using webpack/browserify for the browser), are used to being able to import modules using a simple syntax:
 
@@ -127,17 +96,6 @@ In such systems, these bare import specifiers of `"jquery"` or `"lodash"` are ma
 The main benefit of this system is that it allows easy coordination across the ecosystem. Anyone can write a module and include an import statement using a package's well-known name, and let the Node.js runtime or their build-time tooling take care of translating it into an actual file on disk (including figuring out versioning considerations).
 
 Today, many web developers are even using JavaScript's native module syntax, but combining it with bare import specifiers, thus making their code unable to run on the web without per-application, ahead-of-time modification. We'd like to solve that, and bring these benefits to the web.
-
-### Built-in modules
-
-When considering the introduction of [built-in modules](https://github.com/tc39/proposal-javascript-standard-library/) to the web, we need to ensure that we do not lose any of the important features we have today when introducing features via new globals. Notably, these include:
-
-- Polyfilling: the ability to supply a polyfill module that acts as the built-in one
-- Virtualization: the ability to wrap, extend, or remove access to the built-in module
-
-Both of these capabilities are easy to achieve with globals, but without some mechanism for modifying module resolution, they are not possible for modules (including built-in modules). The import maps proposal provides that mechanism.
-
-Note that these use cases are complicated by the need to support browsers without import map support. More on that below.
 
 ## The import map
 
@@ -198,9 +156,31 @@ import localeData from "moment/locale/zh-cn.js";
 import fp from "lodash/fp.js";
 ```
 
+#### Extension-less imports
+
+It is also common in the Node.js ecosystem to import files without including the extension. [We do not have the luxury](#the-nodejs-module-resolution-algorithm) of trying multiple file extensions until we find a good match. However, we can emulate something similar by using an import map. For example,
+
+```json
+ {
+   "imports": {
+     "lodash": "/node_modules/lodash-es/lodash.js",
+     "lodash/": "/node_modules/lodash-es/",
+     "lodash/fp": "/node_modules/lodash-es/fp.js",
+   }
+ }
+```
+
+would allow not only `import fp from "lodash/fp.js"`, but also allow `import fp from "lodash/fp"`.
+
+Although this example shows how it is _possible_ to allow extension-less imports with import maps, it's not necessarily _desirable_. Doing so bloats the import map, and makes the package's interface less simple—both for humans and for tooling.
+
+This bloat is especially problematic if you need to allow extension-less imports within a package. In that case you will need an import map entry for every file in the package, not just the top-level entry points. For example, to allow `import "./fp"` from within the `/node_modules/lodash-es/lodash.js` file, you would need an import entry mapping `/node_modules/lodash-es/fp` to `/node_modules/lodash-es/fp.js`. Now imagine repeating this for every file referenced without an extension.
+
+As such, we recommend caution when employing patterns like this in your import maps, or writing modules. It will be simpler for the ecosystem if we don't rely on import maps to patch up file-extension related mismatches.
+
 #### General URL-like specifier remapping
 
-As part of allowing general remapping of specifiers, import maps specifically allow remapping of URL-like specifiers, such as `"https://example.com/foo.mjs"` or `"./bar.mjs"`. One of the more advanced usages of this is [for fallbacks](#for-built-in-modules-in-browsers-without-import-maps), but here we demonstrate some basic ones to communicate the concept:
+As part of allowing general remapping of specifiers, import maps specifically allow remapping of URL-like specifiers, such as `"https://example.com/foo.mjs"` or `"./bar.mjs"`. A practical use for this is [mapping away hashes](#mapping-away-hashes-in-script-filenames), but here we demonstrate some basic ones to communicate the concept:
 
 ```json
 {
@@ -235,28 +215,6 @@ Such remapping can also be done on a prefix-matched basis, by ending the specifi
 This version ensures that import statements for specifiers that start with the substring `"https://www.unpkg.com/vue/"` will be mapped to the corresponding URL underneath `/node_modules/vue/`.
 
 In general, the point is that the remapping works the same for URL-like imports as for bare imports. Our previous examples changed the resolution of specifiers like `"lodash"`, and thus changed the meaning of `import "lodash"`. Here we're changing the resolution of specifiers like `"/app/helpers.mjs"`, and thus changing the meaning of `import "/app/helpers.mjs"`.
-
-#### Extension-less imports
-
-It is also common in the Node.js ecosystem to import files without including the extension. [We do not have the luxury](#the-nodejs-module-resolution-algorithm) of trying multiple file extensions until we find a good match. However, we can emulate something similar by using an import map. For example,
-
-```json
- {
-   "imports": {
-     "lodash": "/node_modules/lodash-es/lodash.js",
-     "lodash/": "/node_modules/lodash-es/",
-     "lodash/fp": "/node_modules/lodash-es/fp.js",
-   }
- }
-```
-
-would allow not only `import fp from "lodash/fp.js"`, but also allow `import fp from "loadsh/fp"`.
-
-Although this example shows how it is _possible_ to allow extension-less imports with import maps, it's not necessarily _desirable_. Doing so bloats the import map, and makes the package's interface less simple—both for humans and for tooling.
-
-This bloat is especially problematic if you need to allow extension-less imports within a package. In that case you will need an import map entry for every file in the package, not just the top-level entry points. For example, to allow `import "./fp"` from within the `/node_modules/lodash-es/lodash.js` file, you would need an import entry mapping `/node_modules/lodash-es/fp` to `/node_modules/lodash-es/fp.js`. Now imagine repeating this for every file referenced without an extension.
-
-As such, we recommend caution when employing patterns like this in your import maps, or writing modules. It will be simpler for the ecosystem if we don't rely on import maps to patch up file-extension related mismatches.
 
 #### Mapping away hashes in script filenames
 
@@ -298,116 +256,25 @@ and with import statements that are of the form `import "./sub-dep.mjs"` instead
 
 and leave the `import "./sub-dep.mjs"` statement alone. This means the contents of `dep.mjs` don't change, and so it stays cached; the same for `app.mjs`.
 
-### Fallback examples
+#### Remapping doesn't work for `<script>`
 
-#### For user-supplied packages
-
-Consider the case of wanting to use a CDN's copy of a library, but fall back to a local copy if the CDN is unavailable. Today this is often accomplished via [terrible `document.write()`-using sync-script-loading hacks](https://www.hanselman.com/blog/CDNsFailButYourScriptsDontHaveToFallbackFromCDNToLocalJQuery.aspx). With import maps providing a first-class way of controlling module resolution, we can do better.
-
-To provide fallbacks, use an address array, instead of a string address, for the right-hand side of your mapping:
-
-```json
-{
-  "imports": {
-    "jquery": [
-      "https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js",
-      "/node_modules/jquery/dist/jquery.js"
-    ]
-  }
-}
-```
-
-In this case, any attempts to import with the specifier `"jquery"` will first try to fetch the CDN URL, but if that fails, fall back to the copy in `/node_modules/`. (This fallback process will happen only once, and the choice will be cached for all future imports.)
-
-_Side note: you can think of the string address form as just sugar for a single-element array address. That is, `"jquery": "/node_modules/jquery/dist/jquery.js"` is sugar for `"jquery": ["/node_modules/jquery/dist/jquery.js"]`._
-
-#### For built-in modules, in module-import-map-supporting browsers
-
-When a browser supports import maps, we can use the same principle as the above example to support fallbacks for built-in modules.
-
-For example, consider the following import map, which supplies a polyfill fallback for [KV storage](https://wicg.github.io/kv-storage/):
-
-```json
-{
-  "imports": {
-    "std:kv-storage": [
-      "std:kv-storage",
-      "/node_modules/kvs-polyfill/index.mjs"
-    ]
-  }
-}
-```
-
-Now, statements like
+An important note about using import maps to change the meaning of import specifiers is that it does not change the meaning of raw URLs, such as those that appear in `<script src="">` or `<link rel="modulepreload">`. That is, given the above example, while
 
 ```js
-import { StorageArea } from "std:kv-storage";
+import "./app.mjs";
 ```
 
-will first try to resolve to the `std:kv-storage` URL, i.e. to the browser's built-in implementation of KV storage. If that fails, e.g. because the browser does not implement KV storage, then instead it will fetch the polyfill, at `/node_modules/kvs-polyfill/index.mjs`.
-
-_Note: the usage of the `std:` prefix for built-in module examples is for illustrative purposes. This proposal is generic, and would be able to work with any built-in module prefix._
-
-#### For built-in modules, in browsers without import maps
-
-The goal of the previous example is to use a polyfill in older browsers, but the built-in module in newer browsers. But it falls down in the case of browsers that are old enough to not support import maps at all. (That is, all of today's currently-shipping browsers.) In such cases, the statement `import { StorageArea } from "std:kv-storage"` will always fail, with no chance to remap it.
-
-How can we write code that uses a polyfill in today's browsers, but uses built-in modules in future browsers that support them? We do this by changing our import statement to import the _polyfill_'s URL:
-
-```js
-import { StorageArea } from "/node_modules/kvs-polyfill/index.mjs";
-```
-
-and then remapping the polyfill to the built-in module for module-import-map-supporting browsers:
-
-```json
-{
-  "imports": {
-    "/node_modules/kvs-polyfill/index.mjs": [
-      "std:kv-storage",
-      "/node_modules/kvs-polyfill/index.mjs"
-    ]
-  }
-}
-```
-
-With this mapping, each class of browser behaves as desired, for our above import statement:
-
-- Browsers that do not support import maps will receive the polyfill.
-- Browsers that support import maps, but do not support KV storage, will end up with a mapping from the polyfill URL to itself, and so will receive the polyfill anyway.
-- Browsers that support both import maps and KV storage will end up with a mapping from the polyfill URL to `std:kv-storage`, and so will receive the built-in module.
-
-Note how we're using a capability here that we briefly explored in [a previous example](#general-url-like-specifier-remapping): remapping imports of "URL-like" specifiers, not just bare specifiers.
-
-(Note that, in general, there is only one level of resolution. The address is not itself treated as a specifier and recursively remapped.)
-
-##### This doesn't work for `<script>`
-
-An important caveat to the above example is that it does _not_ help for `<script src="">` scenarios. That is, while
-
-```js
-import "/node_modules/virtual-scroller-polyfill/index.mjs";
-```
-
-would have the correct behavior (using the built-in version when appropriate) in all classes of browser,
+would be correctly remapping to its hashed version in import-map-supporting browsers,
 
 ```html
-<script type="module" src="/node_modules/virtual-scroller-polyfill/index.mjs"></script>
+<script type="module" src="./app.mjs"></script>
 ```
 
-would not: in all classes of browsers, it would fetch the polyfill unconditionally. What _would_ work, in import-map-supporting browsers, would be
+would not: it would cause in all classes of browsers, it would attempt to fetch `app.mjs` directly, resulting in a 404. What _would_ work, in import-map-supporting browsers, would be
 
 ```html
-<script type="module" src="import:/node_modules/virtual-scroller-polyfill/index.mjs"></script>
+<script type="module">import "./app.mjs";</script>
 ```
-
-(See below for more on the subtleties of `import:` URLs.) But alas, in browsers without support for import maps, this will result in a network error. Thus, for side-effecting modules, you'd instead want to use the pattern
-
-```html
-<script type="module">import "/node_modules/virtual-scroller-polyfill/index.mjs";</script>
-```
-
-which will work as desired in all classes of browser.
 
 ### Scoping examples
 
@@ -474,237 +341,6 @@ would give the following resolutions:
 |b        |/scope2/scope3/foo.mjs |/b-3.mjs      |
 |c        |/scope2/scope3/foo.mjs |/c-1.mjs      |
 
-### Virtualization examples
-
-As mentioned above, it's important to be able to wrap, extend, or remove access to built-in modules, the same way you can do with globals. The following examples show how to do this.
-
-_Note: All of the following examples can apply to non built-in modules too, but we show the built-in module cases here._
-
-#### Denying access to a built-in module
-
-Although it is drastic and fairly rare, sometimes it is desirable to remove access to certain capabilities from your application. With globals, this can be done via code such as
-
-```js
-delete self.WebSocket;
-```
-
-With import maps, you can restrict access by mapping a built-in module to the empty address array, i.e. saying "there are no URLs or built-in modules that this should map to":
-
-```json
-{
-  "imports": {
-    "std:kv-storage": []
-  }
-}
-```
-
-Alternately, you can use the form
-
-```json
-{
-  "imports": {
-    "std:kv-storage": null
-  }
-}
-```
-
-which means the same thing.
-
-With this in place, any attempts to resolve the `"std:kv-storage"` specifier will fail. For example,
-
-```js
-import { Storage } from "std:kv-storage"; // throws
-```
-
-#### Selective denial
-
-You can use the scoping feature to restrict access to a built-in module to only some parts of your app:
-
-```json
-{
-  "imports": {
-    "std:kv-storage": null
-  },
-  "scopes": {
-    "/js/storage-code/": {
-      "std:kv-storage": "std:kv-storage"
-    }
-  }
-}
-```
-
-(The way in which this map operates within the scope, "mapping `std:kv-storage` to itself", may appear a bit confusing. The key is to remember that the left hand side is a module specifier, and the right hand side is a URL. So you can read this as saying that, whenever the `"std:kv-storage"` specifier gets imported within that scope, it resolves to the `std:kv-storage` URL.)
-
-Alternately, you can use similar techniques to prevent only certain parts of your app from accessing a built-in module:
-
-```json
-{
-  "scopes": {
-    "/node_modules/untrusted-third-party/": {
-      "std:kv-storage": null
-    }
-  }
-}
-```
-
-#### Wrapping a built-in module
-
-It may be desirable to wrap a built-in module, e.g. to instrument it, and then ensure that the rest of your application gets access only to the wrapped version. You would do this by redirecting the rest of your app to the wrapped version:
-
-```json
-{
-  "imports": {
-    "std:kv-storage": "/js/als-wrapper.mjs"
-  },
-  "scopes": {
-    "/js/als-wrapper.mjs": {
-      "std:kv-storage": "std:kv-storage"
-    }
-  }
-}
-```
-
-This first ensures that in general, `"std:kv-storage"` resolves to `/js/als-wrapper.mjs`, but that for the particular scope of the `/js/als-wrapper.mjs` file itself, the resolution behaves as normal. This allows us to write the wrapper file like so:
-
-```js
-import instrument from "/js/utils/instrumenter.mjs";
-import { storage as orginalStorage, StorageArea as OriginalStorageArea } from "std:kv-storage";
-
-export const storage = instrument(originalStorage);
-export const StorageArea = instrument(OriginalStorageArea);
-```
-
-Now, whenever any part of our app (except the wrapper module itself) imports `"std:kv-storage"`, it will resolve to the wrapper module, giving the wrapped and instrumented exports.
-
-#### Extending a built-in module
-
-The story for extending a built-in module is very similar as for wrapping. For example, let's say that KV storage gained a new export, `SuperAwesomeStorageArea`. We would use the same import map as in the previous example, and just change our wrapper like so:
-
-```js
-export { storage, StorageArea } from "std:kv-storage";
-export class SuperAwesomeStorageArea { ... };
-```
-
-(Note: if we just wanted to add a new method to `StorageArea`, there's no need for a wrapper module or an import map. We would just include a polyfill module that imported `StorageArea` and patched a new method onto `StorageArea.prototype`.)
-
-This same principle would apply for removing exports, if for some reason that was desirable.
-
-## `import:` URLs
-
-As a supplement to the base import map concept, we introduce the new `import:` URL scheme. This scheme allows easier access to "packaged" resources from within HTML, CSS, or other URL-accepting parts of the platform such as `fetch()`.
-
-### A widget package example
-
-Consider a UI widget, distributed under the "package name" `widget`. It contains not only a JavaScript module, but also CSS themes, and corresponding images. You could configure a import map like
-
-```json
-{
-  "imports": {
-    "widget": "/node_modules/widget/index.mjs",
-    "widget/": "/node_modules/widget/"
-  }
-}
-```
-
-and then do
-
-```html
-<link rel="stylesheet" href="import:widget/themes/light.css">
-<script type="module" src="import:widget"></script>
-```
-
-or
-
-```css
-.back-button {
-  background: url('import:widget/assets/back.svg');
-}
-```
-
-This brings the name-coordination benefits of JavaScript's bare import specifiers (i.e., npm-style packages) to all web resources.
-
-### A data file package example
-
-Consider a package of JSON data, for example [the timezone database](https://www.npmjs.com/package/tzdata). Similar to the above, you could configure
-
-```json
-{
-  "imports": {
-    "tzdata": "/node_modules/tzdata/timezone-data.json"
-  }
-}
-```
-
-and then write JavaScript code that did
-
-```js
-const data = await (await fetch('import:tzdata')).json();
-```
-
-### URL resolution semantics
-
-Exactly how `import:` URLs are resolved is still somewhat vague: in particular, what "referrer URL" is used for the purposes of:
-
-- Resolving relative specifiers, such as in `import:./foo`
-- Deciding which scope to use when consulting the realm's import map.
-
-The first of these is not a big deal, as the corresponding use cases are not terribly important anyway. But the second is important. Consider a case where most of your app can use v2 of `widget`, but one of your third-party dependencies (call it `gadget`) needs to get v1, because it depends on the previous API contract. You would generally handle this via an import map like so:
-
-```json
-{
-  "imports": {
-    "widget": "/node_modules/widget-v2/index.mjs",
-    "widget/": "/node_modules/widget-v2/"
-  },
-  "scopes": {
-    "/node_modules/gadget/": {
-      "widget": "/node_modules/widget-v1/index.mjs",
-      "widget/": "/node_modules/widget-v1/"
-    }
-  }
-}
-```
-
-The question is then, inside `/node_modules/gadget/styles.css`, how does
-
-```css
-.back-button {
-  background: url(import:widget/back-button.svg);
-}
-```
-
-resolve? The desired answer is to resolve to the corresponding v1 URL, i.e. `/node_modules/widget-v1/back-button.svg`.
-
-Our current tentative proposal is that the referrer URL for `import:` fetches be determined by using the request's referrer URL. In practice, this will mean:
-
-- By default, use "the page's base URL" (in spec terms: the fetch client's API base URL)
-- If the fetch is from a CSS file, use the CSS file's URL (in spec terms: its [location](https://drafts.csswg.org/cssom/#concept-css-style-sheet-location); see [Referrer Policy](https://w3c.github.io/webappsec-referrer-policy/#integration-with-css))
-- If the fetch is from a [HTML module](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/html-module-spec-changes.md), use the module's base URL (not yet specified)
-
-Note how the default choice here makes things still a bit fragile, when used from JavaScript source files. Consider code inside `/node_modules/gadget/index.mjs`:
-
-```js
-const link = document.createElement('link');
-link.rel = 'stylesheet';
-link.href = 'import:widget/themes/light.css';
-document.head.append(link);
-```
-
-This code will not behave as desired; the URL of the stylesheet that is fetched will be `/node_modules/widget-v2/themes/light.css`, instead of the counterpart v1 URL.
-
-The proposed solution is that we should instead provide an `import.meta.resolve()` function, which (like `import()` or `import` statements) works relative to the active script URL. Then you could write
-
-```js
-const link = document.createElement('link');
-link.rel = 'stylesheet';
-link.href = import.meta.resolve('widget/themes/light.css');
-document.head.append(link);
-```
-
-However, this gets a little complicated due to the [fallbacks for user-supplied packages](#for-user-supplied-packages) feature; see discussion in [#79](https://github.com/WICG/import-maps/issues/79).
-
-_Previous versions of this proposal anticipated making `import:` URLs resolve relative to the current active script. However, that has intractable problems, as discussed in [#75](https://github.com/WICG/import-maps/issues/75)._
-
 
 ## Import map processing
 
@@ -727,22 +363,13 @@ You can install an import map for your application using a `<script>` element, e
 
 When the `src=""` attribute is used, the resulting HTTP response must have the MIME type `application/importmap+json`. (Why not reuse `application/json`? Doing so could [enable CSP bypasses](https://github.com/WICG/import-maps/issues/105).) Like module scripts, the request is made with CORS enabled, and the response is always interpreted as UTF-8.
 
-Because they affect all imports, any import maps must be present and successfully fetched before any module resolution is done. This means that module graph fetching, or any fetching of `import:` URLs, is blocked on import map fetching.
+Because they affect all imports, any import maps must be present and successfully fetched before any module resolution is done. This means that module graph fetching is blocked on import map fetching.
 
 This means that the inline form of import maps is _strongly recommended_ for best performance. This is similar to the best practice of [inlining critical CSS](https://developers.google.com/speed/docs/insights/OptimizeCSSDelivery); both types of resources block your application from doing important work until they're processed, so introducing a second network round-trip (or even disk-cache round trip) is a bad idea. If your heart is set on using external import maps, you can attempt to mitigate this round-trip penalty with technologies like HTTP/2 Push or [bundled HTTP exchanges](https://wicg.github.io/webpackage/draft-yasskin-wpack-bundled-exchanges.html).
 
-As another consequence of how import maps affect all imports, attempting to add a new `<script type="importmap">` after any module graph fetching, or fetching of `import:` URLs, has started, is an error. The import map will be ignored, and the `<script>` element will fire an `error` event.
+As another consequence of how import maps affect all imports, attempting to add a new `<script type="importmap">` after any module graph fetching has started is an error. The import map will be ignored, and the `<script>` element will fire an `error` event.
 
-Multiple `<script type="importmap">`s are allowed on the page. (See previous discussion in [#14](https://github.com/WICG/import-maps/issues/14).) They are merged by an intentionally-simple procedure, roughly equivalent to the JavaScript code
-
-```js
-const result = {
-  imports: { ...a.imports, ...b.imports },
-  scopes: { ...a.scopes, ...b.scopes }
-};
-```
-
-See [the proto-spec](./spec.md) for more details on how this all works.
+For now, only one `<script type="importmap">` is allowed on the page. We plan to extend this in the future, once we figure out the correct semantics for combining multiple import maps. See discussion in [#14](https://github.com/WICG/import-maps/issues/14), [#137](https://github.com/WICG/import-maps/issues/137), and [#167](https://github.com/WICG/import-maps/pull/167).
 
 _What do we do in workers? Probably `new Worker(someURL, { type: "module", importMap: ... })`? Or should you set it from inside the worker? Should dedicated workers use their controlling document's map, either by default or always? Discuss in [#2](https://github.com/WICG/import-maps/issues/2)._
 
@@ -767,25 +394,23 @@ import 'my-library'; // will fetch the randomly-chosen URL
 </script>
 ```
 
-A more realistic example might use this capability to override a previous import map based on feature detection:
+A more realistic example might use this capability to assemble the import map based on feature detection:
 
 ```html
-<script type="importmap">
-{
-  "imports": {
-    "lodash": "/lodash.mjs",
-    "moment": "/moment.mjs"
-  }
-}
-</script>
-
 <script>
-if (!someFeatureDetection()) {
-  const im = document.createElement('script');
-  im.type = 'importmap';
-  im.textContent = '{ "imports": { "lodash": "/lodash-legacy-browsers.js" } }';
-  document.currentScript.after(im);
-}
+const importMap = {
+  imports: {
+    moment: '/moment.mjs',
+    lodash: someFeatureDetection() ?
+      '/lodash.mjs' :
+      '/lodash-legacy-browsers.mjs'
+  }
+};
+
+const im = document.createElement('script');
+im.type = 'importmap';
+im.textContent = JSON.stringify(importMap);
+document.currentScript.after(im);
 </script>
 
 <script type="module">
@@ -793,7 +418,7 @@ import _ from "lodash"; // will fetch the right URL for this browser
 </script>
 ```
 
-Note that (like other `<script>` elements) modifying the contents of a `<script type="importmap">` after it's already inserted in the document will not work; this is why we wrote the above example by inserting a second `<script type="importmap">` to overwrite the first one.
+Note that (like other `<script>` elements) modifying the contents of a `<script type="importmap">` after it's already inserted in the document will not work. This is why we wrote the above example by assembling the contents of the import map before creating and inserting the `<script type="importmap">`.
 
 ### Scope
 
@@ -866,62 +491,41 @@ The import map _could_ be that manifest file. However, it may not be the best fi
 
 - All proposed metadata so far is applicable to any sort of resource, not just JavaScript modules. A solution should probably work at a more general level.
 
-### Alternating logic based on the presence of a built-in module
+## Further work
 
-_See further discussion of this case in the issue tracker: [#61](https://github.com/WICG/import-maps/issues/61)._
+[Previous versions of this repository](https://github.com/WICG/import-maps/tree/93f94c6dfb268bde3009644b65580fb2fbb98fcf) contained more features for import maps, including support for multiple import maps, built-in module remapping, fallbacks, and a new type of URL, the `import:` URL. These have since been removed in the interest of first explaining and specifying a solid, implementable "v1" core.
 
-Not all fallbacks take the role of running one piece of code. For example, sometimes, one code path is to be taken if a particular platform API exists, and another code path is taken if it doesn't exist. The import maps proposal does not aim to solve all such scenarios in a built-in way; instead, the stage 2 TC39 proposal [top-level await](https://github.com/tc39/proposal-top-level-await) can be used to meet some of these use cases.
+We may bring some of those features back, and the issue tracker is a good place for discussing such future extensions. This section contains a discussion of these potential future features.
 
-Imagine if IndexedDB were provided by a built-in module `std:indexed-db` and localStorage were provided by a built-in module `std:local-storage`. For a particular application, all supported browsers support localStorage, and only some support IndexedDB. Although it's possible to polyfill IndexedDB on top of localStorage, in this scenario, doing so leads to performance overhead vs more specialized usage. Therefore, it's preferrable to use a specialized implementation based on either IndexedDB or localStorage directly, instead of using import maps to remap `std:indexed-db`.
+### Multiple import map support
 
-In this scenario, a module may use top-level await to perform feature testing and fallback as follows:
+It is natural for multiple `<script type="importmap">`s to appear on a page, just as multiple `<script>`s of other types can. We would like to enable this in the future.
 
-```js
-export let myStorageFunction;
+The biggest challenge here is deciding how the multiple import maps compose. That is, given two import maps which both remap the same URL, or two scope definitions which cover the same URL prefix space, what should the affect on the page be? The current leading candidate is [cascading resolution](https://github.com/WICG/import-maps/issues/137), which recasts import maps from being import specifier → URL mappings, to instead be a cascading series of import specifier → import specifier mappings, eventually bottoming out in a "fetchable import specifier" (essentially a URL).
 
-try {
-  const indexedDB = await import("std:indexed-db");
-  myStorageFunction = function() { /* in terms of indexedDB */ };
-} catch (e) {
-  const localStorage = await import("std:local-storage");
-  myStorageFunction = function() { /* in terms of localStorage */ };
-}
-```
+### Fallback support
 
-## Implementation notes
+It is possible to extend import maps such that instead of mapping from an import specifier to a single URL, they instead map to multiple URLs. Then, the first successfully-fetchable URL would be the result of the mapping. This enables fallback behavior, both for user-defined packages, and potentially for built-in modules. See [this section of a previous revision of the explainer](https://github.com/WICG/import-maps/tree/93f94c6dfb268bde3009644b65580fb2fbb98fcf#fallback-examples) for more examples and use cases.
 
-### `import:` URL staging
+The challenge with this is that it makes module resolution effectively network-dependent and asynchronous, instead of requiring a synchronous lookup in the import map structure. For fallbacks against built-in modules only, this can be sidestepped, since the user agent synchronously knows what built-in modules it implements. But for the more general case this complexity holds.
 
-The `import:` URL feature is ambitious in that it involves cross-cutting implementation work that goes outside of the usual "module loading" pipeline, and starts affecting network code.
+### `import:` URLs
 
-We believe `import:` URLs are valuable, and solve a real developer need. They were a [prominent feature request](https://github.com/WICG/import-maps/issues/23) against earlier versions of this proposal. We believe that having a proposal that incorporates them is better than trying to tack them on later.
+The `import:` URL scheme is envisioned as providing a way to access the import specifier mappings in URL contexts, not just import specifier contexts. This allows haring the notion of "import specifiers" between JavaScript importing contexts and traditional URL contexts, such as `fetch()`, `<img src="">` or `<link href="">`, so that those APIs can also benefit from the mapping and package abstractions. See [this section of a previous revision of the explainer](https://github.com/WICG/import-maps/tree/93f94c6dfb268bde3009644b65580fb2fbb98fcf#import-urls) for more examples and use cases.
 
-That said, in terms of implementation staging, it's easy to slice this proposal into a "without `import:` URLs" implementation that later gets followed by a "with `import:` URLs" implementation. Simply by making import maps only affect `import` statements and `import()` expressions at first, an implementation can deliver much of the value, and later work on the `import:` URL implementation.
+The biggest challenge here is that this would require rearchitecturing the import maps specification to operate on the general level of fetches and URL resolutions. Whereas, currently import maps only impact import specifier resolution, i.e., a specific phase of module script fetching. There are also challenges around the meaning of "relative `import:` URLs" such as `import:./a.mjs`, the origin of pages or workers loaded via `import:` URLs, and other interactions with loading infrastructure.
 
-### Further implementation staging
+### `import.meta.resolve()`
 
-Speaking of delivering incremental value, it's worth noting that by even before getting to `import:` URLs, implementations can ship subsets of the proposal that solve important use cases. For example, one implementation plan could be:
+The proposed `import.meta.resolve(specifier)` function serves a similar purpose to `import:` URLs, extending the applicability of import specifiers beyond just `import` statements and `import()` expressions. It allows module scripts to resolve import specifiers to URLs at any time.
 
-- Only support map entries of the form `"http(s) URL": ["built-in module", "same http(s) URL"]`. ([See above](#for-built-in-modules-in-module-import-map-supporting-browsers) for a realistic example.) This enables built-in module polyfilling in a backward-compatible way.
-- Support general URL and non-array addresses in the specifier map. This enables basic bare import specifier support.
-- Support scoping. This enables full "npm parity" bare import specifier support.
-- Support fallbacks from HTTP(S) URLs to HTTP(S) URLs. This allows supplanting the [terrible `document.write()`-using sync-script-loading hacks](https://www.hanselman.com/blog/CDNsFailButYourScriptsDontHaveToFallbackFromCDNToLocalJQuery.aspx).
+The challenges with this proposal are intimately tied up with [fallback support](#fallback-support). In particular, if fallbacks make the module resolution process synchronous, then `import.meta.resolve()` cannot be a simple string-returning function as one might expect. See more discussion in [#79](https://github.com/WICG/import-maps/issues/79).
 
-### `import:` URL loads and origins
+### Built-in module remapping
 
-Particular questions come up around whether `import:` URLs can be used for navigations or worker loads. In these cases, the origin of such URLs would become important. Some potential answers:
+Currently import maps are only specified to remap URL-like import specifiers that correspond to a [fetch scheme](https://fetch.spec.whatwg.org/#fetch-scheme), since those are the only URLs that could result in a module being fetched. If browsers support built-in modules (for example via [this Web IDL pull request](https://fetch.spec.whatwg.org/#fetch-scheme)), then we could consider also allowing built-in module URLs to be remapped. This combines well with [fallback support](#fallback-support) and scopes; see [this section of a previous revision of the explainer](https://github.com/WICG/import-maps/tree/93f94c6dfb268bde3009644b65580fb2fbb98fcf#for-built-in-modules-in-module-import-map-supporting-browsers) for more examples on fallback, and [this section](https://github.com/WICG/import-maps#virtualization-examples) for more use cases and examples surrounding virtualization of built-in modules.
 
-- These URLs cannot be used for navigations or workers
-- These URLs can be used for navigations or workers, but have an opaque origin
-- These URLs can be used for navigations or workers, and have an origin derived from where they resolve to.
-
-We can easily start by disallowing such uses of `import:` URLs, and expanding to one of the other two options later.
-
-### `import:` URL interaction with other loading infrastructure
-
-Several implementer questions come up around how `import:` URLs are envisioned to interact with other loading infrastructure, for example service workers. Initial attempts to answer these sorts of questions are in [the proto-spec](./spec.md).
-
-The high-level summary is that any fetch of an `import:` URL should be thought of as sugar for a series of if-then-else statements that in turn fetch the mapped-to URLs. For example, each fetch will pass through the service worker, until one succeeds.
+The primary challenges here are in achieving agreement about built-in modules on the web in the first place. Built-in modules also make other aspects of import maps more complicated, e.g. they tend to necessitate [fallback support](#fallback-support) to enable polyfilling, or [multiple import map support](#multiple-import-map-support) to enable multi-party virtualization.
 
 ## Community polyfills and tooling
 

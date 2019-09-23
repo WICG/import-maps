@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "lint": "eslint .",
-    "test": "jest"
+    "test": "jest --coverage"
   },
   "repository": "WICG/import-maps",
   "author": "Domenic Denicola <d@domenic.me> (https://domenic.me/)",

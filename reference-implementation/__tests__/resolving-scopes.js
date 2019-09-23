@@ -16,20 +16,6 @@ describe('Mapped using scope instead of "imports"', () => {
   const inJSDirURL = new URL('https://example.com/js/app.mjs');
   const topLevelURL = new URL('https://example.com/app.mjs');
 
-  it('should fail when the mapping is to an empty array', () => {
-    const resolveUnderTest = makeResolveUnderTest(`{
-      "scopes": {
-        "/js/": {
-          "moment": null,
-          "lodash": []
-        }
-      }
-    }`);
-
-    expect(() => resolveUnderTest('moment', inJSDirURL)).toThrow(TypeError);
-    expect(() => resolveUnderTest('lodash', inJSDirURL)).toThrow(TypeError);
-  });
-
   describe('Exact vs. prefix based matching', () => {
     it('should match correctly when both are in the map', () => {
       const resolveUnderTest = makeResolveUnderTest(`{
