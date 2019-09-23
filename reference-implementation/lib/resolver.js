@@ -1,7 +1,7 @@
 'use strict';
 const { URL } = require('url');
 const assert = require('assert');
-const { tryURLLikeSpecifierParse } = require('./utils.js');
+const { tryURLLikeSpecifierParse, tryURLParse } = require('./utils.js');
 
 exports.resolve = (specifier, parsedImportMap, scriptURL) => {
   const asURL = tryURLLikeSpecifierParse(specifier, scriptURL);
@@ -45,10 +45,13 @@ function resolveImportsMatch(normalizedSpecifier, specifierMap) {
       // Enforced by parsing
       assert(address.href.endsWith('/'));
 
-      // Cannot use URL resolution directly. E.g. "switch" relative to "std:elements/" is a
-      // parsing failure.
-      // TODO: should we re-consider this, given the removal of built-in modules support?
-      return new URL(address + afterPrefix);
+      const url = tryURLParse(afterPrefix, address);
+
+      // This code looks stupid but it follows the spec more exactly and also gives code coverage a chance to shine.
+      if (url === null) {
+        return null;
+      }
+      return url;
     }
   }
   return null;

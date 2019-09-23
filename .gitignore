@@ -1,4 +1,5 @@
 /reference-implementation/node_modules/
+/reference-implementation/coverage/
 /out/
 /spec.html
 /deploy_key

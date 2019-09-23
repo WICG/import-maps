@@ -39,7 +39,7 @@ exports.expectBad = (input, baseURL, warnings = []) => {
   checkWarnings();
 };
 
-exports.expectWarnings = (input, baseURL, output, warnings = []) => {
+exports.expectWarnings = (input, baseURL, output, warnings) => {
   const checkWarnings = testWarningHandler(warnings);
   expect(parseFromString(input, baseURL)).toEqual(output);
 

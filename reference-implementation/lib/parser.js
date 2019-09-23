@@ -42,7 +42,6 @@ exports.parseFromString = (input, baseURL) => {
 function sortAndNormalizeSpecifierMap(obj, baseURL) {
   assert(isJSONObject(obj));
 
-  // Restrict all entries to be strings
   const normalized = {};
   for (const [specifierKey, value] of Object.entries(obj)) {
     const normalizedSpecifierKey = normalizeSpecifierKey(specifierKey, baseURL);
@@ -50,24 +49,25 @@ function sortAndNormalizeSpecifierMap(obj, baseURL) {
       continue;
     }
 
-    if (typeof value === 'string') {
-      const addressURL = tryURLLikeSpecifierParse(value, baseURL);
-      if (addressURL === null) {
-        console.warn(`Invalid address "${value}" for the specifier key "${specifierKey}".`);
-        continue;
-      }
-
-      if (specifierKey.endsWith('/') && !addressURL.href.endsWith('/')) {
-        console.warn(`Invalid address "${addressURL.href}" for package specifier key "${specifierKey}". ` +
-            `Package addresses must end with "/".`);
-        continue;
-      }
-
-      normalized[normalizedSpecifierKey] = addressURL;
-    } else {
+    if (typeof value !== 'string') {
       console.warn(`Invalid address ${JSON.stringify(value)} for the specifier key "${specifierKey}". ` +
           `Addresses must be strings.`);
+      continue;
     }
+
+    const addressURL = tryURLLikeSpecifierParse(value, baseURL);
+    if (addressURL === null) {
+      console.warn(`Invalid address "${value}" for the specifier key "${specifierKey}".`);
+      continue;
+    }
+
+    if (specifierKey.endsWith('/') && !addressURL.href.endsWith('/')) {
+      console.warn(`Invalid address "${addressURL.href}" for package specifier key "${specifierKey}". ` +
+          `Package addresses must end with "/".`);
+      continue;
+    }
+
+    normalized[normalizedSpecifierKey] = addressURL;
   }
 
   const sortedAndNormalized = {};

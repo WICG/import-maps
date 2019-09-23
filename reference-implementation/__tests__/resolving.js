@@ -219,4 +219,14 @@ describe('Mapped using the "imports" key only (no scopes)', () => {
       expect(() => resolveUnderTest('a/x/c')).toThrow(TypeError);
     });
   });
+
+  it('should deal with data: URL bases', () => {
+    const resolveUnderTest = makeResolveUnderTest(`{
+      "imports": {
+        "foo/": "data:text/javascript,foo/"
+      }
+    }`);
+
+    expect(() => resolveUnderTest('foo/bar')).toThrow(TypeError);
+});
 });
