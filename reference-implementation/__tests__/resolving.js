@@ -228,5 +228,5 @@ describe('Mapped using the "imports" key only (no scopes)', () => {
     }`);
 
     expect(() => resolveUnderTest('foo/bar')).toThrow(TypeError);
-});
+  });
 });

@@ -1,5 +1,4 @@
 'use strict';
-const { URL } = require('url');
 const assert = require('assert');
 const { tryURLLikeSpecifierParse, tryURLParse } = require('./utils.js');
 
