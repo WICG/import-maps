@@ -543,12 +543,17 @@ The primary challenges here are in achieving agreement about built-in modules on
 Several members of the community have been working on polyfills and tooling related to import maps. Here are the ones we know about:
 
 * [@import-maps/generate](https://www.npmjs.com/package/@import-maps/generate) generates an import map from your `yarn.lock`.
+* [@import-maps/resolve](https://www.npmjs.com/package/@import-maps/resolve) resolves a specifier relative to an import map.
 * [@jsenv/node-module-import-map](https://www.npmjs.com/package/@jsenv/node-module-import-map) generates an import map from your `package.json` and `node_modules/` directories.
-* [importly](https://www.npmjs.com/package/importly) generates an import map from a config file.
+* [@pika/web](https://www.npmjs.com/package/@pika/web) will output import maps as part of its larger build process for using modules on the web.
 * [Built-in Module Demo (with Rollup)](https://glitch.com/edit/#!/rollup-built-in-modules) contains code for a [Rollup](https://rollupjs.org/) plugin that generates an import map, focused on built-in module polyfills.
-* [SystemJS](https://github.com/systemjs/systemjs) provides a polyfill-like workflow for using import maps in older browsers with the System module format and `<script type="system-importmap">`.
-* [es-module-shims](https://github.com/guybedford/es-module-shims) provides an import maps polyfill for browsers with basic ES modules support.
 * [Deno](https://github.com/denoland/deno) is a JavaScript/TypeScript runtime with [built-in support for import maps](https://deno.land/manual.html#importmaps).
+* [es-dev-server](https://www.npmjs.com/package/es-dev-server) allows using import maps during development, including polyfills.
+* [es-module-shims](https://github.com/guybedford/es-module-shims) provides an import maps polyfill for browsers with basic ES modules support.
+* [import-map-overrides](https://www.npmjs.com/package/import-map-overrides) allows using import maps to improve development flow by pointing to local versions.
+* [importly](https://www.npmjs.com/package/importly) generates an import map from a `package.json`.
+* [SystemJS](https://github.com/systemjs/systemjs) provides a polyfill-like workflow for using import maps in older browsers with the System module format and `<script type="system-importmap">`.
+* [rollup-plugin-index-html](https://www.npmjs.com/package/rollup-plugin-index-html) is a [Rollup](https://rollupjs.org/) plugin for working with HTML files, which will use import maps that it finds in the HTML.
 
 Feel free to send a pull request with more! Also, you can use [#146](https://github.com/WICG/import-maps/issues/146) in the issue tracker for discussion about this space.
 
