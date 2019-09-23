@@ -33,6 +33,7 @@ _Or, how to control the behavior of JavaScript imports_
   - [Supplying out-of-band metadata for each module](#supplying-out-of-band-metadata-for-each-module)
 - [Further work](#further-work)
   - [Multiple import map support](#multiple-import-map-support)
+  - [Programmatic API](#programmatic-api)
   - [Fallback support](#fallback-support)
   - [`import:` URLs](#import-urls)
   - [`import.meta.resolve()`](#importmetaresolve)
@@ -503,15 +504,25 @@ It is natural for multiple `<script type="importmap">`s to appear on a page, jus
 
 The biggest challenge here is deciding how the multiple import maps compose. That is, given two import maps which both remap the same URL, or two scope definitions which cover the same URL prefix space, what should the affect on the page be? The current leading candidate is [cascading resolution](https://github.com/WICG/import-maps/issues/137), which recasts import maps from being import specifier → URL mappings, to instead be a cascading series of import specifier → import specifier mappings, eventually bottoming out in a "fetchable import specifier" (essentially a URL).
 
+See [these open issues](https://github.com/WICG/import-maps/milestone/5) for more discussion.
+
+### Programmatic API
+
+Some use cases desire a way of reading or manipulating a realm's import map from script, instead of via inserting declarative `<script type="importmap">` elements. Consider it an "import map object model", similar to the CSS object model that allows one to manipulate the page's usually-declarative CSS rules.
+
+The challenges here are around how to reconcile the declarative import maps with any programmatic changes, as well as when in the page's lifecycle such an API can operate. In general, the simpler designs are less powerful and may meet fewer use cases.
+
+See [these open issues](https://github.com/WICG/import-maps/milestone/8) for more discussion and use cases where a programmatic API could help.
+
 ### Fallback support
 
-It is possible to extend import maps such that instead of mapping from an import specifier to a single URL, they instead map to multiple URLs. Then, the first successfully-fetchable URL would be the result of the mapping. This enables fallback behavior, both for user-defined packages, and potentially for built-in modules. See [this section of a previous revision of the explainer](https://github.com/WICG/import-maps/tree/93f94c6dfb268bde3009644b65580fb2fbb98fcf#fallback-examples) for more examples and use cases.
+It is possible to extend import maps such that instead of mapping from an import specifier to a single URL, they instead map to multiple URLs. Then, the first successfully-fetchable URL would be the result of the mapping. This enables fallback behavior, both for user-defined packages, and potentially for built-in modules. See [this section of a previous revision of the explainer](https://github.com/WICG/import-maps/tree/93f94c6dfb268bde3009644b65580fb2fbb98fcf#fallback-examples) for more examples and use cases, and [these open issues](https://github.com/WICG/import-maps/milestone/6).
 
 The challenge with this is that it makes module resolution effectively network-dependent and asynchronous, instead of requiring a synchronous lookup in the import map structure. For fallbacks against built-in modules only, this can be sidestepped, since the user agent synchronously knows what built-in modules it implements. But for the more general case this complexity holds.
 
 ### `import:` URLs
 
-The `import:` URL scheme is envisioned as providing a way to access the import specifier mappings in URL contexts, not just import specifier contexts. This allows haring the notion of "import specifiers" between JavaScript importing contexts and traditional URL contexts, such as `fetch()`, `<img src="">` or `<link href="">`, so that those APIs can also benefit from the mapping and package abstractions. See [this section of a previous revision of the explainer](https://github.com/WICG/import-maps/tree/93f94c6dfb268bde3009644b65580fb2fbb98fcf#import-urls) for more examples and use cases.
+The `import:` URL scheme is envisioned as providing a way to access the import specifier mappings in URL contexts, not just import specifier contexts. This allows haring the notion of "import specifiers" between JavaScript importing contexts and traditional URL contexts, such as `fetch()`, `<img src="">` or `<link href="">`, so that those APIs can also benefit from the mapping and package abstractions. See [this section of a previous revision of the explainer](https://github.com/WICG/import-maps/tree/93f94c6dfb268bde3009644b65580fb2fbb98fcf#import-urls) for more examples and use cases, and [these open issues](https://github.com/WICG/import-maps/milestone/7).
 
 The biggest challenge here is that this would require rearchitecturing the import maps specification to operate on the general level of fetches and URL resolutions. Whereas, currently import maps only impact import specifier resolution, i.e., a specific phase of module script fetching. There are also challenges around the meaning of "relative `import:` URLs" such as `import:./a.mjs`, the origin of pages or workers loaded via `import:` URLs, and other interactions with loading infrastructure.
 
