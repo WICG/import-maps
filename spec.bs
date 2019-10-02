@@ -357,8 +357,7 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
     1. Return |url|.
   1. Let |url| be the result of [=URL parser|parsing=] |specifier| (with no base URL).
   1. If |url| is failure, then return null.
-  1. If |url|'s [=url/scheme=] is a [=fetch scheme=], then return |url|.
-  1. Return null.
+  1. Return |url|.
 </div>
 
 <div algorithm>
