@@ -18,16 +18,7 @@ exports.tryURLLikeSpecifierParse = (specifier, baseURL) => {
   }
 
   const url = exports.tryURLParse(specifier);
-
-  if (url === null) {
-    return null;
-  }
-
-  if (exports.hasFetchScheme(url)) {
-    return url;
-  }
-
-  return null;
+  return url;
 };
 
 exports.hasFetchScheme = url => {
