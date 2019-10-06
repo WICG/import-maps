@@ -69,7 +69,7 @@ describe('Absolute URL scope keys', () => {
         'blob:good',
         'data:good',
         'file:///good',
-        'filesystem:good',
+        'filesystem:http://example.com/good/',
         'http://good/',
         'https://good/',
         'ftp://good/',
@@ -84,7 +84,7 @@ describe('Absolute URL scope keys', () => {
         'blob:good',
         'data:good',
         'file:///good',
-        'filesystem:good',
+        'filesystem:http://example.com/good/',
         'http://good/',
         'https://good/',
         'ftp://good/'

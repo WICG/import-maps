@@ -87,7 +87,7 @@ describe('Absolute URL addresses', () => {
         "blob": "blob:good",
         "data": "data:good",
         "file": "file:///good",
-        "filesystem": "filesystem:good",
+        "filesystem": "filesystem:http://example.com/good/",
         "http": "http://good/",
         "https": "https://good/",
         "ftp": "ftp://good/",
@@ -102,7 +102,7 @@ describe('Absolute URL addresses', () => {
         blob: expect.toMatchURL('blob:good'),
         data: expect.toMatchURL('data:good'),
         file: expect.toMatchURL('file:///good'),
-        filesystem: expect.toMatchURL('filesystem:good'),
+        filesystem: expect.toMatchURL('filesystem:http://example.com/good/'),
         http: expect.toMatchURL('http://good/'),
         https: expect.toMatchURL('https://good/'),
         ftp: expect.toMatchURL('ftp://good/')
