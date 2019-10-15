@@ -53,7 +53,7 @@ summary {
 
 <h2 id="definitions">Definitions</h2>
 
-A <dfn>specifier map</dfn> is an [=ordered map=] from [=strings=] to [=lists=] of [=URLs=].
+A <dfn>specifier map</dfn> is an [=ordered map=] from [=strings=] to [=URLs=].
 
 A <dfn>import map</dfn> is a [=struct=] with two [=struct/items=]:
 
