@@ -1,9 +1,6 @@
 'use strict';
 const { URL } = require('url');
 
-// https://fetch.spec.whatwg.org/#fetch-scheme
-const FETCH_SCHEMES = new Set(['http', 'https', 'ftp', 'about', 'blob', 'data', 'file', 'filesystem']);
-
 exports.tryURLParse = (string, baseURL) => {
   try {
     return new URL(string, baseURL);
@@ -19,8 +16,4 @@ exports.tryURLLikeSpecifierParse = (specifier, baseURL) => {
 
   const url = exports.tryURLParse(specifier);
   return url;
-};
-
-exports.hasFetchScheme = url => {
-  return FETCH_SCHEMES.has(url.protocol.slice(0, -1));
 };
