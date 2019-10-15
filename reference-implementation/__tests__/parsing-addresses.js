@@ -105,14 +105,13 @@ describe('Absolute URL addresses', () => {
         filesystem: expect.toMatchURL('filesystem:good'),
         http: expect.toMatchURL('http://good/'),
         https: expect.toMatchURL('https://good/'),
-        ftp: expect.toMatchURL('ftp://good/')
+        ftp: expect.toMatchURL('ftp://good/'),
+        import: expect.toMatchURL('import:bad'),
+        javascript: expect.toMatchURL('javascript:bad'),
+        mailto: expect.toMatchURL('mailto:bad'),
+        wss: expect.toMatchURL('wss://bad/')
       },
-      [
-        `Invalid address "import:bad" for the specifier key "import".`,
-        `Invalid address "mailto:bad" for the specifier key "mailto".`,
-        `Invalid address "javascript:bad" for the specifier key "javascript".`,
-        `Invalid address "wss:bad" for the specifier key "wss".`
-      ]
+      []
     );
   });
 

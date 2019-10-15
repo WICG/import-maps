@@ -42,11 +42,11 @@ describe('Unmapped', () => {
     expect(resolveUnderTest('https://///example.com///')).toMatchURL('https://example.com///');
   });
 
-  it('should fail for absolute non-fetch-scheme URLs', () => {
-    expect(() => resolveUnderTest('mailto:bad')).toThrow(TypeError);
-    expect(() => resolveUnderTest('import:bad')).toThrow(TypeError);
-    expect(() => resolveUnderTest('javascript:bad')).toThrow(TypeError);
-    expect(() => resolveUnderTest('wss:bad')).toThrow(TypeError);
+  it('should parse absolute non-fetch-scheme URLs', () => {
+    expect(resolveUnderTest('mailto:bad')).toMatchURL('mailto:bad');
+    expect(resolveUnderTest('import:bad')).toMatchURL('import:bad');
+    expect(resolveUnderTest('javascript:bad')).toMatchURL('javascript:bad');
+    expect(resolveUnderTest('wss:bad')).toMatchURL('wss://bad/');
   });
 
   it('should fail for strings not parseable as absolute URLs and not starting with ./ ../ or /', () => {

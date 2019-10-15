@@ -76,7 +76,7 @@ describe('Relative URL-like specifier keys', () => {
 });
 
 describe('Absolute URL specifier keys', () => {
-  it('should only accept absolute URL specifier keys with fetch schemes, treating others as bare specifiers', () => {
+  it('Accept all absolute URL specifier keys even with fetch schemes as URLs', () => {
     expectSpecifierMap(
       `{
         "about:good": "/about",
@@ -105,7 +105,7 @@ describe('Absolute URL specifier keys', () => {
         'import:bad': expect.toMatchURL('https://base.example/import'),
         'mailto:bad': expect.toMatchURL('https://base.example/mailto'),
         'javascript:bad': expect.toMatchURL('https://base.example/javascript'),
-        'wss:bad': expect.toMatchURL('https://base.example/wss')
+        'wss://bad/': expect.toMatchURL('https://base.example/wss')
       }
     );
   });
