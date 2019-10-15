@@ -332,9 +332,6 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
     1. If |scopePrefixURL| is failure, then:
       1. [=Report a warning to the console=] that the scope prefix URL was not parseable.
       1. [=Continue=].
-    1. If |scopePrefixURL|'s [=url/scheme=] is not a [=fetch scheme=], then:
-      1. [=Report a warning to the console=] that scope prefix URLs must have a fetch scheme.
-      1. [=Continue=].
     1. Let |normalizedScopePrefix| be the [=URL serializer|serialization=] of |scopePrefixURL|.
     1. Set |normalized|[|normalizedScopePrefix|] to the result of [=sorting and normalizing a specifier map=] given |potentialSpecifierMap| and |baseURL|.
   1. Return the result of [=map/sorting=] |normalized|, with an entry |a| being less than an entry |b| if |b|'s [=map/key=] is [=code unit less than=] |a|'s [=map/key=].
