@@ -336,7 +336,7 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
   1. Return the result of [=map/sorting=] |normalized|, with an entry |a| being less than an entry |b| if |b|'s [=map/key=] is [=code unit less than=] |a|'s [=map/key=].
 </div>
 
-<div class="note">We sort keys/scopes in reverse order, to put `"foo/bar/"` before `"foo/"` so that `"foo/bar/"` has a higher priority than `"foo/"`.</div>
+<p class="note">We sort keys/scopes in reverse order, to put `"foo/bar/"` before `"foo/"` so that `"foo/bar/"` has a higher priority than `"foo/"`.</p>
 
 <div algorithm>
   To <dfn lt="normalize a specifier key|normalizing a specifier key">normalize a specifier key</dfn>, given a [=string=] |specifierKey| and a [=URL=] |baseURL|:
