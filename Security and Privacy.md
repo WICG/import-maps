@@ -12,7 +12,7 @@ No. This specification only deals with developer-supplied information, not user-
 
 **Does this specification deal with high-value data?**
 
-No, except insofar as developers who already have access to high-value data can choose to store that data in modules, and this affects how modules can be processed. For that, see the threat model discussion above.
+No, except insofar as developers who already have access to high-value data can choose to store that data in modules, and this affects how modules can be processed. For that, see the threat model discussion in the spec.
 
 **Does this specification introduce new state for an origin that persists across browsing sessions?**
 
@@ -26,13 +26,13 @@ No.
 
 No, is the plan.
 
-There are some open questions about the potential design of HTTPS → HTTPS fallback cases ([example such case](https://github.com/WICG/import-maps/blob/master/README.md#for-user-supplied-packages)), especially when combined with `import:` URLs in contexts like `<link>` or `<img>` that do not respect the same-origin policy. If specified and implemented naïvely, these could give rise to the ability to determine the network status of resources in ways that might be new. See more discussion in [#76](https://github.com/WICG/import-maps/issues/76).
+There are some open questions about the potential design of future work that leverages import maps to support HTTPS → HTTPS fallback cases ([see README for more detail](https://github.com/WICG/import-maps/blob/master/README.md#fallback-support)), especially when combined with another future feature, [`import:` URLs](https://github.com/WICG/import-maps/blob/master/README.md#import-urls), in contexts like `<link>` or `<img>` that do not respect the same-origin policy. If specified and implemented naïvely, these could give rise to the ability to determine the network status of resources in ways that might be new. See more discussion in [#76](https://github.com/WICG/import-maps/issues/76).
 
-However, we will be sure to solve this before finalizing any specification for these features. Note that both HTTPS → HTTPS fallback and `import:` URLs are "advanced" parts of import maps, that may not be part of initial implementations, per the ["Implementation notes" section of the README](./README.md#implementation-notes).
+However, we will be sure to solve this before finalizing any specification for these future features.
 
 **Does this specification enable new script execution/loading mechanisms?**
 
-Not really. This modifies the existing mechanism of JavaScript module imports, and makes [built-in modules](https://github.com/tc39/proposal-javascript-standard-library/) more feasible by allowing them to be polyfilled and virtualized. But it's all squarely inside the JavaScript module system.
+Not really. This modifies the existing mechanism of JavaScript module imports, but as discussed in the spec, it doesn't fundamentally change such loading, instead just providing a translation layer.
 
 **Does this specification allow an origin access to a user’s location?**
 
@@ -72,7 +72,7 @@ No, apart from via the HTTP cache.
 
 **Does this specification have a "Security Considerations" and "Privacy Considerations" section?**
 
-When we have a full specification, we'll be sure to include one, likely drawn from this document!
+[Yes](https://wicg.github.io/import-maps/#security-and-privacy).
 
 **Does this specification allow downgrading default security characteristics?**
 

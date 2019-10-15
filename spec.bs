@@ -421,18 +421,18 @@ Call sites will also need to be updated to account for [=resolve a module specif
 
 <h2 id="security-and-privacy">Security and Privacy</h2>
 
-<h3 id="threat-model">Threat models</h3>
+<h3 id="threat-models">Threat models</h3>
 
 <h4 id="comparison-with-first-party-scripts">Comparison with first-party scripts</h4>
 
-Import maps are explicitly designed to be installed by page authors, i.e. those who have the ability to run first-party scripts. (See the README's ["Scope" section](https://github.com/WICG/import-maps/blob/master/README.md#scope).)
+Import maps are explicitly designed to be installed by page authors, i.e. those who have the ability to run first-party scripts. (See the explainer's ["Scope" section](https://github.com/WICG/import-maps/blob/master/README.md#scope).)
 
-Although it may seem that the ability to change how resources are imported from JavaScript and the capability of rewriting rules are powerful, there is no extra power really granted here, compared with first-party scripts. That is, they only change things which the page author could change already, by manually editing their code to use different URLs, or by adding asynchronous try/catch fallback processing.
+Although it may seem that the ability to change how resources are imported from JavaScript and the capability of rewriting rules are powerful, there is no extra power really granted here, compared with first-party scripts. That is, they only change things which the page author could change already, by manually editing their code to use different URLs.
 
 We do still need to apply the traditional protections against first-party malicious actors, for example:
 
-- CSP to protect against injection vulnerabilities. (See [#105](https://github.com/WICG/import-maps/issues/105) for further discussion)
-- CORS and strict MIME type check ("`application/importmap+json`") are enforced for external import maps.
+- CSP to protect against injection vulnerabilities. (See [#105](https://github.com/WICG/import-maps/issues/105) for further discussion.)
+- CORS and strict MIME type checking (with a new MIME type, "`application/importmap+json`") for external import maps.
 
 But there is no fundamentally new capability introduced here, that needs new consideration.
 
@@ -440,21 +440,20 @@ But there is no fundamentally new capability introduced here, that needs new con
 
 On one hand, the ability of import maps to change how resources are imported looks similar to the ability of Service Workers to intercept and rewrite fetch requests.
 
-On the other hand, import maps have much more restricted scopes than Service Workers;
-import maps are not persistent, and an import map only affects the Document that installs the import map via `<script type="importmap">`.
+On the other hand, import maps have a much more restricted scope than Service Workers. Import maps are not persistent, and an import map only affects the document that installs the import map via `<script type="importmap">`.
 
 Therefore, the security restrictions applied to Service Workers (beyond those applied to first-party scripts), e.g. the same-origin/secure contexts requirements, are not applied to import maps.
 
 <h4 id="complexity">Time/memory complexity</h4>
 
-To avoid DOS attacks, explosive memory usage or so, import maps are designed to have reasonably bounded time and memory complexity in worst cases and not to be turing complete.
+To avoid denial of service attacks, explosive memory usage, and the like, import maps are designed to have reasonably bounded time and memory complexity in the worst cases, and to not be Turing complete.
 
 <h3 id="note-on-import-specifiers">A note on import specifiers</h3>
 
-The import specifiers that appear in `import` statements and `import()` expressions are not URLs, and should not be thought of as such.
+The import specifiers that appear in `import` statements and `import()` expressions are not [=URLs=], and should not be thought of as such.
 
-To date, there has been a of <a spec="html" data-lt="resolve a module specifier">default mechanism</a> for translating those strings into URLs. And indeed, some of the strings, such as `"https://example.com/foo.mjs"`, or `"./bar.mjs"`, might look URL-like; for those, the default translation does what you would expect.
+To date, there has been a <a spec="html" data-lt="resolve a module specifier">default mechanism</a> for translating those strings into URLs. And indeed, some of the strings, such as `"https://example.com/foo.mjs"`, or `"./bar.mjs"`, might look URL-like; for those, the default translation does what you would expect.
 
-In summary, one should not think of `import(x)` as corresponding to `fetch(x)`. Instead, the correspondence is to `fetch(translate(x))`, where the translation algorithm produces the actual URL to be fetched. In this framing, the way to think about import maps is as providing a mechanism for overriding the default mechanism, i.e. customizing the `translate()` function.
+But overall, one should not think of `import(x)` as corresponding to `fetch(x)`. Instead, the correspondence is to `fetch(translate(x))`, where the translation algorithm produces the actual URL to be fetched. In this framing, the way to think about import maps is as providing a mechanism for overriding the default mechanism, i.e. customizing the `translate()` function.
 
 This brings some clarity to some common security questions. For example: given an import map which maps the specifier `"https://1.example.com/foo.mjs"` to the URL `<https://2.example.com/bar.mjs>`, should we apply CSP checks to `<https://1.example.com/foo.mjs>` or to `<https://2.example.com/bar.mjs>`? With this framing we can see that we should apply the checks to the post-translation URL `<https://2.example.com/bar.mjs>` which is actually fetched, and not to the pre-translation `"https://1.example.com/foo.mjs"` module specifier.
