@@ -445,6 +445,10 @@ import maps are not persistent, and an import map only affects the Document that
 
 Therefore, the security restrictions applied to Service Workers (beyond those applied to first-party scripts), e.g. the same-origin/secure contexts requirements, are not applied to import maps.
 
+<h4 id="complexity">Time/memory complexity</h4>
+
+To avoid DOS attacks, explosive memory usage or so, import maps are designed to have reasonably bounded time and memory complexity in worst cases and not to be turing complete.
+
 <h3 id="note-on-import-specifiers">A note on import specifiers</h3>
 
 The import specifiers that appear in `import` statements and `import()` expressions are not URLs, and should not be thought of as such.
