@@ -1487,7 +1487,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Import Maps</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Draft Community Group Report, <time class="dt-updated" datetime="2019-10-14">14 October 2019</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Draft Community Group Report, <time class="dt-updated" datetime="2019-10-15">15 October 2019</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1540,6 +1540,18 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      <ol class="toc">
       <li><a href="#new-resolve-algorithm"><span class="secno">4.1</span> <span class="content">New "resolve a module specifier"</span></a>
       <li><a href="#resolving-updates"><span class="secno">4.2</span> <span class="content">Updates to other algorithms</span></a>
+     </ol>
+    <li>
+     <a href="#security-and-privacy"><span class="secno">5</span> <span class="content">Security and Privacy</span></a>
+     <ol class="toc">
+      <li>
+       <a href="#threat-models"><span class="secno">5.1</span> <span class="content">Threat models</span></a>
+       <ol class="toc">
+        <li><a href="#comparison-with-first-party-scripts"><span class="secno">5.1.1</span> <span class="content">Comparison with first-party scripts</span></a>
+        <li><a href="#comparison-with-service-workers"><span class="secno">5.1.2</span> <span class="content">Comparison with Service Workers</span></a>
+        <li><a href="#complexity"><span class="secno">5.1.3</span> <span class="content">Time/memory complexity</span></a>
+       </ol>
+      <li><a href="#note-on-import-specifiers"><span class="secno">5.2</span> <span class="content">A note on import specifiers</span></a>
      </ol>
     <li>
      <a href="#index"><span class="secno"></span> <span class="content">Index</span></a>
@@ -1675,6 +1687,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      </dl>
    </ul>
    <p class="note" role="note"> This is specified similar to the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#list-of-scripts-that-will-execute-in-order-as-soon-as-possible" id="ref-for-list-of-scripts-that-will-execute-in-order-as-soon-as-possible">list of scripts that will execute in order as soon as possible</a>. </p>
+   <p class="note" role="note"> CSPs are applied to inline import maps at Step 13 of <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#prepare-a-script" id="ref-for-prepare-a-script⑧">prepare a script</a>, and to external import maps in <a data-link-type="dfn" href="#fetch-an-import-map" id="ref-for-fetch-an-import-map①">fetch an import map</a>, just like applied to classic/module scripts. </p>
    <div class="algorithm" data-algorithm="fetch an import map">
      To <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="fetch-an-import-map">fetch an import map</dfn> given <var>url</var>, <var>settings object</var>, and <var>options</var>, run the following steps. This algorithm asynchronously returns an <a data-link-type="dfn" href="#import-map" id="ref-for-import-map⑤">import map</a> or null. 
     <p class="note" role="note">This algorithm is specified consistently with <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#fetch-a-single-module-script" id="ref-for-fetch-a-single-module-script">fetch a single module script</a> steps 5, 7, 8, 9, 10, and 12.1. Particularly, we enforce CORS to avoid leaking the import map contents that shouldn’t be accessed.</p>
@@ -2047,6 +2060,30 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      <p><a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#fetch-an-import()-module-script-graph" id="ref-for-fetch-an-import()-module-script-graph①">Fetch an import() module script graph</a> will also need to take a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-script" id="ref-for-concept-script⑥">script</a> instead of a base URL.</p>
    </ul>
    <p>Call sites will also need to be updated to account for <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier⑤">resolve a module specifier</a> now throwing exceptions, instead of returning failure. (Previously most call sites just turned failures into <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#exceptiondef-typeerror" id="ref-for-exceptiondef-typeerror⑤">TypeError</a></code>s manually, so this is straightforward.)</p>
+   <h2 class="heading settled" data-level="5" id="security-and-privacy"><span class="secno">5. </span><span class="content">Security and Privacy</span><a class="self-link" href="#security-and-privacy"></a></h2>
+   <h3 class="heading settled" data-level="5.1" id="threat-models"><span class="secno">5.1. </span><span class="content">Threat models</span><a class="self-link" href="#threat-models"></a></h3>
+   <h4 class="heading settled" data-level="5.1.1" id="comparison-with-first-party-scripts"><span class="secno">5.1.1. </span><span class="content">Comparison with first-party scripts</span><a class="self-link" href="#comparison-with-first-party-scripts"></a></h4>
+   <p>Import maps are explicitly designed to be installed by page authors, i.e. those who have the ability to run first-party scripts. (See the explainer’s <a href="https://github.com/WICG/import-maps/blob/master/README.md#scope">"Scope" section</a>.)</p>
+   <p>Although it may seem that the ability to change how resources are imported from JavaScript and the capability of rewriting rules are powerful, there is no extra power really granted here, compared with first-party scripts. That is, they only change things which the page author could change already, by manually editing their code to use different URLs.</p>
+   <p>We do still need to apply the traditional protections against first-party malicious actors, for example:</p>
+   <ul>
+    <li data-md>
+     <p>CSP to protect against injection vulnerabilities. (See <a href="https://github.com/WICG/import-maps/issues/105">#105</a> for further discussion.)</p>
+    <li data-md>
+     <p>CORS and strict MIME type checking (with a new MIME type, "<code>application/importmap+json</code>") for external import maps.</p>
+   </ul>
+   <p>But there is no fundamentally new capability introduced here, that needs new consideration.</p>
+   <h4 class="heading settled" data-level="5.1.2" id="comparison-with-service-workers"><span class="secno">5.1.2. </span><span class="content">Comparison with Service Workers</span><a class="self-link" href="#comparison-with-service-workers"></a></h4>
+   <p>On one hand, the ability of import maps to change how resources are imported looks similar to the ability of Service Workers to intercept and rewrite fetch requests.</p>
+   <p>On the other hand, import maps have a much more restricted scope than Service Workers. Import maps are not persistent, and an import map only affects the document that installs the import map via <code>&lt;script type="importmap"></code>.</p>
+   <p>Therefore, the security restrictions applied to Service Workers (beyond those applied to first-party scripts), e.g. the same-origin/secure contexts requirements, are not applied to import maps.</p>
+   <h4 class="heading settled" data-level="5.1.3" id="complexity"><span class="secno">5.1.3. </span><span class="content">Time/memory complexity</span><a class="self-link" href="#complexity"></a></h4>
+   <p>To avoid denial of service attacks, explosive memory usage, and the like, import maps are designed to have reasonably bounded time and memory complexity in the worst cases, and to not be Turing complete.</p>
+   <h3 class="heading settled" data-level="5.2" id="note-on-import-specifiers"><span class="secno">5.2. </span><span class="content">A note on import specifiers</span><a class="self-link" href="#note-on-import-specifiers"></a></h3>
+   <p>The import specifiers that appear in <code>import</code> statements and <code>import()</code> expressions are not <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url⑧">URLs</a>, and should not be thought of as such.</p>
+   <p>To date, there has been a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier⑥">default mechanism</a> for translating those strings into URLs. And indeed, some of the strings, such as <code>"https://example.com/foo.mjs"</code>, or <code>"./bar.mjs"</code>, might look URL-like; for those, the default translation does what you would expect.</p>
+   <p>But overall, one should not think of <code>import(x)</code> as corresponding to <code>fetch(x)</code>. Instead, the correspondence is to <code>fetch(translate(x))</code>, where the translation algorithm produces the actual URL to be fetched. In this framing, the way to think about import maps is as providing a mechanism for overriding the default mechanism, i.e. customizing the <code>translate()</code> function.</p>
+   <p>This brings some clarity to some common security questions. For example: given an import map which maps the specifier <code>"https://1.example.com/foo.mjs"</code> to the URL <code>&lt;https://2.example.com/bar.mjs></code>, should we apply CSP checks to <code>&lt;https://1.example.com/foo.mjs></code> or to <code>&lt;https://2.example.com/bar.mjs></code>? With this framing we can see that we should apply the checks to the post-translation URL <code>&lt;https://2.example.com/bar.mjs></code> which is actually fetched, and not to the pre-translation <code>"https://1.example.com/foo.mjs"</code> module specifier.</p>
   </main>
 <script>
 (function() {
@@ -2494,7 +2531,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <a href="https://html.spec.whatwg.org/multipage/scripting.html#prepare-a-script">https://html.spec.whatwg.org/multipage/scripting.html#prepare-a-script</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-prepare-a-script">2.2. Script type</a> <a href="#ref-for-prepare-a-script①">(2)</a>
-    <li><a href="#ref-for-prepare-a-script②">2.3. Prepare a script</a> <a href="#ref-for-prepare-a-script③">(2)</a> <a href="#ref-for-prepare-a-script④">(3)</a> <a href="#ref-for-prepare-a-script⑤">(4)</a> <a href="#ref-for-prepare-a-script⑥">(5)</a> <a href="#ref-for-prepare-a-script⑦">(6)</a>
+    <li><a href="#ref-for-prepare-a-script②">2.3. Prepare a script</a> <a href="#ref-for-prepare-a-script③">(2)</a> <a href="#ref-for-prepare-a-script④">(3)</a> <a href="#ref-for-prepare-a-script⑤">(4)</a> <a href="#ref-for-prepare-a-script⑥">(5)</a> <a href="#ref-for-prepare-a-script⑦">(6)</a> <a href="#ref-for-prepare-a-script⑧">(7)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-queue-a-task">
@@ -2520,6 +2557,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <ul>
     <li><a href="#ref-for-resolve-a-module-specifier②">4.1. New "resolve a module specifier"</a>
     <li><a href="#ref-for-resolve-a-module-specifier③">4.2. Updates to other algorithms</a>
+    <li><a href="#ref-for-resolve-a-module-specifier⑥">5.2. A note on import specifiers</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-script">
@@ -2708,6 +2746,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <ul>
     <li><a href="#ref-for-concept-url">1. Definitions</a> <a href="#ref-for-concept-url①">(2)</a>
     <li><a href="#ref-for-concept-url②">3. Parsing import maps</a> <a href="#ref-for-concept-url③">(2)</a> <a href="#ref-for-concept-url④">(3)</a> <a href="#ref-for-concept-url⑤">(4)</a> <a href="#ref-for-concept-url⑥">(5)</a> <a href="#ref-for-concept-url⑦">(6)</a>
+    <li><a href="#ref-for-concept-url⑧">5.2. A note on import specifiers</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-url-parser">
@@ -2985,7 +3024,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
   <aside class="dfn-panel" data-for="fetch-an-import-map">
    <b><a href="#fetch-an-import-map">#fetch-an-import-map</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-fetch-an-import-map">2.3. Prepare a script</a>
+    <li><a href="#ref-for-fetch-an-import-map">2.3. Prepare a script</a> <a href="#ref-for-fetch-an-import-map①">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="wait-for-import-maps">
