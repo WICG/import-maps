@@ -71,7 +71,7 @@ function sortAndNormalizeSpecifierMap(obj, baseURL) {
   }
 
   const sortedAndNormalized = {};
-  const sortedKeys = Object.keys(normalized).sort(longerLengthThenCodeUnitOrder);
+  const sortedKeys = Object.keys(normalized).sort((a, b) => codeUnitCompare(b, a));
   for (const key of sortedKeys) {
     sortedAndNormalized[key] = normalized[key];
   }
@@ -102,7 +102,7 @@ function sortAndNormalizeScopes(obj, baseURL) {
   }
 
   const sortedAndNormalized = {};
-  const sortedKeys = Object.keys(normalized).sort(longerLengthThenCodeUnitOrder);
+  const sortedKeys = Object.keys(normalized).sort((a, b) => codeUnitCompare(b, a));
   for (const key of sortedKeys) {
     sortedAndNormalized[key] = normalized[key];
   }
@@ -129,16 +129,16 @@ function isJSONObject(value) {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function longerLengthThenCodeUnitOrder(a, b) {
-  return compare(b.length, a.length) || compare(a, b);
-}
-
-function compare(a, b) {
+function codeUnitCompare(a, b) {
   if (a > b) {
     return 1;
   }
+
+  /* istanbul ignore else */
   if (b > a) {
     return -1;
   }
-  return 0;
+
+  /* istanbul ignore next */
+  throw new Error('This should never be reached because this is only used on JSON object keys');
 }

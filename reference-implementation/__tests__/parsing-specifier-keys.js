@@ -135,4 +135,30 @@ describe('Absolute URL specifier keys', () => {
       }
     );
   });
+
+  it('should sort correctly (issue #181)', () => {
+    expectSpecifierMap(
+      `{
+        "https://example.com/aaa": "https://example.com/aaa",
+        "https://example.com/a": "https://example.com/a"
+      }`,
+      'https://base.example/',
+      {
+        'https://example.com/aaa': expect.toMatchURL('https://example.com/aaa'),
+        'https://example.com/a': expect.toMatchURL('https://example.com/a')
+      }
+    );
+
+    expectSpecifierMap(
+      `{
+        "https://example.com/a": "https://example.com/a",
+        "https://example.com/aaa": "https://example.com/aaa"
+      }`,
+      'https://base.example/',
+      {
+        'https://example.com/aaa': expect.toMatchURL('https://example.com/aaa'),
+        'https://example.com/a': expect.toMatchURL('https://example.com/a')
+      }
+    );
+  });
 });
