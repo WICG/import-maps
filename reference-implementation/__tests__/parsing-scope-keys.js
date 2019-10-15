@@ -92,9 +92,8 @@ describe('Absolute URL scope keys', () => {
         'mailto:bad',
         'javascript:bad',
         'wss://ba/'
-       ],
-      [
-      ]
+      ],
+      []
     );
   });
 
