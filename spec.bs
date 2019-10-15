@@ -163,6 +163,10 @@ Inside the <a spec="html">prepare a script</a> algorithm, we make the following 
   This is specified similar to the <a spec="html">list of scripts that will execute in order as soon as possible</a>.
 </p>
 
+<p class="note">
+  CSPs are applied to inline import maps at Step 13 of <a spec="html">prepare a script</a>, and to external import maps in [=fetch an import map=], just like applied to classic/module scripts.
+</p>
+
 </div>
 
 <div algorithm>
@@ -419,9 +423,27 @@ Call sites will also need to be updated to account for [=resolve a module specif
 
 <h3 id="threat-model">Threat models</h3>
 
-Import maps are explicitly designed to be installed by page authors, i.e. those who have the ability to run first-party scripts. (See the README's ["Scope" section](https://github.com/WICG/import-maps/blob/master/README.md#scope).) Although it may seem that the ability to change how resources are imported from JavaScript is powerful, there is no extra power really granted here. That is, they only change things which the page author could change already, by manually editing their code to use different URLs, or by adding asynchronous try/catch fallback processing.
+<h4 id="comparison-with-first-party-scripts">Comparison with first-party scripts</h4>
 
-We do still need to apply the traditional protections against first-party malicious actors, e.g. CSP to protect against injection vulnerabilities. (See [#105](https://github.com/WICG/import-maps/issues/105) for further discussion.) But there is no fundamentally new capability introduced here, that needs new consideration.
+Import maps are explicitly designed to be installed by page authors, i.e. those who have the ability to run first-party scripts. (See the README's ["Scope" section](https://github.com/WICG/import-maps/blob/master/README.md#scope).)
+
+Although it may seem that the ability to change how resources are imported from JavaScript and the capability of rewriting rules are powerful, there is no extra power really granted here, compared with first-party scripts. That is, they only change things which the page author could change already, by manually editing their code to use different URLs, or by adding asynchronous try/catch fallback processing.
+
+We do still need to apply the traditional protections against first-party malicious actors, for example:
+
+- CSP to protect against injection vulnerabilities. (See [#105](https://github.com/WICG/import-maps/issues/105) for further discussion)
+- CORS and strict MIME type check ("`application/importmap+json`") are enforced for external import maps.
+
+But there is no fundamentally new capability introduced here, that needs new consideration.
+
+<h4 id="comparison-with-service-workers">Comparison with Service Workers</h4>
+
+On one hand, the ability of import maps to change how resources are imported looks similar to the ability of Service Workers to intercept and rewrite fetch requests.
+
+On the other hand, import maps have much more restricted scopes than Service Workers;
+import maps are not persistent, and an import map only affects the Document that installs the import map via `<script type="importmap">`.
+
+Therefore, the security restrictions applied to Service Workers (beyond those applied to first-party scripts), e.g. the same-origin/secure contexts requirements, are not applied to import maps.
 
 <h3 id="note-on-import-specifiers">A note on import specifiers</h3>
 
