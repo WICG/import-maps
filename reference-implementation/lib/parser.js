@@ -1,6 +1,6 @@
 'use strict';
 const assert = require('assert');
-const { tryURLParse, hasFetchScheme, tryURLLikeSpecifierParse } = require('./utils.js');
+const { tryURLParse, tryURLLikeSpecifierParse } = require('./utils.js');
 
 exports.parseFromString = (input, baseURL) => {
   const parsed = JSON.parse(input);
@@ -89,11 +89,6 @@ function sortAndNormalizeScopes(obj, baseURL) {
     const scopePrefixURL = tryURLParse(scopePrefix, baseURL);
     if (scopePrefixURL === null) {
       console.warn(`Invalid scope "${scopePrefix}" (parsed against base URL "${baseURL}").`);
-      continue;
-    }
-
-    if (!hasFetchScheme(scopePrefixURL)) {
-      console.warn(`Invalid scope "${scopePrefixURL}". Scope URLs must have a fetch scheme.`);
       continue;
     }
 
