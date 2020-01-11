@@ -552,7 +552,7 @@ Several members of the community have been working on polyfills and tooling rela
 * [es-module-shims](https://github.com/guybedford/es-module-shims) provides an import maps polyfill for browsers with basic ES modules support.
 * [import-map-overrides](https://www.npmjs.com/package/import-map-overrides) allows using import maps to improve development flow by pointing to local versions.
 * [importly](https://www.npmjs.com/package/importly) generates an import map from a `package.json`.
-* [SystemJS](https://github.com/systemjs/systemjs) provides a polyfill-like workflow for using import maps in older browsers with the System module format and `<script type="system-importmap">`.
+* [SystemJS](https://github.com/systemjs/systemjs) provides a polyfill-like workflow for using import maps in older browsers with the System module format and `<script type="systemjs-importmap">`.
 * [rollup-plugin-index-html](https://www.npmjs.com/package/rollup-plugin-index-html) is a [Rollup](https://rollupjs.org/) plugin for working with HTML files, which will use import maps that it finds in the HTML.
 
 Feel free to send a pull request with more! Also, you can use [#146](https://github.com/WICG/import-maps/issues/146) in the issue tracker for discussion about this space.
