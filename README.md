@@ -530,7 +530,7 @@ The biggest challenge here is that this would require rearchitecturing the impor
 
 The proposed `import.meta.resolve(specifier)` function serves a similar purpose to `import:` URLs, extending the applicability of import specifiers beyond just `import` statements and `import()` expressions. It allows module scripts to resolve import specifiers to URLs at any time.
 
-The challenges with this proposal are intimately tied up with [fallback support](#fallback-support). In particular, if fallbacks make the module resolution process synchronous, then `import.meta.resolve()` cannot be a simple string-returning function as one might expect. See more discussion in [#79](https://github.com/WICG/import-maps/issues/79).
+The challenges with this proposal are intimately tied up with [fallback support](#fallback-support). In particular, if fallbacks make the module resolution process asynchronous, then `import.meta.resolve()` cannot be a simple string-returning function as one might expect. See more discussion in [#79](https://github.com/WICG/import-maps/issues/79).
 
 ### Built-in module remapping
 
