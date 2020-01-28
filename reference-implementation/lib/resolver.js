@@ -34,11 +34,19 @@ function resolveImportsMatch(normalizedSpecifier, specifierMap) {
   for (const [specifierKey, address] of Object.entries(specifierMap)) {
     // Exact-match case
     if (specifierKey === normalizedSpecifier) {
-      return address;
+      if (address === null) {
+        throw new TypeError(`Blocked by a null entry for "${specifierKey}"`);
+      } else {
+        return address;
+      }
     }
 
     // Package prefix-match case
-    if (specifierKey.endsWith('/') && normalizedSpecifier.startsWith(specifierKey)) {
+    else if (specifierKey.endsWith('/') && normalizedSpecifier.startsWith(specifierKey)) {
+      if (address === null) {
+        throw new TypeError(`Blocked by a null entry for "${specifierKey}"`);
+      }
+
       const afterPrefix = normalizedSpecifier.substring(specifierKey.length);
 
       // Enforced by parsing
@@ -48,7 +56,7 @@ function resolveImportsMatch(normalizedSpecifier, specifierMap) {
 
       // This code looks stupid but it follows the spec more exactly and also gives code coverage a chance to shine.
       if (url === null) {
-        return null;
+        throw new TypeError(`Failed to resolve prefix-match relative URL for "${specifierKey}"`);
       }
       return url;
     }

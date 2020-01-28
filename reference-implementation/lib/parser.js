@@ -52,18 +52,21 @@ function sortAndNormalizeSpecifierMap(obj, baseURL) {
     if (typeof value !== 'string') {
       console.warn(`Invalid address ${JSON.stringify(value)} for the specifier key "${specifierKey}". ` +
           `Addresses must be strings.`);
+      normalized[normalizedSpecifierKey] = null;
       continue;
     }
 
     const addressURL = tryURLLikeSpecifierParse(value, baseURL);
     if (addressURL === null) {
       console.warn(`Invalid address "${value}" for the specifier key "${specifierKey}".`);
+      normalized[normalizedSpecifierKey] = null;
       continue;
     }
 
     if (specifierKey.endsWith('/') && !addressURL.href.endsWith('/')) {
       console.warn(`Invalid address "${addressURL.href}" for package specifier key "${specifierKey}". ` +
           `Package addresses must end with "/".`);
+      normalized[normalizedSpecifierKey] = null;
       continue;
     }
 

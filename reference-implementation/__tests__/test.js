@@ -16,6 +16,7 @@ for (const jsonFile of [
   'parsing-scope-keys.json',
   'parsing-specifier-keys.json',
   'parsing-trailing-slashes.json',
+  'resolving-null.json',
   'scopes-exact-vs-prefix.json',
   'scopes.json',
   'tricky-specifiers.json',
