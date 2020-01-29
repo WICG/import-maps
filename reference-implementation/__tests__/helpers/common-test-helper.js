@@ -4,16 +4,17 @@ const { URL } = require('url');
 const { parseFromString } = require('../../lib/parser.js');
 const { resolve } = require('../../lib/resolver.js');
 
-function assert_no_extra_properties(object, expectedProperties, description) {
+function assertNoExtraProperties(object, expectedProperties, description) {
   for (const actualProperty in object) {
     assert(
       expectedProperties.indexOf(actualProperty) !== -1,
-      description + ": unexpected property " + actualProperty);
+      description + ': unexpected property ' + actualProperty
+    );
   }
 }
 
-function assert_own_property(j, name) {
-  assert(j.hasOwnProperty(name));
+function assertOwnProperty(j, name) {
+  assert(name in j);
 }
 
 // Parsed import maps in the reference implementation uses `URL`s instead of
@@ -22,12 +23,14 @@ function assert_own_property(j, name) {
 // This function converts `m` (expected import maps or its part)
 // into URL-based, for comparison.
 function replaceStringWithURL(m) {
-  if (typeof m === 'string')
+  if (typeof m === 'string') {
     return new URL(m);
-  if (m == null || typeof m !== 'object')
+  }
+  if (m === null || typeof m !== 'object') {
     return m;
+  }
 
-  let result = {};
+  const result = {};
   for (const key in m) {
     result[key] = replaceStringWithURL(m[key]);
   }
@@ -35,16 +38,17 @@ function replaceStringWithURL(m) {
 }
 
 function runTests(j) {
-  const tests = j.tests;
+  const { tests } = j;
   delete j.tests;
 
-  if (j.hasOwnProperty('importMap')) {
-    assert_own_property(j, 'importMap');
-    assert_own_property(j, 'importMapBaseURL');
+  if ('importMap' in j) {
+    assertOwnProperty(j, 'importMap');
+    assertOwnProperty(j, 'importMapBaseURL');
     try {
       j.parsedImportMap = parseFromString(
         JSON.stringify(j.importMap),
-        new URL(j.importMapBaseURL));
+        new URL(j.importMapBaseURL)
+      );
     } catch (e) {
       j.parsedImportMap = e;
     }
@@ -52,13 +56,16 @@ function runTests(j) {
     delete j.importMapBaseURL;
   }
 
-  assert_no_extra_properties(
-      j,
-      ['expectedResults', 'expectedParsedImportMap',
+  assertNoExtraProperties(
+    j,
+    [
+      'expectedResults', 'expectedParsedImportMap',
       'baseURL', 'name', 'parsedImportMap',
       'importMap', 'importMapBaseURL',
-      'link', 'details'],
-      j.name);
+      'link', 'details'
+    ],
+    j.name
+  );
 
   if (tests) {
     // Nested node.
@@ -74,18 +81,20 @@ function runTests(j) {
   } else {
     // Leaf node.
     for (const key of ['parsedImportMap', 'name']) {
-      assert_own_property(j, key, j.name);
+      assertOwnProperty(j, key, j.name);
     }
-    assert(j.hasOwnProperty('expectedResults') ||
-           j.hasOwnProperty('expectedParsedImportMap'),
-           'expectedResults or expectedParsedImportMap should exist');
+    assert(
+      'expectedResults' in j ||
+           'expectedParsedImportMap' in j,
+      'expectedResults or expectedParsedImportMap should exist'
+    );
 
     // Resolution tests.
-    if (j.hasOwnProperty('expectedResults')) {
+    if ('expectedResults' in j) {
       it(j.name, () => {
-        assert_own_property(j, 'baseURL');
+        assertOwnProperty(j, 'baseURL');
         describe(
-          "Import map registration should be successful for resolution tests",
+          'Import map registration should be successful for resolution tests',
           () => {
             expect(j.parsedImportMap).not.toBeInstanceOf(Error);
           }
@@ -104,7 +113,7 @@ function runTests(j) {
     }
 
     // Parsing tests.
-    if (j.hasOwnProperty('expectedParsedImportMap')) {
+    if ('expectedParsedImportMap' in j) {
       it(j.name, () => {
         if (j.expectedParsedImportMap === null) {
           expect(j.parsedImportMap).toBeInstanceOf(TypeError);
@@ -115,6 +124,6 @@ function runTests(j) {
       });
     }
   }
-};
+}
 
 exports.runTests = runTests;

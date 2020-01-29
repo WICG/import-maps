@@ -19,10 +19,10 @@ for (const jsonFile of [
   'scopes-exact-vs-prefix.json',
   'scopes.json',
   'tricky-specifiers.json',
-  'url-specifiers.json',
+  'url-specifiers.json'
 ]) {
   describe(jsonFile, () => {
-    const j = require('./json/' + jsonFile);
+    const j = require('./json/' + jsonFile); // eslint-disable-line global-require
     runTests(j);
   });
 }
