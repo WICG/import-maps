@@ -21,6 +21,8 @@ for (const jsonFile of [
   'tricky-specifiers.json',
   'url-specifiers.json',
 ]) {
-  const j = require('./json/' + jsonFile);
-  runTests(j);
+  describe(jsonFile, () => {
+    const j = require('./json/' + jsonFile);
+    runTests(j);
+  });
 }

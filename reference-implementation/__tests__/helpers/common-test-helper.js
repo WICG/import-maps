@@ -24,7 +24,7 @@ function assert_own_property(j, name) {
 function replaceStringWithURL(m) {
   if (typeof m === 'string')
     return new URL(m);
-  if (typeof m !== 'object')
+  if (m == null || typeof m !== 'object')
     return m;
 
   let result = {};
