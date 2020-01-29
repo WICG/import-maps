@@ -53,7 +53,13 @@ summary {
 
 <h2 id="definitions">Definitions</h2>
 
-A <dfn>specifier map</dfn> is an [=ordered map=] from [=strings=] to [=URLs=].
+A <dfn>resolution result</dfn> is either
+
+* a [=URL=] on success,
+* Fallback, which indicates the resolution algorithm should proceed to next candidates (less specific prefixes, less specific scopes, etc.), or
+* Block, which indicates the resolution algorithm should fail immediately without any fallbacks.
+
+A <dfn>specifier map</dfn> is an [=ordered map=] from [=strings=] to [=resolution results=].
 
 A <dfn>import map</dfn> is a [=struct=] with two [=struct/items=]:
 
@@ -310,13 +316,16 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
     1. If |normalizedSpecifierKey| is null, then [=continue=].
     1. If |value| is not a [=string=], then:
       1. [=Report a warning to the console=] that addresses must be strings.
+      1. Set |normalized|[|specifierKey|] to Block.
       1. [=Continue=].
     1. Let |addressURL| be the result of [=parsing a URL-like import specifier=] given |value| and |baseURL|.
     1. If |addressURL| is null, then:
       1. [=Report a warning to the console=] that the address was invalid.
+      1. Set |normalized|[|specifierKey|] to Block.
       1. [=Continue=].
     1. If |specifierKey| ends with U+002F (/), and the [=URL serializer|serialization=] of |addressURL| does not end with U+002F (/), then:
       1. [=Report a warning to the console=] that an invalid address was given for the specifier key |specifierKey|; since |specifierKey| ended in a slash, so must the address.
+      1. Set |normalized|[|specifierKey|] to Block.
       1. [=Continue=].
     1. Set |normalized|[|specifierKey|] to |addressURL|.
   1. Return the result of [=map/sorting=] |normalized|, with an entry |a| being less than an entry |b| if |b|'s [=map/key=] is [=code unit less than=] |a|'s [=map/key=].
@@ -393,15 +402,22 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
 <div algorithm>
   To <dfn lt="resolve an imports match|resolving an imports match">resolve an imports match</dfn>, given a [=string=] |normalizedSpecifier| and a [=specifier map=] |specifierMap|:
 
-  1. For each |specifierKey| → |address| of |specifierMap|,
-    1. If |specifierKey| is |normalizedSpecifier|, then return |address|.
-    1. If |specifierKey| ends with U+002F (/) and |normalizedSpecifier| [=/starts with=] |specifierKey|, then:
-      1. Let |afterPrefix| be the portion of |normalizedSpecifier| after the initial |specifierKey| prefix.
-      1. Assert: |afterPrefix| ends with "`/`", as enforced during [=parse an import map string|parsing=].
-      1. Let |url| be the result of [=URL parser|parsing=] |afterPrefix| relative to the base URL |address|.
-      1. If |url| is failure, then return null.
-      1. Return |url|.
+
+  1. For each |specifierKey| → |value| of |specifierMap|,
+    1. Let |resolutionResult| be Fallback.
+    1. If |specifierKey| is |normalizedSpecifier|, then set |resolutionResult| to |value|.
+    1. Else if |specifierKey| ends with U+002F (/) and |normalizedSpecifier| [=/starts with=] |specifierKey|, then:
+      1. If |value| is an [=URL=]:
+        1. Let |afterPrefix| be the portion of |normalizedSpecifier| after the initial |specifierKey| prefix.
+        1. Assert: |afterPrefix| ends with "`/`", as enforced during [=parse an import map string|parsing=].
+        1. Let |url| be the result of [=URL parser|parsing=] |afterPrefix| relative to the base URL |value|.
+        1. If |url| is failure, then set |resolutionResult| to Block. Otherwise, set |resolutionResult| to |url|.
+      1. Otherwise, set |resolutionResult| to |value|.
+    1. If |resolutionResult| is an [=URL=], then |resolutionResult|.
+       If |resolutionResult| is Block, then throw a {{TypeError}} indicating that resolution of |specifierKey| was blocked by an entry in an import map.
+       <p class="note">Otherwise, |resolutionResult| is Fallback, and the algorithm continues to the next entry.</p>
   1. Return null.
+     <p class="note">The caller will fallback to less specific scopes etc., if any.</p>
 </div>
 
 <h3 id="resolving-updates">Updates to other algorithms</h3>
