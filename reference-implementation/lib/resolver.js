@@ -32,17 +32,15 @@ exports.resolve = (specifier, parsedImportMap, scriptURL) => {
 
 function resolveImportsMatch(normalizedSpecifier, specifierMap) {
   for (const [specifierKey, address] of Object.entries(specifierMap)) {
-    // Exact-match case
     if (specifierKey === normalizedSpecifier) {
+      // Exact-match case
       if (address === null) {
         throw new TypeError(`Blocked by a null entry for "${specifierKey}"`);
       } else {
         return address;
       }
-    }
-
-    // Package prefix-match case
-    else if (specifierKey.endsWith('/') && normalizedSpecifier.startsWith(specifierKey)) {
+    } else if (specifierKey.endsWith('/') && normalizedSpecifier.startsWith(specifierKey)) {
+      // Package prefix-match case
       if (address === null) {
         throw new TypeError(`Blocked by a null entry for "${specifierKey}"`);
       }
