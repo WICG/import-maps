@@ -52,7 +52,6 @@ function resolveImportsMatch(normalizedSpecifier, specifierMap) {
 
       const url = tryURLParse(afterPrefix, address);
 
-      // This code looks stupid but it follows the spec more exactly and also gives code coverage a chance to shine.
       if (url === null) {
         throw new TypeError(`Failed to resolve prefix-match relative URL for "${specifierKey}"`);
       }
