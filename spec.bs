@@ -371,13 +371,11 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
 <h2 id="resolving">Resolving module specifiers</h2>
 
 <div class="note">
-During [=resolve a module specifier|resolving a module specifier=], the following algorithms check candidate entries of [=specifier maps=], from most-specific to least-specific scopes and to top-level "`imports`", from most-specific to least-specific prefixes.
-For each entry, the result is one of the following:
+  During [=resolve a module specifier|resolving a module specifier=], the following algorithms check candidate entries of [=specifier maps=], from most-specific to least-specific scopes (falling back to top-level "`imports`"), and from most-specific to least-specific prefixes. For each candidate, the result is one of the following:
 
-  - Successfully resolves a specifier to a [=URL=].
-    This makes the [=resolve a module specifier=] algorithm return immediately successfully with the [=URL=].
-  - Throws an error.
-    This makes the [=resolve a module specifier=] algorithm fail immediately, i.e. throw the error, without any further fallbacks.
+  - Successfully resolves a specifier to a [=URL=]. This makes the [=resolve a module specifier=] algorithm immediately return that [=URL=].
+  - Throws an error. This makes the [=resolve a module specifier=] algorithm rethrow the error, without any further fallbacks.
+  - Fail to resolve, without an error. In this case the algorithm moves on to the next candidate.
 </div>
 
 <h3 id="new-resolve-algorithm">New "resolve a module specifier"</h3>
@@ -408,22 +406,21 @@ For each entry, the result is one of the following:
 <div algorithm>
   To <dfn lt="resolve an imports match|resolving an imports match">resolve an imports match</dfn>, given a [=string=] |normalizedSpecifier| and a [=specifier map=] |specifierMap|:
 
-
   1. For each |specifierKey| → |value| of |specifierMap|,
     1. If |specifierKey| is |normalizedSpecifier|, then set |resolutionResult| to |value|.
-    1. Else if |specifierKey| ends with U+002F (/) and |normalizedSpecifier| [=/starts with=] |specifierKey|, then:
+    1. Otherwise, if |specifierKey| ends with U+002F (/) and |normalizedSpecifier| [=/starts with=] |specifierKey|, then:
       1. If |value| is a [=URL=]:
         1. Let |afterPrefix| be the portion of |normalizedSpecifier| after the initial |specifierKey| prefix.
         1. Assert: |afterPrefix| ends with "`/`", as enforced during [=parse an import map string|parsing=].
         1. Let |url| be the result of [=URL parser|parsing=] |afterPrefix| relative to the base URL |value|.
         1. If |url| is failure, then set |resolutionResult| to null. Otherwise, set |resolutionResult| to |url|.
-      1. Otherwise, set |resolutionResult| to |value|.
-    1. Else, continue.
-    1. If |resolutionResult| is an [=URL=], then return |resolutionResult|.
-    1. Otherwise (i.e. |resolutionResult| is null), then throw a {{TypeError}} indicating that resolution of |specifierKey| was blocked by an entry in an import map.
-       <p class="note">This terminates the entire [=resolve a module specifier=] algorithm, without any further fallbacks.</p>
+      1. Otherwise (i.e., if |value| is null), set |resolutionResult| to null.
+    1. Otherwise, [=continue=].
+    1. If |resolutionResult| is a [=URL=], then return |resolutionResult|.
+    1. Otherwise (i.e. |resolutionResult| is null), throw a {{TypeError}} indicating that resolution of |specifierKey| was blocked by an entry in an import map.
+       <p class="note">This will terminate the entire [=resolve a module specifier=] algorithm, without any further fallbacks.</p>
   1. Return null.
-     <p class="note">The caller will fallback to less specific scopes or to "`imports`", if any.</p>
+     <p class="note">The [=resolve a module specifier=] algorithm will fallback to a less specific scope or to "`imports`", if possible.</p>
 </div>
 
 <h3 id="resolving-updates">Updates to other algorithms</h3>
