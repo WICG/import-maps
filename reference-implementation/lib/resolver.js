@@ -52,7 +52,7 @@ function resolveImportsMatch(normalizedSpecifier, specifierMap) {
       const url = tryURLParse(afterPrefix, resolutionResult);
 
       if (url === null) {
-        throw new TypeError(`Failed to resolve prefix-match relative URL for "${specifierKey}" due to a URL parse failure`);
+        throw new TypeError(`Failed to resolve prefix-match relative URL for "${specifierKey}"`);
       }
       return url;
     }
