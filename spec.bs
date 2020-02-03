@@ -406,19 +406,23 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
 <div algorithm>
   To <dfn lt="resolve an imports match|resolving an imports match">resolve an imports match</dfn>, given a [=string=] |normalizedSpecifier| and a [=specifier map=] |specifierMap|:
 
-  1. For each |specifierKey| → |value| of |specifierMap|,
-    1. If |specifierKey| is |normalizedSpecifier|, then set |resolutionResult| to |value|.
-    1. Otherwise, if |specifierKey| ends with U+002F (/) and |normalizedSpecifier| [=/starts with=] |specifierKey|, then:
-      1. If |value| is a [=URL=]:
-        1. Let |afterPrefix| be the portion of |normalizedSpecifier| after the initial |specifierKey| prefix.
-        1. Assert: |afterPrefix| ends with "`/`", as enforced during [=parse an import map string|parsing=].
-        1. Let |url| be the result of [=URL parser|parsing=] |afterPrefix| relative to the base URL |value|.
-        1. If |url| is failure, then set |resolutionResult| to null. Otherwise, set |resolutionResult| to |url|.
-      1. Otherwise (i.e., if |value| is null), set |resolutionResult| to null.
-    1. Otherwise, [=continue=].
-    1. If |resolutionResult| is a [=URL=], then return |resolutionResult|.
-    1. Otherwise (i.e. |resolutionResult| is null), throw a {{TypeError}} indicating that resolution of |specifierKey| was blocked by an entry in an import map.
-       <p class="note">This will terminate the entire [=resolve a module specifier=] algorithm, without any further fallbacks.</p>
+  1. For each |specifierKey| → |resolutionResult| of |specifierMap|,
+    1. If |specifierKey| is |normalizedSpecifier|, then:
+      1. If |resolutionResult| is null, then throw a {{TypeError}} indicating that resolution of |specifierKey| was blocked by a null entry.
+        <p class="note">This will terminate the entire [=resolve a module specifier=] algorithm, without any further fallbacks.</p>
+      1. Assert: |resolutionResult| is a [=URL=].
+      1. Return |resolutionResult|.
+    1. If |specifierKey| ends with U+002F (/) and |normalizedSpecifier| [=/starts with=] |specifierKey|, then:
+      1. If |resolutionResult| is null, then throw a {{TypeError}} indicating that resolution of |specifierKey| was blocked by a null entry.
+        <p class="note">This will terminate the entire [=resolve a module specifier=] algorithm, without any further fallbacks.</p>
+      1. Assert: |resolutionResult| is a [=URL=].
+      1. Let |afterPrefix| be the portion of |normalizedSpecifier| after the initial |specifierKey| prefix.
+      1. Assert: |afterPrefix| ends with "`/`", as enforced during [=parse an import map string|parsing=].
+      1. Let |url| be the result of [=URL parser|parsing=] |afterPrefix| relative to the base URL |resolutionResult|.
+      1. If |url| is failure, then throw a {{TypeError}} indicating that resolution of |specifierKey| was blocked due to a URL parse failure.
+        <p class="note">This will terminate the entire [=resolve a module specifier=] algorithm, without any further fallbacks.</p>
+      1. Assert: |url| is a [=URL=].
+      1. Return |url|.
   1. Return null.
      <p class="note">The [=resolve a module specifier=] algorithm will fallback to a less specific scope or to "`imports`", if possible.</p>
 </div>
