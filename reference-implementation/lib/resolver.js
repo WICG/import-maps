@@ -32,17 +32,24 @@ exports.resolve = (specifier, parsedImportMap, scriptURL) => {
 
 function resolveImportsMatch(normalizedSpecifier, specifierMap) {
   for (const [specifierKey, resolutionResult] of Object.entries(specifierMap)) {
+    // Exact-match case
     if (specifierKey === normalizedSpecifier) {
-      // Exact-match case
       if (resolutionResult === null) {
         throw new TypeError(`Blocked by a null entry for "${specifierKey}"`);
       }
+
+      assert(resolutionResult instanceof URL);
+
       return resolutionResult;
-    } else if (specifierKey.endsWith('/') && normalizedSpecifier.startsWith(specifierKey)) {
-      // Package prefix-match case
+    }
+
+    // Package prefix-match case
+    if (specifierKey.endsWith('/') && normalizedSpecifier.startsWith(specifierKey)) {
       if (resolutionResult === null) {
         throw new TypeError(`Blocked by a null entry for "${specifierKey}"`);
       }
+
+      assert(resolutionResult instanceof URL);
 
       const afterPrefix = normalizedSpecifier.substring(specifierKey.length);
 
@@ -54,6 +61,9 @@ function resolveImportsMatch(normalizedSpecifier, specifierMap) {
       if (url === null) {
         throw new TypeError(`Failed to resolve prefix-match relative URL for "${specifierKey}"`);
       }
+
+      assert(url instanceof URL);
+
       return url;
     }
   }
