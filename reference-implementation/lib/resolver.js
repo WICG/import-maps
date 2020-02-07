@@ -31,25 +31,39 @@ exports.resolve = (specifier, parsedImportMap, scriptURL) => {
 };
 
 function resolveImportsMatch(normalizedSpecifier, specifierMap) {
-  for (const [specifierKey, address] of Object.entries(specifierMap)) {
+  for (const [specifierKey, resolutionResult] of Object.entries(specifierMap)) {
     // Exact-match case
     if (specifierKey === normalizedSpecifier) {
-      return address;
+      if (resolutionResult === null) {
+        throw new TypeError(`Blocked by a null entry for "${specifierKey}"`);
+      }
+
+      assert(resolutionResult instanceof URL);
+
+      return resolutionResult;
     }
 
     // Package prefix-match case
     if (specifierKey.endsWith('/') && normalizedSpecifier.startsWith(specifierKey)) {
+      if (resolutionResult === null) {
+        throw new TypeError(`Blocked by a null entry for "${specifierKey}"`);
+      }
+
+      assert(resolutionResult instanceof URL);
+
       const afterPrefix = normalizedSpecifier.substring(specifierKey.length);
 
       // Enforced by parsing
-      assert(address.href.endsWith('/'));
+      assert(resolutionResult.href.endsWith('/'));
 
-      const url = tryURLParse(afterPrefix, address);
+      const url = tryURLParse(afterPrefix, resolutionResult);
 
-      // This code looks stupid but it follows the spec more exactly and also gives code coverage a chance to shine.
       if (url === null) {
-        return null;
+        throw new TypeError(`Failed to resolve prefix-match relative URL for "${specifierKey}"`);
       }
+
+      assert(url instanceof URL);
+
       return url;
     }
   }
