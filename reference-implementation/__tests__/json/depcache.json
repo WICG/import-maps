@@ -1,0 +1,42 @@
+{
+  "importMapBaseURL": "https://example.com/app/index.html",
+  "tests": {
+    "Depcache resolution": {
+      "importMap": {
+        "imports": {
+          "a": "/a-1.mjs",
+          "b": "/scope/b-1.mjs"
+        },
+        "scopes": {
+          "/a-1.mjs": {
+            "a": "/a-2.mjs"
+          },
+          "/scope/": {
+            "a": "/scope/a-3.mjs",
+            "b": "./b-2.mjs"
+          }
+        },
+        "depcache": {
+          "/a-1.mjs": ["a"],
+          "/a-2.mjs": ["b"],
+          "/scope/b-1.mjs": ["./b-2.mjs"],
+          "/scope/b-2.mjs": ["a"]
+        }
+      },
+      "tests": {
+        "should trace full depcache": {
+          "baseURL": "https://example.com/scope2/foo.mjs",
+          "expectedDepcache": {
+            "a": [
+              "https://example.com/a-1.mjs",
+              "https://example.com/a-2.mjs",
+              "https://example.com/scope/b-1.mjs",
+              "https://example.com/scope/b-2.mjs",
+              "https://example.com/scope/a-3.mjs"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

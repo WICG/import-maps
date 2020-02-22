@@ -25,9 +25,18 @@ exports.parseFromString = (input, baseURL) => {
     sortedAndNormalizedScopes = sortAndNormalizeScopes(parsed.scopes, baseURL);
   }
 
+  let normalizedDepcache = {};
+  if ('depcache' in parsed) {
+    if (!isJSONObject(parsed.depcache)) {
+      throw new TypeError('Import map\'s depcache value must be an object.');
+    }
+    normalizedDepcache = normalizeDepcache(parsed.depcache, baseURL);
+  }
+
   const badTopLevelKeys = new Set(Object.keys(parsed));
   badTopLevelKeys.delete('imports');
   badTopLevelKeys.delete('scopes');
+  badTopLevelKeys.delete('depcache');
   for (const badKey of badTopLevelKeys) {
     console.warn(`Invalid top-level key "${badKey}". Only "imports" and "scopes" can be present.`);
   }
@@ -35,7 +44,8 @@ exports.parseFromString = (input, baseURL) => {
   // Always have these two keys, and exactly these two keys, in the result.
   return {
     imports: sortedAndNormalizedImports,
-    scopes: sortedAndNormalizedScopes
+    scopes: sortedAndNormalizedScopes,
+    depcache: normalizedDepcache
   };
 };
 
@@ -108,6 +118,36 @@ function sortAndNormalizeScopes(obj, baseURL) {
   return sortedAndNormalized;
 }
 
+function normalizeDepcache(obj, baseURL) {
+  const normalized = {};
+  for (const [module, dependencies] of Object.entries(obj)) {
+    if (!isJSONArray(dependencies)) {
+      throw new TypeError(`The value for the "${module}" depcache dependencies must be an array.`);
+    }
+
+    const moduleURL = tryURLParse(module, baseURL);
+    if (moduleURL === null) {
+      console.warn(`Invalid depcache entry URL "${module}" (parsed against base URL "${baseURL}").`);
+      continue;
+    }
+
+    let validDependencies = true;
+    for (const dependency of dependencies) {
+      if (typeof dependency !== 'string') {
+        console.warn(`Invalid depcache item type "${typeof dependency}" for "${module}, only strings are permitted.`);
+        validDependencies = false;
+        break;
+      }
+    }
+    if (dependencies.length && validDependencies) {
+      const normalizedModule = moduleURL.href;
+      normalized[normalizedModule] = dependencies;
+    }
+  }
+
+  return normalized;
+}
+
 function normalizeSpecifierKey(specifierKey, baseURL) {
   // Ignore attempts to use the empty string as a specifier key
   if (specifierKey === '') {
@@ -125,6 +165,10 @@ function normalizeSpecifierKey(specifierKey, baseURL) {
 
 function isJSONObject(value) {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isJSONArray(value) {
+  return Array.isArray(value);
 }
 
 function codeUnitCompare(a, b) {

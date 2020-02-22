@@ -17,6 +17,7 @@
         }
       },
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {
           "null": null,
           "boolean": null,
@@ -36,6 +37,7 @@
         }
       },
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {},
         "scopes": {}
       }

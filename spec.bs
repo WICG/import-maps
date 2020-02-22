@@ -30,7 +30,11 @@ spec: html; type: dfn; urlPrefix: https://html.spec.whatwg.org/multipage/
   text: fetch an import() module script graph; url: webappapis.html#fetch-an-import()-module-script-graph
   text: fetch a modulepreload module script graph; url: webappapis.html#fetch-a-modulepreload-module-script-graph
   text: fetch an inline module script graph; url: webappapis.html#fetch-an-inline-module-script-graph
+  text: fetch a single module script; url: webappapis.html#fetch-a-single-module-script
   text: script; url: webappapis.html#concept-script
+
+urlPrefix: https://tc39.github.io/ecma262/#; spec: ECMA-262; type: abstract-op;
+  text: IsArray; url: sec-isarray
 </pre>
 
 <style>
@@ -57,12 +61,15 @@ A <dfn>resolution result</dfn> is either a [=URL=] or null.
 
 A <dfn>specifier map</dfn> is an [=ordered map=] from [=strings=] to [=resolution results=].
 
-A <dfn>import map</dfn> is a [=struct=] with two [=struct/items=]:
+A <dfn>dependency cache list</dfn> is a optimization cache [=list=] of the dependency [=strings=] of a module.
+
+A <dfn>import map</dfn> is a [=struct=] with three [=struct/items=]:
 
 * <dfn for="import map">imports</dfn>, a [=specifier map=], and
 * <dfn for="import map">scopes</dfn>, an [=ordered map=] of [=URLs=] to [=specifier maps=].
+* <dfn for="import map">depcache</dfn>, an [=ordered map=] of [=URLs=] to [=dependency cache lists=].
 
-An <dfn>empty import map</dfn> is an [=/import map=] with its [=import map/imports=] and [=import map/scopes=] both being empty maps.
+An <dfn>empty import map</dfn> is an [=/import map=] with its [=import map/imports=], [=import map/scopes=] and [=import map/depcache=] all being empty maps.
 
 <h2 id="acquiring">Acquiring import maps</h2>
 
@@ -173,7 +180,7 @@ Inside the <a spec="html">prepare a script</a> algorithm, we make the following 
 
 <div algorithm>
   To <dfn export>fetch an import map</dfn> given |url|, |settings object|, and |options|, run the following steps. This algorithm asynchronously returns an [=/import map=] or null.
-  <p class="note">This algorithm is specified consistently with <a spec="html">fetch a single module script</a> steps 5, 7, 8, 9, 10, and 12.1. Particularly, we enforce CORS to avoid leaking the import map contents that shouldn't be accessed.</p>
+  <p class="note">This algorithm is specified consistently with [=fetch a single module script=] steps 5, 7, 8, 9, 10, and 12.1. Particularly, we enforce CORS to avoid leaking the import map contents that shouldn't be accessed.</p>
 
   1. Let |request| be a new [=/request=] whose [=request/url=] is |url|, [=request/destination=] is "`script`", [=request/mode=] is "`cors`", [=request/referrer=] is "`client`", and [=request/client=] is |settings object|.
      <p class="note">Here we use "`script`" as the [=request/destination=], which means the `script-src-elem` CSP directive applies.</p>
@@ -266,9 +273,12 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
   1. If |parsed|["`scopes`"] [=map/exists=], then:
     1. If |parsed|["`scopes`"] is not a [=map=], then throw a {{TypeError}} indicating that the "`scopes`" top-level key must be a JSON object.
     1. Set |sortedAndNormalizedScopes| to the result of [=sorting and normalizing scopes=] given |parsed|["`scopes`"] and |baseURL|.
-  1. If |parsed|'s [=map/get the keys|keys=] [=set/contains=] any items besides "`imports`" or "`scopes`", [=report a warning to the console=] that an invalid top-level key was present in the import map.
+  1. If |parsed|["`depcache`"] [=map/exists=], then:
+    1. If |parsed|["`depcache`"] is not a [=map=], then throw a {{TypeError}} indicating that the "`depcache`" top-level key must be a JSON object.
+    1. Set |normalizedDepcache| to the result of [=normalizing depcache=] given |parsed|["`depcache`"] and |baseURL|.
+  1. If |parsed|'s [=map/get the keys|keys=] [=set/contains=] any items besides "`imports`", "`scopes`" or "`depcache`", [=report a warning to the console=] that an invalid top-level key was present in the import map.
      <p class="note">This can help detect typos. It is not an error, because that would prevent any future extensions from being added backward-compatibly.</p>
-  1. Return the [=/import map=] whose [=import map/imports=] are |sortedAndNormalizedImports| and whose [=import map/scopes=] scopes are |sortedAndNormalizedScopes|.
+  1. Return the [=/import map=] whose [=import map/imports=] are |sortedAndNormalizedImports|, [=import map/scopes=] scopes are |sortedAndNormalizedScopes| and [=import map/depcache=] depcache are |normalizedDepcache|.
 </div>
 
 <div algorithm>
@@ -300,7 +310,7 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
   ]»
   </xmp>
 
-  and (despite nothing being present in the input) an empty [=map=] for its [=import map/scopes=].
+  and (despite nothing being present in the input) empty [=map=] entries for its [=import map/scopes=] and [=import map/depcache=].
 </div>
 
 <div algorithm>
@@ -340,6 +350,28 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
     1. Let |normalizedScopePrefix| be the [=URL serializer|serialization=] of |scopePrefixURL|.
     1. Set |normalized|[|normalizedScopePrefix|] to the result of [=sorting and normalizing a specifier map=] given |potentialSpecifierMap| and |baseURL|.
   1. Return the result of [=map/sorting=] |normalized|, with an entry |a| being less than an entry |b| if |b|'s [=map/key=] is [=code unit less than=] |a|'s [=map/key=].
+</div>
+
+<div algorithm>
+  To <dfn lt="normalize depcache|normalizing depcache">normalize depcache</dfn>, given a [=map=] |originalMap| and a [=URL=] |baseURL|:
+
+  1. Let |normalized| be an empty [=map=].
+  1. [=map/For each=] |module| → |dependencies| of |originalMap|,
+    1. If ![$IsArray$](dependencies), then throw a {{TypeError}} indicating that the value of the depcache for module |module| must be a JSON array.
+    1. Let |moduleURL| be the result of [=URL parser|parsing=] |module| with |baseURL| as the base URL.
+    1. If |moduleURL| is failure, then:
+      1. [=Report a warning to the console=] that the depcache URL was not parseable.
+      1. [=Continue=].
+    1. Let |validDependencies| be true.
+    1. [=list/For each=] |dependency| of |dependencies|,
+      1. If |dependency| is not a Javascript [=string=], then:
+        1. [=Report a warning to the console=] that the depcache list for |moduleURL| is invalid.
+        1. Set _validDependencies_ to false.
+        1. [=Break=].
+    1. If |dependencies| is not [=list/empty=] and |validDependencies| is true, then:
+      1. Let |normalizedModule| be the [=URL serializer|serialization=] of |moduleURL|.
+      1. Set |normalized|[|normalizedModule|] to |dependencies|.
+  1. Return |normalized|.
 </div>
 
 <p class="note">We sort keys/scopes in reverse order, to put `"foo/bar/"` before `"foo/"` so that `"foo/bar/"` has a higher priority than `"foo/"`.</p>
@@ -389,6 +421,12 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
     1. Set |settingsObject| to |referringScript|'s [=script/settings object=].
     1. Set |baseURL| to |referringScript|'s [=script/base URL=].
   1. Let |importMap| be |settingsObject|'s [=environment settings object/import map=].
+  1. Return the result of [=resolve an import map=] given |specifier|, |importMap| and |baseURL|.
+
+</div>
+
+<div algorithm>
+  To <dfn lt="resolve an import map|resolve an import map">resolve an import map</dfn>, given a [=string=] |specifier|, an [=/import map=] |importMap| and a [=URL=] |baseURL|:
   1. Let |baseURLString| be |baseURL|, [=URL serializer|serialized=].
   1. Let |asURL| be the result of [=parsing a URL-like import specifier=] given |specifier| and |baseURL|.
   1. Let |normalizedSpecifier| be the [=URL serializer|serialization=] of |asURL|, if |asURL| is non-null; otherwise, |specifier|.
@@ -435,6 +473,39 @@ All call sites of HTML's existing <a spec="html">resolve a module specifier</a> 
 * [=Fetch an import() module script graph=] will also need to take a [=script=] instead of a base URL.
 
 Call sites will also need to be updated to account for [=resolve a module specifier=] now throwing exceptions, instead of returning failure. (Previously most call sites just turned failures into {{TypeError}}s manually, so this is straightforward.)
+
+<h2 id="parallelizing">Parallelizing module graphs</h2>
+
+  To parallelize the loading of modules in the import map, a module graph [=dependency cache list=] can be used to provide upfront a cache of module dependencies so they can be loaded in parallel when lazily loaded, without unnecessary requests or extra round trips.
+
+  When this list of dependency hints is provided for a module [=URL=] the algorithm will, on resolution for that module [=URL=], immediately trigger resolution and preloading for each dependency hint provided.
+
+  The behavior of the dependency cache preloader is distinct from the [=fetch a modulepreload module script graph=] preloader in that it immediately iterates all dependency preloads, and does not trigger instantiation since the top-level module instantiation would already be queued.
+
+<h3 id="preloading-dependency-graphs">Preloading dependency graphs</h3>
+
+  The [=preload depcache=] steps below should be included in [=fetch a single module script=], right after step 4 setting moduleMap[url] to "fetching" combining to form an optimizally-terminating graph fetch parallelizing operation, with minimum complexity. Alternatively these steps can be inlined into [=fetch a single module script=] directly. The rationale of this ordering being that dependencies should be triggered for fetching before their parents, even when fetching in parallel.
+
+<div algorithm>
+  To <dfn lt="preload a dependency graph cache|preload depcache">preload a dependency graph cache</dfn>, given a |url|, a |fetch client settings object|, a |destination|, some |options| and a |module map settings object|, run these steps:
+
+  1. Let |urlString| be |url|, [=URL serializer|serialized=].
+  1. Let |moduleMap| be |module map settings object|'s [=module map=].
+  1. If |moduleMap|[|urlString|] is not undefined, return null.
+    <p class="note">null entries in the |moduleMap| for errored modules will also return here.</p>
+  1. Let |importMap| be |module map settings object|'s [=environment settings object/import map=].
+  1. Let |depcache| be |importMap|'s [=import map/depcache=],
+  1. If |depcache| contains an entry for |urlString|, then:
+    1. Let |dependencies| be the [=list=] |depcache|[|urlString|].
+    1. For each |dependency| of |dependencies|,
+      1. Let |resolvedDependencyURL| be the result of [=resolve an import map=] called with |dependency|, |importMap| and |url|.
+      1. If |resolvedDependencyURL| is null, then:
+        1. Throw a {{TypeError}} indicating that |dependency| was a specifier preloaded by the depcache for |urlString|, but was not resolved by |importMap|.
+      1. Perfom the steps of HTML's [=fetch a single module script] with |resolvedDependencyURL|, |fetch client settings object|, |destination|, |options|, |module map settings object|, |url|, and with the top-level module fetch flag unset, without waiting for asynchronous completion.
+        <p class="note">This triggers the recursive fetch preload operations in turn, since this algorithm is in turn called by [=fetch a single module script=].</p>
+</div>
+
+<p class="note">Only dependency preload resolution errors are thrown, not dependency preload instantiation errors. These can be ignored as they will be rethrown appropriately by the top-level module load operation.</p>
 
 <h2 id="security-and-privacy">Security and Privacy</h2>
 

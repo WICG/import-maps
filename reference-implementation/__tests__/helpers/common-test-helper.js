@@ -3,6 +3,7 @@ const assert = require('assert');
 const { URL } = require('url');
 const { parseFromString } = require('../../lib/parser.js');
 const { resolve } = require('../../lib/resolver.js');
+const { traceDepcache } = require('../../lib/depcache.js');
 
 function assertNoExtraProperties(object, expectedProperties, description) {
   for (const actualProperty in object) {
@@ -59,7 +60,7 @@ function runTests(j) {
   assertNoExtraProperties(
     j,
     [
-      'expectedResults', 'expectedParsedImportMap',
+      'expectedResults', 'expectedParsedImportMap', 'expectedDepcache',
       'baseURL', 'name', 'parsedImportMap',
       'importMap', 'importMapBaseURL',
       'link', 'details'
@@ -85,8 +86,9 @@ function runTests(j) {
     }
     assert(
       'expectedResults' in j ||
-           'expectedParsedImportMap' in j,
-      'expectedResults or expectedParsedImportMap should exist'
+           'expectedParsedImportMap' in j ||
+           'expectedDepcache' in j,
+      'expectedResults, expectedParsedImportMap or expectedDepcache should exist'
     );
 
     // Resolution tests.
@@ -120,6 +122,25 @@ function runTests(j) {
         } else {
           expect(j.parsedImportMap)
             .toEqual(replaceStringWithURL(j.expectedParsedImportMap));
+        }
+      });
+    }
+
+    // Depcache tests
+    if ('expectedDepcache' in j) {
+      it(j.name, () => {
+        assertOwnProperty(j, 'baseURL');
+        describe(
+          'Import map registration should be successful for resolution tests',
+          () => {
+            expect(j.parsedImportMap).not.toBeInstanceOf(Error);
+          }
+        );
+
+        for (const specifier in j.expectedDepcache) {
+          const resolved = resolve(specifier, j.parsedImportMap, new URL(j.baseURL));
+          const traced = traceDepcache(resolved, j.parsedImportMap);
+          expect(traced).toEqual(j.expectedDepcache[specifier]);
         }
       });
     }

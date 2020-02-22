@@ -2,6 +2,7 @@
 const { runTests } = require('./helpers/common-test-helper.js');
 for (const jsonFile of [
   'data-base-url.json',
+  'depcache.json',
   'empty-import-map.json',
   'overlapping-entries.json',
   'packages-via-trailing-slashes.json',

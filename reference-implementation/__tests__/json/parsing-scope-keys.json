@@ -8,6 +8,7 @@
         }
       },
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {},
         "scopes": {
           "https://base.example/path1/path2/foo": {}
@@ -23,6 +24,7 @@
         }
       },
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {},
         "scopes": {
           "https://base.example/path1/path2/foo": {},
@@ -41,6 +43,7 @@
       },
       "importMapBaseURL": "data:text/html,test",
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {},
         "scopes": {}
       }
@@ -54,6 +57,7 @@
         }
       },
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {},
         "scopes": {
           "https://base.example/path1/path2/": {},
@@ -69,6 +73,7 @@
         }
       },
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {},
         "scopes": {
           "https://base.example/path1/path2/foo/bar?baz#qux": {}
@@ -82,6 +87,7 @@
         }
       },
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {},
         "scopes": {
           "https://base.example/path1/path2/path3": {}
@@ -99,6 +105,7 @@
         }
       },
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {},
         "scopes": {
           "https://base.example/path1/path2/foo/": {},
@@ -123,6 +130,7 @@
         }
       },
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {},
         "scopes": {
           "https://base.example/path1/path2/foo//": {
@@ -149,6 +157,7 @@
         }
       },
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {},
         "scopes": {
           "about:good": {},
@@ -178,6 +187,7 @@
         }
       },
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {},
         "scopes": {
           "https://base.example/path1/path2/example.org": {},
