@@ -357,10 +357,12 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
 
   1. Let |normalized| be an empty [=map=].
   1. [=map/For each=] |module| → |dependencies| of |originalMap|,
-    1. If ![$IsArray$](dependencies), then throw a {{TypeError}} indicating that the value of the depcache for module |module| must be a JSON array.
     1. Let |moduleURL| be the result of [=URL parser|parsing=] |module| with |baseURL| as the base URL.
     1. If |moduleURL| is failure, then:
       1. [=Report a warning to the console=] that the depcache URL was not parseable.
+      1. [=Continue=].
+    1. If ![$IsArray$](dependencies), then:
+      1. [=Report a warning to the console=] that the value of the depcache for module |module| must be a JSON array.
       1. [=Continue=].
     1. Let |validDependencies| be true.
     1. [=list/For each=] |dependency| of |dependencies|,

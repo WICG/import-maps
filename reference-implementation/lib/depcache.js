@@ -14,7 +14,6 @@ function traceDepcache(url, parsedImportMap, visited = new Set()) {
 
   const dependencies = parsedImportMap.depcache[urlString] || [];
   for (const dep of dependencies) {
-    console.log(dep);
     const resolved = resolve(dep, parsedImportMap, url);
     traceDepcache(resolved, parsedImportMap, visited);
   }

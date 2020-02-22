@@ -1,6 +1,108 @@
 {
   "importMapBaseURL": "https://example.com/app/index.html",
   "tests": {
+    "Invalid depcache": {
+      "importMap": {
+        "depcache": []
+      },
+      "tests": {
+        "should report invalid depcache": {
+          "expectedParsedImportMap": null
+        }
+      }
+    },
+    "Invalid depcache URL": {
+      "importMap": {
+        "depcache": {
+          "http://[www.example.com]/": [],
+          "/a.js": ["/b.js"]
+        }
+      },
+      "tests": {
+        "should ignore invalid depcache URL": {
+          "baseURL": "https://example.com/",
+          "expectedDepcache": {
+            "/a.js": [
+              "https://example.com/a.js",
+              "https://example.com/b.js"
+            ]
+          }
+        }
+      }
+    },
+    "Invalid depcache keys and specifiers": {
+      "importMap": {
+        "depcache": {
+          "/a.js": ["/b.js"],
+          "/c.js": ["http://[www.example.com]/"]
+        }
+      },
+      "tests": {
+        "should ignore invalid depcache URL": {
+          "baseURL": "https://example.com/",
+          "expectedParsedImportMap": {
+            "depcache": {
+              "https://example.com/a.js": ["/b.js"],
+              "https://example.com/c.js": ["http://[www.example.com]/"]
+            },
+            "imports": {},
+            "scopes": {}
+          },
+          "expectedDepcache": {
+            "/a.js": [
+              "https://example.com/a.js",
+              "https://example.com/b.js"
+            ]
+          }
+        },
+        "invalid depcache key resolution": {
+          "baseURL": "https://example.com/",
+          "expectedDepcache": {
+            "/c.js": null
+          }
+        }
+      }
+    },
+    "Invalid depcache dependencies list": {
+      "importMap": {
+        "depcache": {
+          "/valid.js": ["/a.js"],
+          "/a.js": {}
+        }
+      },
+      "tests": {
+        "should ignore invalid depcache items": {
+          "baseURL": "https://example.com/",
+          "expectedParsedImportMap": {
+            "depcache": {
+              "https://example.com/valid.js": ["/a.js"]
+            },
+            "imports": {},
+            "scopes": {}
+          }
+        }
+      }
+    },
+    "Invalid depcache list items": {
+      "importMap": {
+        "depcache": {
+          "/valid.js": ["/a.js"],
+          "/a.js": ["/b.js", null, {}]
+        }
+      },
+      "tests": {
+        "should ignore invalid depcache items": {
+          "baseURL": "https://example.com/",
+          "expectedParsedImportMap": {
+            "depcache": {
+              "https://example.com/valid.js": ["/a.js"]
+            },
+            "imports": {},
+            "scopes": {}
+          }
+        }
+      }
+    },
     "Depcache resolution": {
       "importMap": {
         "imports": {
@@ -18,14 +120,14 @@
         },
         "depcache": {
           "/a-1.mjs": ["a"],
-          "/a-2.mjs": ["b"],
+          "/a-2.mjs": ["b", "a"],
           "/scope/b-1.mjs": ["./b-2.mjs"],
           "/scope/b-2.mjs": ["a"]
         }
       },
       "tests": {
         "should trace full depcache": {
-          "baseURL": "https://example.com/scope2/foo.mjs",
+          "baseURL": "https://example.com/",
           "expectedDepcache": {
             "a": [
               "https://example.com/a-1.mjs",

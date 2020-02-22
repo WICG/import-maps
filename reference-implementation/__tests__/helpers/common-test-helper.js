@@ -23,6 +23,14 @@ function assertOwnProperty(j, name) {
 // expected import maps (taken from JSONs) uses strings.
 // This function converts `m` (expected import maps or its part)
 // into URL-based, for comparison.
+function replaceImportMapStringWithURL(m) {
+  return {
+    depcache: m.depcache,
+    imports: replaceStringWithURL(m.imports),
+    scopes: replaceStringWithURL(m.scopes)
+  };
+}
+
 function replaceStringWithURL(m) {
   if (typeof m === 'string') {
     return new URL(m);
@@ -121,7 +129,7 @@ function runTests(j) {
           expect(j.parsedImportMap).toBeInstanceOf(TypeError);
         } else {
           expect(j.parsedImportMap)
-            .toEqual(replaceStringWithURL(j.expectedParsedImportMap));
+            .toEqual(replaceImportMapStringWithURL(j.expectedParsedImportMap));
         }
       });
     }
@@ -138,9 +146,14 @@ function runTests(j) {
         );
 
         for (const specifier in j.expectedDepcache) {
+          const expected = j.expectedDepcache[specifier];
           const resolved = resolve(specifier, j.parsedImportMap, new URL(j.baseURL));
-          const traced = traceDepcache(resolved, j.parsedImportMap);
-          expect(traced).toEqual(j.expectedDepcache[specifier]);
+          if (expected === null) {
+            expect(() => traceDepcache(resolved, j.parsedImportMap)).toThrow(TypeError);
+          } else {
+            const traced = traceDepcache(resolved, j.parsedImportMap);
+            expect(traced).toEqual(j.expectedDepcache[specifier]);
+          }
         }
       });
     }

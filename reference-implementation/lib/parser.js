@@ -38,7 +38,7 @@ exports.parseFromString = (input, baseURL) => {
   badTopLevelKeys.delete('scopes');
   badTopLevelKeys.delete('depcache');
   for (const badKey of badTopLevelKeys) {
-    console.warn(`Invalid top-level key "${badKey}". Only "imports" and "scopes" can be present.`);
+    console.warn(`Invalid top-level key "${badKey}". Only "imports", "scopes" and "depcache" can be present.`);
   }
 
   // Always have these two keys, and exactly these two keys, in the result.
@@ -121,13 +121,14 @@ function sortAndNormalizeScopes(obj, baseURL) {
 function normalizeDepcache(obj, baseURL) {
   const normalized = {};
   for (const [module, dependencies] of Object.entries(obj)) {
-    if (!isJSONArray(dependencies)) {
-      throw new TypeError(`The value for the "${module}" depcache dependencies must be an array.`);
-    }
-
     const moduleURL = tryURLParse(module, baseURL);
     if (moduleURL === null) {
       console.warn(`Invalid depcache entry URL "${module}" (parsed against base URL "${baseURL}").`);
+      continue;
+    }
+
+    if (!isJSONArray(dependencies)) {
+      console.warn(`The value for the "${module}" depcache dependencies must be an array.`);
       continue;
     }
 
