@@ -229,7 +229,7 @@ With module graphs, this technique can be problematic:
 
   If we upgrade or change `sub-dep.mjs`, our build process will re-generate a new filename for the production version, say `sub-dep-5f47101dc.mjs`. But this means we need to change the `import` statement in the production version of `dep.mjs`. That changes its contents, which means the production version of `dep.mjs` itself needs a new filename. But then this means we need to update the `import` statement in the production version of `app.mjs`...
 
-That is, with module graphs and `import` statements containing hased-filename script files, updates to any part of the graph become viral to all its dependencies, losing all the cachability benefits.
+That is, with module graphs and `import` statements containing hashed-filename script files, updates to any part of the graph become viral to all its dependencies, losing all the cachability benefits.
 
 Import maps provide a way out of this dillema, by decoupling the module specifiers that appear in `import` statements from the URLs on the server. For example, our site could start out with an import map like
 
