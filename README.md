@@ -547,7 +547,7 @@ Several members of the community have been working on polyfills and tooling rela
 * [@jsenv/node-module-import-map](https://www.npmjs.com/package/@jsenv/node-module-import-map) generates an import map from your `package.json` and `node_modules/` directories.
 * [Snowpack](https://www.snowpack.dev) generates an import map when it installs your npm packages to run on the web.
 * [Built-in Module Demo (with Rollup)](https://glitch.com/edit/#!/rollup-built-in-modules) contains code for a [Rollup](https://rollupjs.org/) plugin that generates an import map, focused on built-in module polyfills.
-* [Deno](https://github.com/denoland/deno) is a JavaScript/TypeScript runtime with [built-in support for import maps](https://deno.land/manual.html#importmaps).
+* [Deno](https://github.com/denoland/deno) is a JavaScript/TypeScript runtime with [built-in support for import maps](https://deno.land/manual/linking_to_external_code/import_maps).
 * [es-dev-server](https://www.npmjs.com/package/es-dev-server) allows using import maps during development, including polyfills.
 * [es-module-shims](https://github.com/guybedford/es-module-shims) provides an import maps polyfill for browsers with basic ES modules support.
 * [import-map-overrides](https://www.npmjs.com/package/import-map-overrides) allows using import maps to improve development flow by pointing to local versions.
