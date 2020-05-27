@@ -236,9 +236,9 @@ Import maps provide a way out of this dillema, by decoupling the module specifie
 ```json
 {
   "imports": {
-    "app.mjs": "app-8e0d62a03.mjs",
-    "dep.mjs": "dep-16f9d819a.mjs",
-    "sub-dep.mjs": "sub-dep-7be2aa47f.mjs"
+    "/js/app.mjs": "/js/app-8e0d62a03.mjs",
+    "/js/dep.mjs": "/js/dep-16f9d819a.mjs",
+    "/js/sub-dep.mjs": "/js/sub-dep-7be2aa47f.mjs"
   }
 }
 ```
@@ -248,9 +248,9 @@ and with import statements that are of the form `import "./sub-dep.mjs"` instead
 ```json
 {
   "imports": {
-    "app.mjs": "app-8e0d62a03.mjs",
-    "dep.mjs": "dep-16f9d819a.mjs",
-    "sub-dep.mjs": "sub-dep-5f47101dc.mjs"
+    "/js/app.mjs": "/js/app-8e0d62a03.mjs",
+    "/js/dep.mjs": "/js/dep-16f9d819a.mjs",
+    "/js/sub-dep.mjs": "/js/sub-dep-5f47101dc.mjs"
   }
 }
 ```
