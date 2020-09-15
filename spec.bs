@@ -358,7 +358,7 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
 <div algorithm>
   To <dfn lt="parse a URL-like import specifier|parsing a URL-like import specifier">parse a URL-like import specifier</dfn>, given a [=string=] |specifier| and a [=URL=] |baseURL|:
 
-  1. If |specifier| [=/starts with=] "`/`", "`./`", or "`../`", then:
+  1. If |specifier| [=string/starts with=] "`/`", "`./`", or "`../`", then:
     1. Let |url| be the result of [=URL parser|parsing=] |specifier| with |baseURL| as the base URL.
     1. If |url| is failure, then return null.
        <p class="example" id="example-bad-urllike-import-specifier">One way this could happen is if |specifier| is "`../foo`" and |baseURL| is a `data:` URL.</p>
@@ -393,7 +393,7 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
   1. Let |asURL| be the result of [=parsing a URL-like import specifier=] given |specifier| and |baseURL|.
   1. Let |normalizedSpecifier| be the [=URL serializer|serialization=] of |asURL|, if |asURL| is non-null; otherwise, |specifier|.
   1. [=map/For each=] |scopePrefix| → |scopeImports| of |importMap|'s [=import map/scopes=],
-    1. If |scopePrefix| is |baseURLString|, or if |scopePrefix| ends with U+002F (/) and |baseURLString| [=/starts with=] |scopePrefix|, then:
+    1. If |scopePrefix| is |baseURLString|, or if |scopePrefix| ends with U+002F (/) and |baseURLString| [=string/starts with=] |scopePrefix|, then:
       1. Let |scopeImportsMatch| be the result of [=resolving an imports match=] given |normalizedSpecifier| and |scopeImports|.
       1. If |scopeImportsMatch| is not null, then return |scopeImportsMatch|.
   1. Let |topLevelImportsMatch| be the result of [=resolving an imports match=] given |normalizedSpecifier| and |importMap|'s [=import map/imports=].
@@ -412,7 +412,7 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
         <p class="note">This will terminate the entire [=resolve a module specifier=] algorithm, without any further fallbacks.</p>
       1. Assert: |resolutionResult| is a [=URL=].
       1. Return |resolutionResult|.
-    1. If |specifierKey| ends with U+002F (/) and |normalizedSpecifier| [=/starts with=] |specifierKey|, then:
+    1. If |specifierKey| ends with U+002F (/) and |normalizedSpecifier| [=string/starts with=] |specifierKey|, then:
       1. If |resolutionResult| is null, then throw a {{TypeError}} indicating that resolution of |specifierKey| was blocked by a null entry.
         <p class="note">This will terminate the entire [=resolve a module specifier=] algorithm, without any further fallbacks.</p>
       1. Assert: |resolutionResult| is a [=URL=].
