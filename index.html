@@ -1175,7 +1175,7 @@ Possible extra rowspan handling
 		   1. When table < content column, centers table in column.
 		   2. When content < table < available, left-aligns.
 		   3. When table > available, fills available + scroll bar.
-		*/ 
+		*/
 		display: grid;
 		grid-template-columns: minmax(0, 50em);
 	}
@@ -1222,7 +1222,7 @@ Possible extra rowspan handling
 	}
 </style>
   <link href="https://www.w3.org/StyleSheets/TR/2016/cg-draft" rel="stylesheet">
-  <meta content="Bikeshed version e3f9ab1a, updated Fri Apr 24 17:43:54 2020 -0700" name="generator">
+  <meta content="Bikeshed version 5f7b0e20, updated Tue Aug 18 15:46:28 2020 -0700" name="generator">
   <link href="https://wicg.github.io/import-maps/" rel="canonical">
 <style>
 .selected-text-file-an-issue {
@@ -1496,7 +1496,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Import Maps</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Draft Community Group Report, <time class="dt-updated" datetime="2020-05-19">19 May 2020</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Draft Community Group Report, <time class="dt-updated" datetime="2020-09-15">15 September 2020</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1966,7 +1966,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      To <dfn class="dfn-paneled" data-dfn-type="dfn" data-lt="parse a URL-like import specifier|parsing a URL-like import specifier" data-noexport id="parse-a-url-like-import-specifier">parse a URL-like import specifier</dfn>, given a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string⑤">string</a> <var>specifier</var> and a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url⑦">URL</a> <var>baseURL</var>: 
     <ol>
      <li data-md>
-      <p>If <var>specifier</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#code-unit-prefix" id="ref-for-code-unit-prefix">starts with</a> "<code>/</code>", "<code>./</code>", or "<code>../</code>", then:</p>
+      <p>If <var>specifier</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string-starts-with" id="ref-for-string-starts-with">starts with</a> "<code>/</code>", "<code>./</code>", or "<code>../</code>", then:</p>
       <ol>
        <li data-md>
         <p>Let <var>url</var> be the result of <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-parser" id="ref-for-concept-url-parser①">parsing</a> <var>specifier</var> with <var>baseURL</var> as the base URL.</p>
@@ -2024,7 +2024,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
       <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-iterate" id="ref-for-map-iterate②">For each</a> <var>scopePrefix</var> → <var>scopeImports</var> of <var>importMap</var>’s <a data-link-type="dfn" href="#import-map-scopes" id="ref-for-import-map-scopes③">scopes</a>,</p>
       <ol>
        <li data-md>
-        <p>If <var>scopePrefix</var> is <var>baseURLString</var>, or if <var>scopePrefix</var> ends with U+002F (/) and <var>baseURLString</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#code-unit-prefix" id="ref-for-code-unit-prefix①">starts with</a> <var>scopePrefix</var>, then:</p>
+        <p>If <var>scopePrefix</var> is <var>baseURLString</var>, or if <var>scopePrefix</var> ends with U+002F (/) and <var>baseURLString</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string-starts-with" id="ref-for-string-starts-with①">starts with</a> <var>scopePrefix</var>, then:</p>
         <ol>
          <li data-md>
           <p>Let <var>scopeImportsMatch</var> be the result of <a data-link-type="dfn" href="#resolve-an-imports-match" id="ref-for-resolve-an-imports-match">resolving an imports match</a> given <var>normalizedSpecifier</var> and <var>scopeImports</var>.</p>
@@ -2061,7 +2061,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
           <p>Return <var>resolutionResult</var>.</p>
         </ol>
        <li data-md>
-        <p>If <var>specifierKey</var> ends with U+002F (/) and <var>normalizedSpecifier</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#code-unit-prefix" id="ref-for-code-unit-prefix②">starts with</a> <var>specifierKey</var>, then:</p>
+        <p>If <var>specifierKey</var> ends with U+002F (/) and <var>normalizedSpecifier</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string-starts-with" id="ref-for-string-starts-with②">starts with</a> <var>specifierKey</var>, then:</p>
         <ol>
          <li data-md>
           <p>If <var>resolutionResult</var> is null, then throw a <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#exceptiondef-typeerror" id="ref-for-exceptiondef-typeerror⑥">TypeError</a></code> indicating that resolution of <var>specifierKey</var> was blocked by a null entry.</p>
@@ -2741,11 +2741,11 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
     <li><a href="#ref-for-map-sort-in-ascending-order">3. Parsing import maps</a> <a href="#ref-for-map-sort-in-ascending-order①">(2)</a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="term-for-code-unit-prefix">
-   <a href="https://infra.spec.whatwg.org/#code-unit-prefix">https://infra.spec.whatwg.org/#code-unit-prefix</a><b>Referenced in:</b>
+  <aside class="dfn-panel" data-for="term-for-string-starts-with">
+   <a href="https://infra.spec.whatwg.org/#string-starts-with">https://infra.spec.whatwg.org/#string-starts-with</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-code-unit-prefix">3. Parsing import maps</a>
-    <li><a href="#ref-for-code-unit-prefix①">4.1. New "resolve a module specifier"</a> <a href="#ref-for-code-unit-prefix②">(2)</a>
+    <li><a href="#ref-for-string-starts-with">3. Parsing import maps</a>
+    <li><a href="#ref-for-string-starts-with①">4.1. New "resolve a module specifier"</a> <a href="#ref-for-string-starts-with②">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-string">
@@ -2891,7 +2891,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      <li><span class="dfn-paneled" id="term-for-ordered-map①" style="color:initial">ordered map</span>
      <li><span class="dfn-paneled" id="term-for-parse-json-into-infra-values" style="color:initial">parse json into infra values</span>
      <li><span class="dfn-paneled" id="term-for-map-sort-in-ascending-order" style="color:initial">sorting</span>
-     <li><span class="dfn-paneled" id="term-for-code-unit-prefix" style="color:initial">starts with</span>
+     <li><span class="dfn-paneled" id="term-for-string-starts-with" style="color:initial">starts with</span>
      <li><span class="dfn-paneled" id="term-for-string①" style="color:initial">string</span>
      <li><span class="dfn-paneled" id="term-for-struct" style="color:initial">struct</span>
     </ul>
