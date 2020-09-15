@@ -312,18 +312,18 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
     1. If |normalizedSpecifierKey| is null, then [=continue=].
     1. If |value| is not a [=string=], then:
       1. [=Report a warning to the console=] that addresses must be strings.
-      1. Set |normalized|[|specifierKey|] to null.
+      1. Set |normalized|[|normalizedSpecifierKey|] to null.
       1. [=Continue=].
     1. Let |addressURL| be the result of [=parsing a URL-like import specifier=] given |value| and |baseURL|.
     1. If |addressURL| is null, then:
       1. [=Report a warning to the console=] that the address was invalid.
-      1. Set |normalized|[|specifierKey|] to null.
+      1. Set |normalized|[|normalizedSpecifierKey|] to null.
       1. [=Continue=].
     1. If |specifierKey| ends with U+002F (/), and the [=URL serializer|serialization=] of |addressURL| does not end with U+002F (/), then:
       1. [=Report a warning to the console=] that an invalid address was given for the specifier key |specifierKey|; since |specifierKey| ended in a slash, so must the address.
-      1. Set |normalized|[|specifierKey|] to null.
+      1. Set |normalized|[|normalizedSpecifierKey|] to null.
       1. [=Continue=].
-    1. Set |normalized|[|specifierKey|] to |addressURL|.
+    1. Set |normalized|[|normalizedSpecifierKey|] to |addressURL|.
   1. Return the result of [=map/sorting=] |normalized|, with an entry |a| being less than an entry |b| if |b|'s [=map/key=] is [=code unit less than=] |a|'s [=map/key=].
 </div>
 
