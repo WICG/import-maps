@@ -1880,7 +1880,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
          <li data-md>
           <p><a data-link-type="dfn" href="https://console.spec.whatwg.org/#report-a-warning-to-the-console" id="ref-for-report-a-warning-to-the-console①">Report a warning to the console</a> that addresses must be strings.</p>
          <li data-md>
-          <p>Set <var>normalized</var>[<var>specifierKey</var>] to null.</p>
+          <p>Set <var>normalized</var>[<var>normalizedSpecifierKey</var>] to null.</p>
          <li data-md>
           <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue" id="ref-for-iteration-continue①">Continue</a>.</p>
         </ol>
@@ -1892,7 +1892,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
          <li data-md>
           <p><a data-link-type="dfn" href="https://console.spec.whatwg.org/#report-a-warning-to-the-console" id="ref-for-report-a-warning-to-the-console②">Report a warning to the console</a> that the address was invalid.</p>
          <li data-md>
-          <p>Set <var>normalized</var>[<var>specifierKey</var>] to null.</p>
+          <p>Set <var>normalized</var>[<var>normalizedSpecifierKey</var>] to null.</p>
          <li data-md>
           <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue" id="ref-for-iteration-continue②">Continue</a>.</p>
         </ol>
@@ -1902,12 +1902,12 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
          <li data-md>
           <p><a data-link-type="dfn" href="https://console.spec.whatwg.org/#report-a-warning-to-the-console" id="ref-for-report-a-warning-to-the-console③">Report a warning to the console</a> that an invalid address was given for the specifier key <var>specifierKey</var>; since <var>specifierKey</var> ended in a slash, so must the address.</p>
          <li data-md>
-          <p>Set <var>normalized</var>[<var>specifierKey</var>] to null.</p>
+          <p>Set <var>normalized</var>[<var>normalizedSpecifierKey</var>] to null.</p>
          <li data-md>
           <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue" id="ref-for-iteration-continue③">Continue</a>.</p>
         </ol>
        <li data-md>
-        <p>Set <var>normalized</var>[<var>specifierKey</var>] to <var>addressURL</var>.</p>
+        <p>Set <var>normalized</var>[<var>normalizedSpecifierKey</var>] to <var>addressURL</var>.</p>
       </ol>
      <li data-md>
       <p>Return the result of <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-sort-in-ascending-order" id="ref-for-map-sort-in-ascending-order">sorting</a> <var>normalized</var>, with an entry <var>a</var> being less than an entry <var>b</var> if <var>b</var>’s <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-key" id="ref-for-map-key">key</a> is <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#code-unit-less-than" id="ref-for-code-unit-less-than">code unit less than</a> <var>a</var>’s <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-key" id="ref-for-map-key①">key</a>.</p>
