@@ -257,14 +257,14 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
   To <dfn lt="parse an import map string|parsing an import map string">parse an import map string</dfn>, given a [=string=] |input| and a [=URL=] |baseURL|:
 
   1. Let |parsed| be the result of [=parse JSON into Infra values|parsing JSON into Infra values=] given |input|.
-  1. If |parsed| is not a [=map=], then throw a {{TypeError}} indicating that the top-level value must be a JSON object.
+  1. If |parsed| is not a [=map=], then throw a {{TypeError}} indicating that the top-level value needs to be a JSON object.
   1. Let |sortedAndNormalizedImports| be an empty [=map=].
   1. If |parsed|["`imports`"] [=map/exists=], then:
-    1. If |parsed|["`imports`"] is not a [=map=], then throw a {{TypeError}} indicating that the "`imports`" top-level key must be a JSON object.
+    1. If |parsed|["`imports`"] is not a [=map=], then throw a {{TypeError}} indicating that the "`imports`" top-level key needs to be a JSON object.
     1. Set |sortedAndNormalizedImports| to the result of [=sorting and normalizing a specifier map=] given |parsed|["`imports`"] and |baseURL|.
   1. Let |sortedAndNormalizedScopes| be an empty [=map=].
   1. If |parsed|["`scopes`"] [=map/exists=], then:
-    1. If |parsed|["`scopes`"] is not a [=map=], then throw a {{TypeError}} indicating that the "`scopes`" top-level key must be a JSON object.
+    1. If |parsed|["`scopes`"] is not a [=map=], then throw a {{TypeError}} indicating that the "`scopes`" top-level key needs to be a JSON object.
     1. Set |sortedAndNormalizedScopes| to the result of [=sorting and normalizing scopes=] given |parsed|["`scopes`"] and |baseURL|.
   1. If |parsed|'s [=map/get the keys|keys=] [=set/contains=] any items besides "`imports`" or "`scopes`", [=report a warning to the console=] that an invalid top-level key was present in the import map.
      <p class="note">This can help detect typos. It is not an error, because that would prevent any future extensions from being added backward-compatibly.</p>
@@ -311,7 +311,7 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
     1. Let |normalizedSpecifierKey| be the result of [=normalizing a specifier key=] given |specifierKey| and |baseURL|.
     1. If |normalizedSpecifierKey| is null, then [=continue=].
     1. If |value| is not a [=string=], then:
-      1. [=Report a warning to the console=] that addresses must be strings.
+      1. [=Report a warning to the console=] that addresses need to be strings.
       1. Set |normalized|[|normalizedSpecifierKey|] to null.
       1. [=Continue=].
     1. Let |addressURL| be the result of [=parsing a URL-like import specifier=] given |value| and |baseURL|.
@@ -320,7 +320,7 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
       1. Set |normalized|[|normalizedSpecifierKey|] to null.
       1. [=Continue=].
     1. If |specifierKey| ends with U+002F (/), and the [=URL serializer|serialization=] of |addressURL| does not end with U+002F (/), then:
-      1. [=Report a warning to the console=] that an invalid address was given for the specifier key |specifierKey|; since |specifierKey| ended in a slash, so must the address.
+      1. [=Report a warning to the console=] that an invalid address was given for the specifier key |specifierKey|; since |specifierKey| ended in a slash, the address needs to as well.
       1. Set |normalized|[|normalizedSpecifierKey|] to null.
       1. [=Continue=].
     1. Set |normalized|[|normalizedSpecifierKey|] to |addressURL|.
@@ -332,7 +332,7 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
 
   1. Let |normalized| be an empty [=map=].
   1. [=map/For each=] |scopePrefix| → |potentialSpecifierMap| of |originalMap|,
-    1. If |potentialSpecifierMap| is not a [=map=], then throw a {{TypeError}} indicating that the value of the scope with prefix |scopePrefix| must be a JSON object.
+    1. If |potentialSpecifierMap| is not a [=map=], then throw a {{TypeError}} indicating that the value of the scope with prefix |scopePrefix| needs to be a JSON object.
     1. Let |scopePrefixURL| be the result of [=URL parser|parsing=] |scopePrefix| with |baseURL| as the base URL.
     1. If |scopePrefixURL| is failure, then:
       1. [=Report a warning to the console=] that the scope prefix URL was not parseable.
