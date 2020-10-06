@@ -363,6 +363,9 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
     1. If |url| is failure, then return null.
        <p class="example" id="example-bad-urllike-import-specifier">One way this could happen is if |specifier| is "`../foo`" and |baseURL| is a `data:` URL.</p>
     1. Return |url|.
+
+    <p class="note">This includes cases where |specifier| [=string/starts with=] "`//`", i.e. scheme-relative URLs. Thus, |url| might end up with a different [=url/host=] than |baseURL|.</p>
+
   1. Let |url| be the result of [=URL parser|parsing=] |specifier| (with no base URL).
   1. If |url| is failure, then return null.
   1. Return |url|.
