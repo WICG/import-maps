@@ -126,6 +126,8 @@ import("lodash").then(_ => ...);
 
 Note that the right-hand side of the mapping (known as the "address") must start with `/`, `../`, or `./`, or be parseable as an absolute URL, to identify a URL. In the case of relative-URL-like addresses, they are resolved relative to the import map's base URL, i.e. the base URL of the page for inline import maps, and the URL of the import map resource for external import maps.
 
+In particular, "bare" relative URLs like `node_modules/moment/src/moment.js` will not work in these positions, for now. This is done as a conservative default, as in the future we may want to allow [multiple import maps](#multiple-import-map-support), which might change the meaning of the right-hand side in ways that especially affect these bare cases.
+
 #### "Packages" via trailing slashes
 
 It's common in the JavaScript ecosystem to have a package (in the sense of [npm](https://www.npmjs.com/)) contain multiple modules, or other files. For such cases, we want to map a prefix in the module specifier space, onto another prefix in the fetchable-URL space.
