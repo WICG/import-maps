@@ -1904,7 +1904,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Import Maps</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Draft Community Group Report, <time class="dt-updated" datetime="2020-10-02">2 October 2020</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Draft Community Group Report, <time class="dt-updated" datetime="2020-10-06">6 October 2020</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -2066,7 +2066,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      <ul>
       <li data-md>
        <p>If <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#concept-script-type" id="ref-for-concept-script-type②">the script’s type</a> is "<code>importmap</code>", and either the element’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node-document" id="ref-for-concept-node-document">node document</a>'s <a data-link-type="dfn" href="#document-acquiring-import-maps" id="ref-for-document-acquiring-import-maps">acquiring import maps</a> is false or the element’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node-document" id="ref-for-concept-node-document①">node document</a>'s <a data-link-type="dfn" href="#document-pending-import-map-script" id="ref-for-document-pending-import-map-script">pending import map script</a> is non-null, then <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#queue-a-task" id="ref-for-queue-a-task">queue a task</a> to <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#concept-event-fire" id="ref-for-concept-event-fire">fire an event</a> named <code>error</code> at the element, and return.</p>
-       <p class="note" role="note">In the future we could losen the constrain of erroring when the <a data-link-type="dfn" href="#document-pending-import-map-script" id="ref-for-document-pending-import-map-script①">pending import map script</a> is non-null, to allow multiple import maps.</p>
+       <p class="note" role="note">In the future we could loosen the constraint of erroring when the <a data-link-type="dfn" href="#document-pending-import-map-script" id="ref-for-document-pending-import-map-script①">pending import map script</a> is non-null, to allow multiple import maps.</p>
      </ul>
     <li data-md>
      <p>Insert the following case to <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#prepare-a-script" id="ref-for-prepare-a-script⑤">prepare a script</a> step 24.6:</p>
@@ -2191,7 +2191,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
       <p>Let <var>settings object</var> be <var>import map parse result</var>’s <a data-link-type="dfn" href="#import-map-parse-result-settings-object" id="ref-for-import-map-parse-result-settings-object">settings object</a>.</p>
      <li data-md>
       <p>If <var>element</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#node-document" id="ref-for-node-document">node document</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#relevant-settings-object" id="ref-for-relevant-settings-object">relevant settings object</a> is not equal to <var>settings object</var>, then return.</p>
-      <p class="note" role="note">This is spec’ed consistently with <a href="https://github.com/whatwg/html/pull/2673">whatwg/html#2673</a>.</p>
+      <p class="note" role="note">This is specified consistently with <a href="https://github.com/whatwg/html/pull/2673">whatwg/html#2673</a>.</p>
       <p class="advisement">Currently we don’t fire <code>error</code> events in this case. If we change the decision at <a href="https://github.com/whatwg/html/pull/2673">whatwg/html#2673</a> to fire <code>error</code> events, then we should change this step accordingly.</p>
      <li data-md>
       <p>If <var>import map parse result</var>’s <a data-link-type="dfn" href="#import-map-parse-result-error-to-rethrow" id="ref-for-import-map-parse-result-error-to-rethrow">error to rethrow</a> is not null, then:</p>
@@ -2214,7 +2214,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      To <dfn class="dfn-paneled" data-dfn-type="dfn" data-lt="parse an import map string|parsing an import map string" data-noexport id="parse-an-import-map-string">parse an import map string</dfn>, given a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string①">string</a> <var>input</var> and a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url②">URL</a> <var>baseURL</var>: 
     <ol>
      <li data-md>
-      <p>Let <var>parsed</var> be the result of <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#parse-json-into-infra-values" id="ref-for-parse-json-into-infra-values">parsing JSON into Infra values</a> given <var>input</var>.</p>
+      <p>Let <var>parsed</var> be the result of <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#parse-a-json-string-to-an-infra-value" id="ref-for-parse-a-json-string-to-an-infra-value">parsing JSON into Infra values</a> given <var>input</var>.</p>
      <li data-md>
       <p>If <var>parsed</var> is not a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-map" id="ref-for-ordered-map②">map</a>, then throw a <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#exceptiondef-typeerror" id="ref-for-exceptiondef-typeerror">TypeError</a></code> indicating that the top-level value needs to be a JSON object.</p>
      <li data-md>
@@ -2529,6 +2529,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <p>To date, there has been a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier①③">default mechanism</a> for translating those strings into URLs. And indeed, some of the strings, such as <code>"https://example.com/foo.mjs"</code>, or <code>"./bar.mjs"</code>, might look URL-like; for those, the default translation does what you would expect.</p>
    <p>But overall, one should not think of <code>import(x)</code> as corresponding to <code>fetch(x)</code>. Instead, the correspondence is to <code>fetch(translate(x))</code>, where the translation algorithm produces the actual URL to be fetched. In this framing, the way to think about import maps is as providing a mechanism for overriding the default mechanism, i.e. customizing the <code>translate()</code> function.</p>
    <p>This brings some clarity to some common security questions. For example: given an import map which maps the specifier <code>"https://1.example.com/foo.mjs"</code> to the URL <code>&lt;https://2.example.com/bar.mjs></code>, should we apply CSP checks to <code>&lt;https://1.example.com/foo.mjs></code> or to <code>&lt;https://2.example.com/bar.mjs></code>? With this framing we can see that we should apply the checks to the post-translation URL <code>&lt;https://2.example.com/bar.mjs></code> which is actually fetched, and not to the pre-translation <code>"https://1.example.com/foo.mjs"</code> module specifier.</p>
+   <p>This also makes it clear that other URL-keyed features of the platform, such as as-yet-unspecified the <code>error.stack</code> property, will use the post-translation URLs, not the pre-translation module specifiers.</p>
   </main>
 <script>
 (function() {
@@ -3137,10 +3138,10 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
     <li><a href="#ref-for-ordered-map②">3. Parsing import maps</a> <a href="#ref-for-ordered-map③">(2)</a> <a href="#ref-for-ordered-map④">(3)</a> <a href="#ref-for-ordered-map⑤">(4)</a> <a href="#ref-for-ordered-map⑥">(5)</a> <a href="#ref-for-ordered-map⑦">(6)</a> <a href="#ref-for-ordered-map⑧">(7)</a> <a href="#ref-for-ordered-map⑨">(8)</a> <a href="#ref-for-ordered-map①⓪">(9)</a> <a href="#ref-for-ordered-map①①">(10)</a> <a href="#ref-for-ordered-map①②">(11)</a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="term-for-parse-json-into-infra-values">
-   <a href="https://infra.spec.whatwg.org/#parse-json-into-infra-values">https://infra.spec.whatwg.org/#parse-json-into-infra-values</a><b>Referenced in:</b>
+  <aside class="dfn-panel" data-for="term-for-parse-a-json-string-to-an-infra-value">
+   <a href="https://infra.spec.whatwg.org/#parse-a-json-string-to-an-infra-value">https://infra.spec.whatwg.org/#parse-a-json-string-to-an-infra-value</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-parse-json-into-infra-values">3. Parsing import maps</a>
+    <li><a href="#ref-for-parse-a-json-string-to-an-infra-value">3. Parsing import maps</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-map-sort-in-ascending-order">
@@ -3297,7 +3298,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      <li><span class="dfn-paneled" id="term-for-map-key">key</span>
      <li><span class="dfn-paneled" id="term-for-ordered-map">map</span>
      <li><span class="dfn-paneled" id="term-for-ordered-map①">ordered map</span>
-     <li><span class="dfn-paneled" id="term-for-parse-json-into-infra-values">parse json into infra values</span>
+     <li><span class="dfn-paneled" id="term-for-parse-a-json-string-to-an-infra-value">parse json into infra values</span>
      <li><span class="dfn-paneled" id="term-for-map-sort-in-ascending-order">sorting</span>
      <li><span class="dfn-paneled" id="term-for-string-starts-with">starts with</span>
      <li><span class="dfn-paneled" id="term-for-string①">string</span>
