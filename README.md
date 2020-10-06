@@ -271,7 +271,7 @@ would be correctly remapping to its hashed version in import-map-supporting brow
 <script type="module" src="./app.mjs"></script>
 ```
 
-would not: it would cause in all classes of browsers, it would attempt to fetch `app.mjs` directly, resulting in a 404. What _would_ work, in import-map-supporting browsers, would be
+would not: in all classes of browsers, it would attempt to fetch `app.mjs` directly, resulting in a 404. What _would_ work, in import-map-supporting browsers, would be
 
 ```html
 <script type="module">import "./app.mjs";</script>
