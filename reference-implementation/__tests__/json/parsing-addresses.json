@@ -3,6 +3,7 @@
   "tests": {
     "should accept strings prefixed with ./, ../, or /": {
       "importMap": {
+        "depcache": {},
         "imports": {
           "dotSlash": "./foo",
           "dotDotSlash": "../foo",
@@ -11,6 +12,7 @@
       },
       "importMapBaseURL": "https://base.example/path1/path2/path3",
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {
           "dotSlash": "https://base.example/path1/path2/foo",
           "dotDotSlash": "https://base.example/path1/foo",
@@ -21,6 +23,7 @@
     },
     "should not accept strings prefixed with ./, ../, or / for data: base URLs": {
       "importMap": {
+        "depcache": {},
         "imports": {
           "dotSlash": "./foo",
           "dotDotSlash": "../foo",
@@ -29,6 +32,7 @@
       },
       "importMapBaseURL": "data:text/html,test",
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {
           "dotSlash": null,
           "dotDotSlash": null,
@@ -39,6 +43,7 @@
     },
     "should accept the literal strings ./, ../, or / with no suffix": {
       "importMap": {
+        "depcache": {},
         "imports": {
           "dotSlash": "./",
           "dotDotSlash": "../",
@@ -47,6 +52,7 @@
       },
       "importMapBaseURL": "https://base.example/path1/path2/path3",
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {
           "dotSlash": "https://base.example/path1/path2/",
           "dotDotSlash": "https://base.example/path1/",
@@ -57,6 +63,7 @@
     },
     "should ignore percent-encoded variants of ./, ../, or /": {
       "importMap": {
+        "depcache": {},
         "imports": {
           "dotSlash1": "%2E/",
           "dotDotSlash1": "%2E%2E/",
@@ -69,6 +76,7 @@
       },
       "importMapBaseURL": "https://base.example/path1/path2/path3",
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {
           "dotSlash1": null,
           "dotDotSlash1": null,

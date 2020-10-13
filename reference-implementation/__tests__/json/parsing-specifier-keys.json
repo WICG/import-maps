@@ -10,6 +10,7 @@
         }
       },
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {
           "https://base.example/path1/path2/foo": "https://base.example/dotslash",
           "https://base.example/path1/foo": "https://base.example/dotdotslash",
@@ -28,6 +29,7 @@
       },
       "importMapBaseURL": "data:text/html,",
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {
           "./foo": "https://example.com/dotslash",
           "../foo": "https://example.com/dotdotslash",
@@ -45,6 +47,7 @@
         }
       },
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {
           "https://base.example/path1/path2/": "https://base.example/dotslash/",
           "https://base.example/path1/": "https://base.example/dotdotslash/",
@@ -60,6 +63,7 @@
         }
       },
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {
           "https://base.example/path1/path2/foo/bar?baz#qux": "https://base.example/foo"
         },
@@ -73,6 +77,7 @@
         }
       },
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {},
         "scopes": {}
       }
@@ -90,6 +95,7 @@
         }
       },
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {
           "%2E/": "https://base.example/dotSlash1/",
           "%2E%2E/": "https://base.example/dotDotSlash1/",
@@ -111,6 +117,7 @@
         }
       },
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {
           "https://base.example/path1/path2/foo//": "https://base.example/foo3"
         },
@@ -135,6 +142,7 @@
         }
       },
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {
           "about:good": "https://base.example/about",
           "blob:good": "https://base.example/blob",
@@ -164,6 +172,7 @@
         }
       },
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {
           "https://example.com:demo": "https://base.example/unparseable2",
           "http://[www.example.com]/": "https://base.example/unparseable3/",
@@ -183,6 +192,7 @@
         }
       },
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {
           "https://example.com/aaa": "https://example.com/aaa",
           "https://example.com/a": "https://example.com/a"
@@ -198,6 +208,7 @@
         }
       },
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {
           "https://example.com/aaa": "https://example.com/aaa",
           "https://example.com/a": "https://example.com/a"

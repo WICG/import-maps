@@ -20,6 +20,7 @@
       },
       "importMapBaseURL": "https://base.example/path1/path2/path3",
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {
           "about": "about:good",
           "blob": "blob:good",
@@ -50,6 +51,7 @@
       },
       "importMapBaseURL": "https://base.example/path1/path2/path3",
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {
           "unparseable2": null,
           "unparseable3": null,

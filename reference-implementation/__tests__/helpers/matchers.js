@@ -15,7 +15,7 @@ expect.extend({
     }
 
     received = received.href;
-    expected = (new URL(expected)).href;
+    expected = new URL(expected).href;
 
     const pass = received === expected;
 

@@ -13,6 +13,7 @@
       },
       "importMapBaseURL": "https://base.example/path1/path2/path3",
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {
           "foo1": null,
           "foo2": null,

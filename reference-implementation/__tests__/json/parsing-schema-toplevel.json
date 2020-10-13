@@ -89,6 +89,7 @@
         "scops": {}
       },
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {},
         "scopes": {}
       }

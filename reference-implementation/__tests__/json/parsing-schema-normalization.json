@@ -5,6 +5,7 @@
     "should normalize empty import maps to have imports and scopes keys": {
       "importMap": {},
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {},
         "scopes": {}
       }
@@ -14,6 +15,7 @@
         "scopes": {}
       },
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {},
         "scopes": {}
       }
@@ -23,6 +25,7 @@
         "imports": {}
       },
       "expectedParsedImportMap": {
+        "depcache": {},
         "imports": {},
         "scopes": {}
       }
