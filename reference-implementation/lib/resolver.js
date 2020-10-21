@@ -1,6 +1,6 @@
 'use strict';
 const assert = require('assert');
-const { tryURLLikeSpecifierParse, tryURLParse } = require('./utils.js');
+const { tryURLLikeSpecifierParse, tryURLParse, isSpecial } = require('./utils.js');
 
 exports.resolve = (specifier, parsedImportMap, scriptURL) => {
   const asURL = tryURLLikeSpecifierParse(specifier, scriptURL);
@@ -10,14 +10,14 @@ exports.resolve = (specifier, parsedImportMap, scriptURL) => {
   for (const [scopePrefix, scopeImports] of Object.entries(parsedImportMap.scopes)) {
     if (scopePrefix === scriptURLString ||
         (scopePrefix.endsWith('/') && scriptURLString.startsWith(scopePrefix))) {
-      const scopeImportsMatch = resolveImportsMatch(normalizedSpecifier, scopeImports);
+      const scopeImportsMatch = resolveImportsMatch(normalizedSpecifier, asURL, scopeImports);
       if (scopeImportsMatch !== null) {
         return scopeImportsMatch;
       }
     }
   }
 
-  const topLevelImportsMatch = resolveImportsMatch(normalizedSpecifier, parsedImportMap.imports);
+  const topLevelImportsMatch = resolveImportsMatch(normalizedSpecifier, asURL, parsedImportMap.imports);
   if (topLevelImportsMatch !== null) {
     return topLevelImportsMatch;
   }
@@ -30,7 +30,7 @@ exports.resolve = (specifier, parsedImportMap, scriptURL) => {
   throw new TypeError(`Unmapped bare specifier "${specifier}"`);
 };
 
-function resolveImportsMatch(normalizedSpecifier, specifierMap) {
+function resolveImportsMatch(normalizedSpecifier, asURL, specifierMap) {
   for (const [specifierKey, resolutionResult] of Object.entries(specifierMap)) {
     // Exact-match case
     if (specifierKey === normalizedSpecifier) {
@@ -44,7 +44,9 @@ function resolveImportsMatch(normalizedSpecifier, specifierMap) {
     }
 
     // Package prefix-match case
-    if (specifierKey.endsWith('/') && normalizedSpecifier.startsWith(specifierKey)) {
+    if (specifierKey.endsWith('/') &&
+        normalizedSpecifier.startsWith(specifierKey) &&
+        (!asURL || isSpecial(asURL))) {
       if (resolutionResult === null) {
         throw new TypeError(`Blocked by a null entry for "${specifierKey}"`);
       }
