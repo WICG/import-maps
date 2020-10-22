@@ -61,7 +61,13 @@ function resolveImportsMatch(normalizedSpecifier, asURL, specifierMap) {
       const url = tryURLParse(afterPrefix, resolutionResult);
 
       if (url === null) {
-        throw new TypeError(`Failed to resolve prefix-match relative URL for "${specifierKey}"`);
+        throw new TypeError(`Failed to resolve the specifier "${normalizedSpecifier}" as its after-prefix portion ` +
+                            `"${afterPrefix}" could not be URL-parsed relative to the URL prefix ` +
+                            `"${resolutionResult.href}" mapped to by the prefix "${specifierKey}"`);
+      }
+
+      if (!url.href.startsWith(resolutionResult.href)) {
+        throw new TypeError(`The specifier "${normalizedSpecifier}" backtracks above its prefix "${specifierKey}"`);
       }
 
       assert(url instanceof URL);

@@ -6,7 +6,8 @@
       "lodash-dot": "./node_modules/lodash-es/lodash.js",
       "lodash-dot/": "./node_modules/lodash-es/",
       "lodash-dotdot": "../node_modules/lodash-es/lodash.js",
-      "lodash-dotdot/": "../node_modules/lodash-es/"
+      "lodash-dotdot/": "../node_modules/lodash-es/",
+      "mapped/path/": "https://github.com/WICG/import-maps/issues/207/"
     }
   },
   "importMapBaseURL": "https://example.com/app/index.html",
@@ -37,6 +38,17 @@
       "expectedResults": {
         "underscore/": null,
         "underscore/foo": null
+      }
+    },
+    "backtracking via ..": {
+      "expectedResults": {
+        "mapped/path/": "https://github.com/WICG/import-maps/issues/207/",
+        "mapped/path/..": null,
+        "mapped/path/../backtrack": null,
+        "mapped/path/../../backtrack": null,
+        "mapped/path/../../../backtrack": null,
+        "moment/../backtrack": null,
+        "moment/..": null
       }
     }
   }
