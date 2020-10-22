@@ -1,4 +1,4 @@
-name: Build & Deploy
+name: Build
 on:
   pull_request:
     branches:
