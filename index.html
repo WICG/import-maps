@@ -2436,13 +2436,13 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
         <p>If <var>scopePrefix</var> is <var>baseURLString</var>, or if <var>scopePrefix</var> ends with U+002F (/) and <var>baseURLString</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string-starts-with" id="ref-for-string-starts-with②">starts with</a> <var>scopePrefix</var>, then:</p>
         <ol>
          <li data-md>
-          <p>Let <var>scopeImportsMatch</var> be the result of <a data-link-type="dfn" href="#resolve-an-imports-match" id="ref-for-resolve-an-imports-match">resolving an imports match</a> given <var>normalizedSpecifier</var> and <var>scopeImports</var>.</p>
+          <p>Let <var>scopeImportsMatch</var> be the result of <a data-link-type="dfn" href="#resolve-an-imports-match" id="ref-for-resolve-an-imports-match">resolving an imports match</a> given <var>normalizedSpecifier</var>, <var>asURL</var>, and <var>scopeImports</var>.</p>
          <li data-md>
           <p>If <var>scopeImportsMatch</var> is not null, then return <var>scopeImportsMatch</var>.</p>
         </ol>
       </ol>
      <li data-md>
-      <p>Let <var>topLevelImportsMatch</var> be the result of <a data-link-type="dfn" href="#resolve-an-imports-match" id="ref-for-resolve-an-imports-match①">resolving an imports match</a> given <var>normalizedSpecifier</var> and <var>importMap</var>’s <a data-link-type="dfn" href="#import-map-imports" id="ref-for-import-map-imports③">imports</a>.</p>
+      <p>Let <var>topLevelImportsMatch</var> be the result of <a data-link-type="dfn" href="#resolve-an-imports-match" id="ref-for-resolve-an-imports-match①">resolving an imports match</a> given <var>normalizedSpecifier</var>, <var>asURL</var>, and <var>importMap</var>’s <a data-link-type="dfn" href="#import-map-imports" id="ref-for-import-map-imports③">imports</a>.</p>
      <li data-md>
       <p>If <var>topLevelImportsMatch</var> is not null, then return <var>topLevelImportsMatch</var>.</p>
      <li data-md>
@@ -2453,7 +2453,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
     </ol>
    </div>
    <div class="algorithm" data-algorithm="resolve an imports match">
-     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-lt="resolve an imports match|resolving an imports match" data-noexport id="resolve-an-imports-match">resolve an imports match</dfn>, given a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string⑦">string</a> <var>normalizedSpecifier</var> and a <a data-link-type="dfn" href="#specifier-map" id="ref-for-specifier-map③">specifier map</a> <var>specifierMap</var>: 
+     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-lt="resolve an imports match|resolving an imports match" data-noexport id="resolve-an-imports-match">resolve an imports match</dfn>, given a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string⑦">string</a> <var>normalizedSpecifier</var>, a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url①⓪">URL</a> or null <var>asURL</var>, and a <a data-link-type="dfn" href="#specifier-map" id="ref-for-specifier-map③">specifier map</a> <var>specifierMap</var>: 
     <ol>
      <li data-md>
       <p>For each <var>specifierKey</var> → <var>resolutionResult</var> of <var>specifierMap</var>,</p>
@@ -2465,18 +2465,27 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
           <p>If <var>resolutionResult</var> is null, then throw a <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#exceptiondef-typeerror" id="ref-for-exceptiondef-typeerror⑤">TypeError</a></code> indicating that resolution of <var>specifierKey</var> was blocked by a null entry.</p>
           <p class="note" role="note">This will terminate the entire <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier⑥">resolve a module specifier</a> algorithm, without any further fallbacks.</p>
          <li data-md>
-          <p class="assertion">Assert: <var>resolutionResult</var> is a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url①⓪">URL</a>.</p>
+          <p class="assertion">Assert: <var>resolutionResult</var> is a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url①①">URL</a>.</p>
          <li data-md>
           <p>Return <var>resolutionResult</var>.</p>
         </ol>
        <li data-md>
-        <p>If <var>specifierKey</var> ends with U+002F (/) and <var>normalizedSpecifier</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string-starts-with" id="ref-for-string-starts-with③">starts with</a> <var>specifierKey</var>, then:</p>
+        <p>If all of the following are true:</p>
+        <ul>
+         <li data-md>
+          <p><var>specifierKey</var> ends with U+002F (/),</p>
+         <li data-md>
+          <p><var>normalizedSpecifier</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string-starts-with" id="ref-for-string-starts-with③">starts with</a> <var>specifierKey</var>, and</p>
+         <li data-md>
+          <p>either <var>asURL</var> is null, or <var>asURL</var> <a data-link-type="dfn" href="https://url.spec.whatwg.org/#is-special" id="ref-for-is-special">is special</a></p>
+        </ul>
+        <p>then:</p>
         <ol>
          <li data-md>
           <p>If <var>resolutionResult</var> is null, then throw a <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#exceptiondef-typeerror" id="ref-for-exceptiondef-typeerror⑥">TypeError</a></code> indicating that resolution of <var>specifierKey</var> was blocked by a null entry.</p>
           <p class="note" role="note">This will terminate the entire <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier⑦">resolve a module specifier</a> algorithm, without any further fallbacks.</p>
          <li data-md>
-          <p class="assertion">Assert: <var>resolutionResult</var> is a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url①①">URL</a>.</p>
+          <p class="assertion">Assert: <var>resolutionResult</var> is a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url①②">URL</a>.</p>
          <li data-md>
           <p>Let <var>afterPrefix</var> be the portion of <var>normalizedSpecifier</var> after the initial <var>specifierKey</var> prefix.</p>
          <li data-md>
@@ -2487,7 +2496,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
           <p>If <var>url</var> is failure, then throw a <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#exceptiondef-typeerror" id="ref-for-exceptiondef-typeerror⑦">TypeError</a></code> indicating that resolution of <var>specifierKey</var> was blocked due to a URL parse failure.</p>
           <p class="note" role="note">This will terminate the entire <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier⑧">resolve a module specifier</a> algorithm, without any further fallbacks.</p>
          <li data-md>
-          <p class="assertion">Assert: <var>url</var> is a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url①②">URL</a>.</p>
+          <p class="assertion">Assert: <var>url</var> is a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url①③">URL</a>.</p>
          <li data-md>
           <p>Return <var>url</var>.</p>
         </ol>
@@ -2526,7 +2535,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <h4 class="heading settled" data-level="5.1.3" id="complexity"><span class="secno">5.1.3. </span><span class="content">Time/memory complexity</span><a class="self-link" href="#complexity"></a></h4>
    <p>To avoid denial of service attacks, explosive memory usage, and the like, import maps are designed to have reasonably bounded time and memory complexity in the worst cases, and to not be Turing complete.</p>
    <h3 class="heading settled" data-level="5.2" id="note-on-import-specifiers"><span class="secno">5.2. </span><span class="content">A note on import specifiers</span><a class="self-link" href="#note-on-import-specifiers"></a></h3>
-   <p>The import specifiers that appear in <code>import</code> statements and <code>import()</code> expressions are not <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url①③">URLs</a>, and should not be thought of as such.</p>
+   <p>The import specifiers that appear in <code>import</code> statements and <code>import()</code> expressions are not <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url①④">URLs</a>, and should not be thought of as such.</p>
    <p>To date, there has been a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier①③">default mechanism</a> for translating those strings into URLs. And indeed, some of the strings, such as <code>"https://example.com/foo.mjs"</code>, or <code>"./bar.mjs"</code>, might look URL-like; for those, the default translation does what you would expect.</p>
    <p>But overall, one should not think of <code>import(x)</code> as corresponding to <code>fetch(x)</code>. Instead, the correspondence is to <code>fetch(translate(x))</code>, where the translation algorithm produces the actual URL to be fetched. In this framing, the way to think about import maps is as providing a mechanism for overriding the default mechanism, i.e. customizing the <code>translate()</code> function.</p>
    <p>This brings some clarity to some common security questions. For example: given an import map which maps the specifier <code>"https://1.example.com/foo.mjs"</code> to the URL <code>&lt;https://2.example.com/bar.mjs></code>, should we apply CSP checks to <code>&lt;https://1.example.com/foo.mjs></code> or to <code>&lt;https://2.example.com/bar.mjs></code>? With this framing we can see that we should apply the checks to the post-translation URL <code>&lt;https://2.example.com/bar.mjs></code> which is actually fetched, and not to the pre-translation <code>"https://1.example.com/foo.mjs"</code> module specifier.</p>
@@ -3051,14 +3060,20 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
     <li><a href="#ref-for-concept-url-host">3. Parsing import maps</a>
    </ul>
   </aside>
+  <aside class="dfn-panel" data-for="term-for-is-special">
+   <a href="https://url.spec.whatwg.org/#is-special">https://url.spec.whatwg.org/#is-special</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-is-special">4.1. New "resolve a module specifier"</a>
+   </ul>
+  </aside>
   <aside class="dfn-panel" data-for="term-for-concept-url">
    <a href="https://url.spec.whatwg.org/#concept-url">https://url.spec.whatwg.org/#concept-url</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-concept-url">1. Definitions</a> <a href="#ref-for-concept-url①">(2)</a>
     <li><a href="#ref-for-concept-url②">3. Parsing import maps</a> <a href="#ref-for-concept-url③">(2)</a> <a href="#ref-for-concept-url④">(3)</a> <a href="#ref-for-concept-url⑤">(4)</a> <a href="#ref-for-concept-url⑥">(5)</a> <a href="#ref-for-concept-url⑦">(6)</a>
     <li><a href="#ref-for-concept-url⑧">4. Resolving module specifiers</a> <a href="#ref-for-concept-url⑨">(2)</a>
-    <li><a href="#ref-for-concept-url①⓪">4.1. New "resolve a module specifier"</a> <a href="#ref-for-concept-url①①">(2)</a> <a href="#ref-for-concept-url①②">(3)</a>
-    <li><a href="#ref-for-concept-url①③">5.2. A note on import specifiers</a>
+    <li><a href="#ref-for-concept-url①⓪">4.1. New "resolve a module specifier"</a> <a href="#ref-for-concept-url①①">(2)</a> <a href="#ref-for-concept-url①②">(3)</a> <a href="#ref-for-concept-url①③">(4)</a>
+    <li><a href="#ref-for-concept-url①④">5.2. A note on import specifiers</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-url-parser">
@@ -3187,6 +3202,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
     <a data-link-type="biblio">[URL]</a> defines the following terms:
     <ul>
      <li><span class="dfn-paneled" id="term-for-concept-url-host">host</span>
+     <li><span class="dfn-paneled" id="term-for-is-special">is special</span>
      <li><span class="dfn-paneled" id="term-for-concept-url">url</span>
      <li><span class="dfn-paneled" id="term-for-concept-url-parser">url parser</span>
      <li><span class="dfn-paneled" id="term-for-concept-url-serializer">url serializer</span>
