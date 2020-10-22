@@ -44,6 +44,11 @@ function runTests(j) {
   if ('importMap' in j) {
     assertOwnProperty(j, 'importMap');
     assertOwnProperty(j, 'importMapBaseURL');
+
+    // Suppress console warnings while parsing.
+    const originalConsoleWarn = console.warn;
+    console.warn = () => {};
+
     try {
       j.parsedImportMap = parseFromString(
         JSON.stringify(j.importMap),
@@ -52,6 +57,9 @@ function runTests(j) {
     } catch (e) {
       j.parsedImportMap = e;
     }
+
+    console.warn = originalConsoleWarn;
+
     delete j.importMap;
     delete j.importMapBaseURL;
   }
@@ -93,12 +101,7 @@ function runTests(j) {
     if ('expectedResults' in j) {
       it(j.name, () => {
         assertOwnProperty(j, 'baseURL');
-        describe(
-          'Import map registration should be successful for resolution tests',
-          () => {
-            expect(j.parsedImportMap).not.toBeInstanceOf(Error);
-          }
-        );
+        expect(j.parsedImportMap).not.toBeInstanceOf(Error);
 
         for (const specifier in j.expectedResults) {
           const expected = j.expectedResults[specifier];
