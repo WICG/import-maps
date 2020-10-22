@@ -12,11 +12,12 @@ Editor: Domenic Denicola, Google https://www.google.com/, d@domenic.me, https://
 Abstract: Import maps allow web pages to control the behavior of JavaScript imports.
 !Participate: <a href="https://github.com/WICG/import-maps">GitHub WICG/import-maps</a> (<a href="https://github.com/WICG/import-maps/issues/new">new issue</a>, <a href="https://github.com/WICG/import-maps/issues?state=open">open issues</a>)
 !Commits: <a href="https://github.com/WICG/import-maps/commits/master/spec.bs">GitHub spec.bs commits</a>
-Complain About: accidental-2119 yes, missing-example-ids yes
+Complain About: accidental-2119 yes
 Indent: 2
 Default Biblio Status: current
 Markup Shorthands: markdown yes
 </pre>
+<!-- TODO: add back `Complain About: missing-example-ids yes` when https://github.com/tabatkins/bikeshed/issues/1804 gets fixed. -->
 <pre class="link-defaults">
 spec: infra; type: dfn
   text: string
