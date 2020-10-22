@@ -17,3 +17,7 @@ exports.tryURLLikeSpecifierParse = (specifier, baseURL) => {
   const url = exports.tryURLParse(specifier);
   return url;
 };
+
+// https://url.spec.whatwg.org/#special-scheme
+const specialProtocols = new Set(['ftp:', 'file:', 'http:', 'https:', 'ws:', 'wss:']);
+exports.isSpecial = url => specialProtocols.has(url.protocol);

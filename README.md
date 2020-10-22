@@ -219,6 +219,8 @@ This version ensures that import statements for specifiers that start with the s
 
 In general, the point is that the remapping works the same for URL-like imports as for bare imports. Our previous examples changed the resolution of specifiers like `"lodash"`, and thus changed the meaning of `import "lodash"`. Here we're changing the resolution of specifiers like `"/app/helpers.mjs"`, and thus changing the meaning of `import "/app/helpers.mjs"`.
 
+Note that this trailing-slash variant of URL-like specifier mapping only works if the URL-like specifier has a [special scheme](https://url.spec.whatwg.org/#special-scheme): e.g., a mapping of `"data:text/": "/foo"` will not impact the meaning of `import "data:text/javascript,console.log('test')"`, but instead will only impact `import "data:text/"`.
+
 #### Mapping away hashes in script filenames
 
 Script files are often given a unique hash in their filename, to improve cachability. See [this general discussion of the technique](https://jakearchibald.com/2016/caching-best-practices/), or [this more JavaScript- and webpack-focused discussion](https://developers.google.com/web/fundamentals/performance/webpack/use-long-term-caching).

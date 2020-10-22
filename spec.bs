@@ -398,9 +398,9 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
   1. Let |normalizedSpecifier| be the [=URL serializer|serialization=] of |asURL|, if |asURL| is non-null; otherwise, |specifier|.
   1. [=map/For each=] |scopePrefix| → |scopeImports| of |importMap|'s [=import map/scopes=],
     1. If |scopePrefix| is |baseURLString|, or if |scopePrefix| ends with U+002F (/) and |baseURLString| [=string/starts with=] |scopePrefix|, then:
-      1. Let |scopeImportsMatch| be the result of [=resolving an imports match=] given |normalizedSpecifier| and |scopeImports|.
+      1. Let |scopeImportsMatch| be the result of [=resolving an imports match=] given |normalizedSpecifier|, |asURL|, and |scopeImports|.
       1. If |scopeImportsMatch| is not null, then return |scopeImportsMatch|.
-  1. Let |topLevelImportsMatch| be the result of [=resolving an imports match=] given |normalizedSpecifier| and |importMap|'s [=import map/imports=].
+  1. Let |topLevelImportsMatch| be the result of [=resolving an imports match=] given |normalizedSpecifier|, |asURL|, and |importMap|'s [=import map/imports=].
   1. If |topLevelImportsMatch| is not null, then return |topLevelImportsMatch|.
   1. <p class="note">At this point, the specifier was able to be turned in to a URL, but it wasn't remapped to anything by |importMap|.</p>
     If |asURL| is not null, then return |asURL|.
@@ -408,7 +408,7 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
 </div>
 
 <div algorithm>
-  To <dfn lt="resolve an imports match|resolving an imports match">resolve an imports match</dfn>, given a [=string=] |normalizedSpecifier| and a [=specifier map=] |specifierMap|:
+  To <dfn lt="resolve an imports match|resolving an imports match">resolve an imports match</dfn>, given a [=string=] |normalizedSpecifier|, a [=URL=] or null |asURL|, and a [=specifier map=] |specifierMap|:
 
   1. For each |specifierKey| → |resolutionResult| of |specifierMap|,
     1. If |specifierKey| is |normalizedSpecifier|, then:
@@ -416,7 +416,13 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
         <p class="note">This will terminate the entire [=resolve a module specifier=] algorithm, without any further fallbacks.</p>
       1. Assert: |resolutionResult| is a [=URL=].
       1. Return |resolutionResult|.
-    1. If |specifierKey| ends with U+002F (/) and |normalizedSpecifier| [=string/starts with=] |specifierKey|, then:
+    1. If all of the following are true:
+
+      * |specifierKey| ends with U+002F (/),
+      * |normalizedSpecifier| [=string/starts with=] |specifierKey|, and
+      * either |asURL| is null, or |asURL| [=is special=]
+
+      then:
       1. If |resolutionResult| is null, then throw a {{TypeError}} indicating that resolution of |specifierKey| was blocked by a null entry.
         <p class="note">This will terminate the entire [=resolve a module specifier=] algorithm, without any further fallbacks.</p>
       1. Assert: |resolutionResult| is a [=URL=].
