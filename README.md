@@ -558,6 +558,7 @@ Several members of the community have been working on polyfills and tooling rela
 * [importly](https://www.npmjs.com/package/importly) generates an import map from a `package.json`.
 * [SystemJS](https://github.com/systemjs/systemjs) provides a polyfill-like workflow for using import maps in older browsers with the System module format and `<script type="systemjs-importmap">`.
 * [rollup-plugin-index-html](https://www.npmjs.com/package/rollup-plugin-index-html) is a [Rollup](https://rollupjs.org/) plugin for working with HTML files, which will use import maps that it finds in the HTML.
+* [@node-loader/import-maps](https://github.com/node-loader/node-loader-import-maps) is a [NodeJS loader](https://nodejs.org/dist/latest-v15.x/docs/api/esm.html#esm_experimental_loaders) for using import maps in NodeJS.
 
 Feel free to send a pull request with more! Also, you can use [#146](https://github.com/WICG/import-maps/issues/146) in the issue tracker for discussion about this space.
 
