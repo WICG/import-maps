@@ -15,13 +15,13 @@ To build the specification, you can use one of:
 
 ## Reference implementation
 
-We maintain a reference implementation in the [`reference-implementation/`](https://github.com/WICG/import-maps/tree/master/reference-implementation) subfolder. This is currently serving as a prototyping ground before we start working on the formal specification. Eventually we anticipate it co-evolving alongside the specification, in the same was as is done for other standards like Streams, URL, and the MIME type parser.
+We maintain a reference implementation in the [`reference-implementation/`](https://github.com/WICG/import-maps/tree/master/reference-implementation) subfolder. This reference implementation, along with its tests, is meant to co-evolve along with the specification and stay in sync.
 
 ## Tests
 
-This specification is not yet far enough along to have [web platform tests](https://github.com/web-platform-tests/wpt). But soon!
+This specification has [web platform tests](https://github.com/web-platform-tests/wpt), in the [`import-maps/`](https://github.com/web-platform-tests/wpt/tree/master/import-maps) subdirectory. All normative specification updates need accompanying web platform test changes.
 
-In the meantime, unit tests that validate individual algorithms accompany the reference implementation, and should be updated as part of it.
+Tests for parsing and resolution are driven by [JSON files](https://github.com/web-platform-tests/wpt/tree/master/import-maps/data-driven/resources), in a [documented format](https://github.com/web-platform-tests/wpt/tree/master/import-maps/data-driven). This repository also contains a copy of these files in [`reference-implementation/__tests__/json`](https://github.com/WICG/import-maps/tree/master/reference-implementation/__tests__/json). Currently this repository and the web platform tests repository are synchronized manually.
 
 ## For maintainers: identifying contributors to a pull request
 
