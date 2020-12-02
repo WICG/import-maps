@@ -2649,28 +2649,31 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
          <li data-md>
           <p>Let <var>url</var> be the result of <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-parser" id="ref-for-concept-url-parser③">parsing</a> <var>afterPrefix</var> relative to the base URL <var>resolutionResult</var>.</p>
          <li data-md>
-          <p>If <var>url</var> is failure, then throw a <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#exceptiondef-typeerror" id="ref-for-exceptiondef-typeerror⑦">TypeError</a></code> indicating that resolution of <var>specifierKey</var> was blocked due to a URL parse failure.</p>
+          <p>If <var>url</var> is failure, then throw a <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#exceptiondef-typeerror" id="ref-for-exceptiondef-typeerror⑦">TypeError</a></code> indicating that resolution of <var>normalizedSpecifier</var> was blocked since the <var>afterPrefix</var> portion could not be URL-parsed relative to the <var>resolutionResult</var> mapped to by the <var>specifierKey</var> prefix.</p>
           <p class="note" role="note">This will terminate the entire <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier⑥">resolve a module specifier</a> algorithm, without any further fallbacks.</p>
          <li data-md>
           <p class="assertion">Assert: <var>url</var> is a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url①③">URL</a>.</p>
+         <li data-md>
+          <p>If the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer" id="ref-for-concept-url-serializer⑥">serialization</a> of <var>url</var> does not <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string-starts-with" id="ref-for-string-starts-with④">start with</a> the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer" id="ref-for-concept-url-serializer⑦">serialization</a> of <var>resolutionResult</var>, then throw a <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#exceptiondef-typeerror" id="ref-for-exceptiondef-typeerror⑧">TypeError</a></code> indicating that resolution of <var>normalizedSpecifier</var> was blocked due to it backtracking above its prefix <var>specifierKey</var>.</p>
+          <p class="note" role="note">This will terminate the entire <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier⑦">resolve a module specifier</a> algorithm, without any further fallbacks.</p>
          <li data-md>
           <p>Return <var>url</var>.</p>
         </ol>
       </ol>
      <li data-md>
       <p>Return null.</p>
-      <p class="note" role="note">The <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier⑦">resolve a module specifier</a> algorithm will fallback to a less specific scope or to "<code>imports</code>", if possible.</p>
+      <p class="note" role="note">The <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier⑧">resolve a module specifier</a> algorithm will fallback to a less specific scope or to "<code>imports</code>", if possible.</p>
     </ol>
    </div>
    <h3 class="heading settled" data-level="4.2" id="resolving-updates"><span class="secno">4.2. </span><span class="content">Updates to other algorithms</span><a class="self-link" href="#resolving-updates"></a></h3>
-   <p>All call sites of HTML’s existing <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier⑧">resolve a module specifier</a> will need to be updated to pass the appropriate <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-script" id="ref-for-concept-script⑤">script</a>, not just its <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-script-base-url" id="ref-for-concept-script-base-url①">base URL</a>. Some particular interesting cases:</p>
+   <p>All call sites of HTML’s existing <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier⑨">resolve a module specifier</a> will need to be updated to pass the appropriate <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-script" id="ref-for-concept-script⑤">script</a>, not just its <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-script-base-url" id="ref-for-concept-script-base-url①">base URL</a>. Some particular interesting cases:</p>
    <ul>
     <li data-md>
-     <p><a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#js-hostresolveimportedmodule" id="ref-for-js-hostresolveimportedmodule">HostResolveImportedModule</a> and <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#js-hostimportmoduledynamically" id="ref-for-js-hostimportmoduledynamically">HostImportModuleDynamically</a> no longer need to compute the base URL themselves, as <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier⑨">resolve a module specifier</a> now handles that.</p>
+     <p><a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#js-hostresolveimportedmodule" id="ref-for-js-hostresolveimportedmodule">HostResolveImportedModule</a> and <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#js-hostimportmoduledynamically" id="ref-for-js-hostimportmoduledynamically">HostImportModuleDynamically</a> no longer need to compute the base URL themselves, as <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier①⓪">resolve a module specifier</a> now handles that.</p>
     <li data-md>
      <p><a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#fetch-an-import()-module-script-graph" id="ref-for-fetch-an-import()-module-script-graph①">Fetch an import() module script graph</a> will also need to take a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-script" id="ref-for-concept-script⑥">script</a> instead of a base URL.</p>
    </ul>
-   <p>Call sites will also need to be updated to account for <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier①⓪">resolve a module specifier</a> now throwing exceptions, instead of returning failure. (Previously most call sites just turned failures into <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#exceptiondef-typeerror" id="ref-for-exceptiondef-typeerror⑧">TypeError</a></code>s manually, so this is straightforward.)</p>
+   <p>Call sites will also need to be updated to account for <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier①①">resolve a module specifier</a> now throwing exceptions, instead of returning failure. (Previously most call sites just turned failures into <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#exceptiondef-typeerror" id="ref-for-exceptiondef-typeerror⑨">TypeError</a></code>s manually, so this is straightforward.)</p>
    <h2 class="heading settled" data-level="5" id="security-and-privacy"><span class="secno">5. </span><span class="content">Security and Privacy</span><a class="self-link" href="#security-and-privacy"></a></h2>
    <h3 class="heading settled" data-level="5.1" id="threat-models"><span class="secno">5.1. </span><span class="content">Threat models</span><a class="self-link" href="#threat-models"></a></h3>
    <h4 class="heading settled" data-level="5.1.1" id="comparison-with-first-party-scripts"><span class="secno">5.1.1. </span><span class="content">Comparison with first-party scripts</span><a class="self-link" href="#comparison-with-first-party-scripts"></a></h4>
@@ -2692,7 +2695,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <p>To avoid denial of service attacks, explosive memory usage, and the like, import maps are designed to have reasonably bounded time and memory complexity in the worst cases, and to not be Turing complete.</p>
    <h3 class="heading settled" data-level="5.2" id="note-on-import-specifiers"><span class="secno">5.2. </span><span class="content">A note on import specifiers</span><a class="self-link" href="#note-on-import-specifiers"></a></h3>
    <p>The import specifiers that appear in <code>import</code> statements and <code>import()</code> expressions are not <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url①④">URLs</a>, and should not be thought of as such.</p>
-   <p>To date, there has been a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier①①">default mechanism</a> for translating those strings into URLs. And indeed, some of the strings, such as <code>"https://example.com/foo.mjs"</code>, or <code>"./bar.mjs"</code>, might look URL-like; for those, the default translation does what you would expect.</p>
+   <p>To date, there has been a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier①②">default mechanism</a> for translating those strings into URLs. And indeed, some of the strings, such as <code>"https://example.com/foo.mjs"</code>, or <code>"./bar.mjs"</code>, might look URL-like; for those, the default translation does what you would expect.</p>
    <p>But overall, one should not think of <code>import(x)</code> as corresponding to <code>fetch(x)</code>. Instead, the correspondence is to <code>fetch(translate(x))</code>, where the translation algorithm produces the actual URL to be fetched. In this framing, the way to think about import maps is as providing a mechanism for overriding the default mechanism, i.e. customizing the <code>translate()</code> function.</p>
    <p>This brings some clarity to some common security questions. For example: given an import map which maps the specifier <code>"https://1.example.com/foo.mjs"</code> to the URL <code>&lt;https://2.example.com/bar.mjs></code>, should we apply CSP checks to <code>&lt;https://1.example.com/foo.mjs></code> or to <code>&lt;https://2.example.com/bar.mjs></code>? With this framing we can see that we should apply the checks to the post-translation URL <code>&lt;https://2.example.com/bar.mjs></code> which is actually fetched, and not to the pre-translation <code>"https://1.example.com/foo.mjs"</code> module specifier.</p>
    <p>This also makes it clear that other URL-keyed features of the platform, such as as-yet-unspecified the <code>error.stack</code> property, will use the post-translation URLs, not the pre-translation module specifiers.</p>
@@ -3035,8 +3038,8 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <a href="https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier">https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-resolve-a-module-specifier③">4.1. New "resolve a module specifier"</a>
-    <li><a href="#ref-for-resolve-a-module-specifier⑧">4.2. Updates to other algorithms</a>
-    <li><a href="#ref-for-resolve-a-module-specifier①①">5.2. A note on import specifiers</a>
+    <li><a href="#ref-for-resolve-a-module-specifier⑨">4.2. Updates to other algorithms</a>
+    <li><a href="#ref-for-resolve-a-module-specifier①②">5.2. A note on import specifiers</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-script">
@@ -3192,7 +3195,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <a href="https://infra.spec.whatwg.org/#string-starts-with">https://infra.spec.whatwg.org/#string-starts-with</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-string-starts-with">3. Parsing import maps</a> <a href="#ref-for-string-starts-with①">(2)</a>
-    <li><a href="#ref-for-string-starts-with②">4.1. New "resolve a module specifier"</a> <a href="#ref-for-string-starts-with③">(2)</a>
+    <li><a href="#ref-for-string-starts-with②">4.1. New "resolve a module specifier"</a> <a href="#ref-for-string-starts-with③">(2)</a> <a href="#ref-for-string-starts-with④">(3)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-string">
@@ -3243,15 +3246,15 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <a href="https://url.spec.whatwg.org/#concept-url-serializer">https://url.spec.whatwg.org/#concept-url-serializer</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-concept-url-serializer">3. Parsing import maps</a> <a href="#ref-for-concept-url-serializer①">(2)</a> <a href="#ref-for-concept-url-serializer②">(3)</a>
-    <li><a href="#ref-for-concept-url-serializer③">4.1. New "resolve a module specifier"</a> <a href="#ref-for-concept-url-serializer④">(2)</a> <a href="#ref-for-concept-url-serializer⑤">(3)</a>
+    <li><a href="#ref-for-concept-url-serializer③">4.1. New "resolve a module specifier"</a> <a href="#ref-for-concept-url-serializer④">(2)</a> <a href="#ref-for-concept-url-serializer⑤">(3)</a> <a href="#ref-for-concept-url-serializer⑥">(4)</a> <a href="#ref-for-concept-url-serializer⑦">(5)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-exceptiondef-typeerror">
    <a href="https://heycam.github.io/webidl/#exceptiondef-typeerror">https://heycam.github.io/webidl/#exceptiondef-typeerror</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-exceptiondef-typeerror">3. Parsing import maps</a> <a href="#ref-for-exceptiondef-typeerror①">(2)</a> <a href="#ref-for-exceptiondef-typeerror②">(3)</a> <a href="#ref-for-exceptiondef-typeerror③">(4)</a>
-    <li><a href="#ref-for-exceptiondef-typeerror④">4.1. New "resolve a module specifier"</a> <a href="#ref-for-exceptiondef-typeerror⑤">(2)</a> <a href="#ref-for-exceptiondef-typeerror⑥">(3)</a> <a href="#ref-for-exceptiondef-typeerror⑦">(4)</a>
-    <li><a href="#ref-for-exceptiondef-typeerror⑧">4.2. Updates to other algorithms</a>
+    <li><a href="#ref-for-exceptiondef-typeerror④">4.1. New "resolve a module specifier"</a> <a href="#ref-for-exceptiondef-typeerror⑤">(2)</a> <a href="#ref-for-exceptiondef-typeerror⑥">(3)</a> <a href="#ref-for-exceptiondef-typeerror⑦">(4)</a> <a href="#ref-for-exceptiondef-typeerror⑧">(5)</a>
+    <li><a href="#ref-for-exceptiondef-typeerror⑨">4.2. Updates to other algorithms</a>
    </ul>
   </aside>
   <h3 class="no-num no-ref heading settled" id="index-defined-elsewhere"><span class="content">Terms defined by reference</span><a class="self-link" href="#index-defined-elsewhere"></a></h3>
@@ -3574,8 +3577,8 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <b><a href="#resolve-a-module-specifier">#resolve-a-module-specifier</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-resolve-a-module-specifier">4. Resolving module specifiers</a> <a href="#ref-for-resolve-a-module-specifier①">(2)</a> <a href="#ref-for-resolve-a-module-specifier②">(3)</a>
-    <li><a href="#ref-for-resolve-a-module-specifier④">4.1. New "resolve a module specifier"</a> <a href="#ref-for-resolve-a-module-specifier⑤">(2)</a> <a href="#ref-for-resolve-a-module-specifier⑥">(3)</a> <a href="#ref-for-resolve-a-module-specifier⑦">(4)</a>
-    <li><a href="#ref-for-resolve-a-module-specifier⑨">4.2. Updates to other algorithms</a> <a href="#ref-for-resolve-a-module-specifier①⓪">(2)</a>
+    <li><a href="#ref-for-resolve-a-module-specifier④">4.1. New "resolve a module specifier"</a> <a href="#ref-for-resolve-a-module-specifier⑤">(2)</a> <a href="#ref-for-resolve-a-module-specifier⑥">(3)</a> <a href="#ref-for-resolve-a-module-specifier⑦">(4)</a> <a href="#ref-for-resolve-a-module-specifier⑧">(5)</a>
+    <li><a href="#ref-for-resolve-a-module-specifier①⓪">4.2. Updates to other algorithms</a> <a href="#ref-for-resolve-a-module-specifier①①">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="resolve-an-imports-match">
