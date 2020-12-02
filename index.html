@@ -26,6 +26,7 @@
  *   - .figure and .caption (HTML4) and figure and figcaption (HTML5)
  *     -> .sidefigure for right-floated figures
  *   - ins/del
+ *     -> ins/del.c### for candidate and proposed changes (amendments)
  *
  * Code
  *   - pre and code
@@ -34,9 +35,12 @@
  *   - .note       for informative notes             (div, p, span, aside, details)
  *   - .example    for informative examples          (div, p, pre, span)
  *   - .issue      for issues                        (div, p, span)
- *   - .assertion  for assertions                    (div, p, span)
  *   - .advisement for loud normative statements     (div, p, strong)
  *   - .annoying-warning for spec obsoletion notices (div, aside, details)
+ *   - .correction for "candidate corrections"       (div, aside, details, section)
+ *   - .addition   for "candidate additions"         (div, aside, details, section)
+ *   - .correction.proposed for "proposed corrections" (div, aside, details, section)
+ *   - .addition.proposed   for "proposed additions"   (div, aside, details, section)
  *
  * Definition Boxes
  *   - pre.def   for WebIDL definitions
@@ -57,6 +61,8 @@
  *   - .head for the header
  *   - .copyright for the copyright
  *
+ * Outdated warning for old specs
+ *
  * Miscellaneous
  *   - .overlarge for things that should be as wide as possible, even if
  *     that overflows the body text area. This can be used on an item or
@@ -64,6 +70,7 @@
  *     Note that this styling basically doesn't help at all when printing,
  *     since A4 paper isn't much wider than the max-width here.
  *     It's better to design things to fit into a narrower measure if possible.
+ *
  *   - js-added ToC jump links (see fixup.js)
  *
  ******************************************************************************/
@@ -71,24 +78,20 @@
 /* color variables included separately for reliability */
 
 /******************************************************************************/
-/*                                   Body                                     */
+/*                                    Body                                    */
 /******************************************************************************/
 
 	html {
-		color: black;
-		color: var(--text);
-		background-color: white;
-		background-color: var(--bg);
 	}
 
 	body {
 		counter-reset: example figure issue;
 
 		/* Layout */
-		max-width: 50em;               /* limit line length to 50em for readability   */
-		margin: 0 auto;                /* center text within page                     */
+		max-width: 50em;			  /* limit line length to 50em for readability   */
+		margin: 0 auto;				/* center text within page                    */
 		padding: 1.6em 1.5em 2em 50px; /* assume 16px font size for downlevel clients */
-		padding: 1.6em 1.5em 2em calc(26px + 1.5em); /* leave space for status flag     */
+		padding: 1.6em 1.5em 2em calc(26px + 1.5em); /* leave space for status flag    */
 
 		/* Typography */
 		line-height: 1.5;
@@ -99,7 +102,10 @@
 		overflow-wrap: break-word;
 		hyphens: auto;
 
-		background: transparent top left fixed no-repeat;
+		color: black;
+		color: var(--text);
+		background: white top left fixed no-repeat;
+		background: var(--bg) top left fixed no-repeat;
 		background-size: 25px auto;
 	}
 
@@ -110,7 +116,7 @@
 
 /** Header ********************************************************************/
 
-	div.head { margin-bottom: 1em }
+	div.head { margin-bottom: 1em; }
 	div.head hr { border-style: solid; }
 
 	div.head h1 {
@@ -158,7 +164,7 @@
 /** Copyright *****************************************************************/
 
 	p.copyright,
-	p.copyright small { font-size: small }
+	p.copyright small { font-size: small; }
 
 /** Back to Top / ToC Toggle **************************************************/
 
@@ -170,7 +176,7 @@
 	@media not print {
 		#toc-nav {
 			position: fixed;
-			z-index: 2;
+			z-index: 3;
 			bottom: 0; left: 0;
 			margin: 0;
 			min-width: 1.33em;
@@ -337,9 +343,9 @@
 		page-break-after: avoid;
 		page-break-inside: avoid;
 		font: 100% sans-serif;   /* Reset all font styling to clear out UA styles */
-		font-family: inherit;    /* Inherit the font family. */
-		line-height: 1.2;        /* Keep wrapped headings compact */
-		hyphens: manual;         /* Hyphenated headings look weird */
+		font-family: inherit;	/* Inherit the font family. */
+		line-height: 1.2;		/* Keep wrapped headings compact */
+		hyphens: manual;		/* Hyphenated headings look weird */
 	}
 
 	h2, h3, h4, h5, h6 {
@@ -423,51 +429,51 @@
 	/* Style for algorithms */
 	ol.algorithm ol:not(.algorithm),
 	.algorithm > ol ol:not(.algorithm) {
-	 border-left: 0.5em solid #DEF;
-	 border-left: 0.5em solid var(--algo-border);
+	border-left: 0.5em solid #DEF;
+	border-left: 0.5em solid var(--algo-border);
 	}
 
 	/* Put nice boxes around each algorithm. */
 	[data-algorithm]:not(.heading) {
-	  padding: .5em;
-	  border: thin solid #ddd;
-	  border: thin solid var(--algo-border);
-	  border-radius: .5em;
-	  margin: .5em calc(-0.5em - 1px);
+	 padding: .5em;
+	 border: thin solid #ddd;
+	 border: thin solid var(--algo-border);
+	 border-radius: .5em;
+	 margin: .5em calc(-0.5em - 1px);
 	}
 	[data-algorithm]:not(.heading) > :first-child {
-	  margin-top: 0;
+	 margin-top: 0;
 	}
 	[data-algorithm]:not(.heading) > :last-child {
-	  margin-bottom: 0;
+	 margin-bottom: 0;
 	}
 
 	/* Style for switch/case <dl>s */
 	dl.switch > dd > ol.only,
 	dl.switch > dd > .only > ol {
-	 margin-left: 0;
+	margin-left: 0;
 	}
 	dl.switch > dd > ol.algorithm,
 	dl.switch > dd > .algorithm > ol {
-	 margin-left: -2em;
+	margin-left: -2em;
 	}
 	dl.switch {
-	 padding-left: 2em;
+	padding-left: 2em;
 	}
 	dl.switch > dt {
-	 text-indent: -1.5em;
-	 margin-top: 1em;
+	text-indent: -1.5em;
+	margin-top: 1em;
 	}
 	dl.switch > dt + dt {
-	 margin-top: 0;
+	margin-top: 0;
 	}
 	dl.switch > dt::before {
-	 content: '\21AA';
-	 padding: 0 0.5em 0 0;
-	 display: inline-block;
-	 width: 1em;
-	 text-align: right;
-	 line-height: 0.5em;
+	content: '\21AA';
+	padding: 0 0.5em 0 0;
+	display: inline-block;
+	width: 1em;
+	text-align: right;
+	line-height: 0.5em;
 	}
 
 /** Terminology Markup ********************************************************/
@@ -485,7 +491,7 @@
 		font-style: normal;
 	}
 	dt dfn code, code.idl {
-		font-size: medium;
+		font-size: inherit;
 	}
 	dfn var {
 		font-style: normal;
@@ -494,18 +500,37 @@
 /** Change Marking ************************************************************/
 
 	del {
-		color: red;
+		color: #aa0000;
 		color: var(--del-text);
 		background: transparent;
 		background: var(--del-bg);
 		text-decoration: line-through;
 	}
 	ins {
-		color: #080;
+		color: #006100;
 		color: var(--ins-text);
 		background: transparent;
 		background: var(--ins-bg);
 		text-decoration: underline;
+	}
+
+	/* for amendments (candidate/proposed changes) */
+
+	.amendment ins, .correction ins, .addition ins,
+	ins[class^=c] {
+		text-decoration-style: dotted;
+	}
+	.amendment del, .correction del, .addition del,
+	del[class^=c] {
+		text-decoration-style: dotted;
+	}
+	.amendment.proposed ins, .correction.proposed ins, .addition.proposed ins,
+	ins[class^=c].proposed {
+		text-decoration-style: double;
+	}
+	.amendment.proposed del, .correction.proposed del, .addition.proposed del,
+	del[class^=c].proposed {
+		text-decoration-style: double;
 	}
 
 /** Miscellaneous improvements to inline formatting ***************************/
@@ -546,7 +571,7 @@
 
 /** Inline Code fragments *****************************************************/
 
-  /* Do something nice. */
+	/* Do something nice. */
 
 /******************************************************************************/
 /*                                    Links                                   */
@@ -610,7 +635,7 @@
 	}
 
 	/* For autogen numbers, add
-	   .caption::before, figcaption::before { content: "Figure " counter(figure) ". "; }
+	  .caption::before, figcaption::before { content: "Figure " counter(figure) ". "; }
 	*/
 
 	figure, .figure, .sidefigure {
@@ -618,7 +643,7 @@
 		text-align: center;
 		margin: 2.5em 0;
 	}
-	.figure img,    .sidefigure img,    figure img,
+	.figure img,	.sidefigure img,	figure img,
 	.figure object, .sidefigure object, figure object {
 		max-width: 100%;
 		margin: auto;
@@ -636,7 +661,7 @@
 		.sidefigure {
 			float: right;
 			width: 50%;
-			margin: 0 0 0.5em 0.5em
+			margin: 0 0 0.5em 0.5em;
 		}
 	}
 	.caption, figcaption, caption {
@@ -651,13 +676,15 @@
 	}
 
 	/* DL list is indented 2em, but figure inside it is not */
-	dd > .figure, dd > figure { margin-left: -2em }
+	dd > .figure, dd > figure { margin-left: -2em; }
 
 /******************************************************************************/
 /*                             Colored Boxes                                  */
 /******************************************************************************/
 
-	.issue, .note, .example, .assertion, .advisement, blockquote {
+	.issue, .note, .example, .assertion, .advisement, blockquote,
+	.amendment, .correction, .addition {
+		margin: 1em auto;
 		padding: .5em;
 		border: .5em;
 		border-left-style: solid;
@@ -668,20 +695,20 @@
 		border-right-style: solid;
 	}
 
-	.issue,
-	.note,
-	.example,
-	.advisement,
-	.assertion,
-	blockquote {
-		margin: 1em auto;
-	}
+	blockquote > :first-child,
 	.note  > p:first-child,
 	.issue > p:first-child,
-	blockquote > :first-child {
+	.amendment > p:first-child,
+	.correction > p:first-child,
+	.addition > p:first-child {
 		margin-top: 0;
 	}
-	blockquote > :last-child {
+	blockquote > :last-child,
+	.note  > p:last-child,
+	.issue > p:last-child,
+	.amendment > p:last-child,
+	.correction > p:last-child,
+	.addition > p:last-child {
 		margin-bottom: 0;
 	}
 
@@ -689,7 +716,14 @@
 	.issue::before, .issue > .marker,
 	.example::before, .example > .marker,
 	.note::before, .note > .marker,
-	details.note > summary > .marker {
+	details.note > summary > .marker,
+	.amendment::before, .amendment > .marker,
+	details.amendment > summary > .marker,
+	.addition::before, .addition > .marker,
+	addition.amendment > summary > .marker,
+	.correction::before, .correction > .marker,
+	correction.amendment > summary > .marker
+	{
 		text-transform: uppercase;
 		padding-right: 1em;
 	}
@@ -727,7 +761,7 @@
 		color: var(--issueheading-text);
 	}
 	/* Add .issue::before { content: "Issue " counter(issue) " "; } for autogen numbers,
-	   or use class="marker" to mark up the issue number in source. */
+	  or use class="marker" to mark up the issue number in source. */
 
 /** Example *******************************************************************/
 
@@ -747,7 +781,7 @@
 		color: var(--exampleheading-text);
 	}
 	/* Add .example::before { content: "Example " counter(example) " "; } for autogen numbers,
-	   or use class="marker" to mark up the example number in source. */
+	  or use class="marker" to mark up the example number in source. */
 
 /** Non-normative Note ********************************************************/
 
@@ -767,7 +801,7 @@
 		color: var(--noteheading-text);
 	}
 	/* Add .note::before { content: "Note "; } for autogen label,
-	   or use class="marker" to mark up the label in source. */
+	  or use class="marker" to mark up the label in source. */
 
 	details.note[open] > summary {
 		border-bottom: 1px silver solid;
@@ -807,6 +841,38 @@
 		color: var(--advisementheading-text);
 	}
 
+/** Amendment Box *************************************************************/
+
+	.amendment, .correction, .addition {
+		border-color: #330099;
+		border-color: var(--amendment-border);
+		background: #F5F0FF;
+		background: var(--amendment-bg);
+		color: black;
+		color: var(--amendment-text);
+	}
+	.amendment.proposed, .correction.proposed, .addition.proposed {
+		border-style: solid;
+		border-block-width: 0.25em;
+	}
+	.amendment::before, .amendment > .marker,
+	details.amendment > summary::before, details.amendment > summary > .marker,
+	.correction::before, .correction > .marker,
+	details.correction > summary::before, details.correction > summary > .marker,
+	.addition::before, .addition > .marker,
+	details.addition > summary::before, details.addition > summary > .marker {
+		color: #220066;
+		color: var(--amendmentheading-text);
+	}
+	.amendment.proposed::before, .amendment.proposed > .marker,
+	details.amendment.proposed > summary::before, details.amendment.proposed > summary > .marker,
+	.correction.proposed::before, .correction.proposed > .marker,
+	details.correction.proposed > summary::before, details.correction.proposed > summary > .marker,
+	.addition.proposed::before, .addition.proposed > .marker,
+	details.addition.proposed > summary::before, details.addition.proposed > summary > .marker {
+		font-weight: bold;
+	}
+
 /** Spec Obsoletion Notice ****************************************************/
 	/* obnoxious obsoletion notice for older/abandoned specs. */
 
@@ -835,15 +901,15 @@
 		margin-bottom: 0;
 	}
 
-	@media not print {
-		details.annoying-warning[open] {
-			position: fixed;
-			left: 0;
-			right: 0;
-			bottom: 2em;
-			z-index: 1000;
-		}
+@media not print {
+	details.annoying-warning[open] {
+		position: fixed;
+		left: 0;
+		right: 0;
+		bottom: 2em;
+		z-index: 1000;
 	}
+}
 
 	details.annoying-warning:not([open]) > summary {
 		text-align: center;
@@ -918,15 +984,15 @@
 
 /** Data tables (and properly marked-up index tables) *************************/
 	/*
-		 <table class="data"> highlights structural relationships in a table
-		 when correct markup is used (e.g. thead/tbody, th vs. td, scope attribute)
+		<table class="data"> highlights structural relationships in a table
+		when correct markup is used (e.g. thead/tbody, th vs. td, scope attribute)
 
-		 Use class="complex data" for particularly complicated tables --
-		 (This will draw more lines: busier, but clearer.)
+		Use class="complex data" for particularly complicated tables --
+		(This will draw more lines: busier, but clearer.)
 
-		 Use class="long" on table cells with paragraph-like contents
-		 (This will adjust text alignment accordingly.)
-		 Alternately use class="longlastcol" on tables, to have the last column assume "long".
+		Use class="long" on table cells with paragraph-like contents
+		(This will adjust text alignment accordingly.)
+		Alternately use class="longlastcol" on tables, to have the last column assume "long".
 	*/
 
 	table {
@@ -1075,22 +1141,22 @@ Possible extra rowspan handling
 		/* because generated content isn't search/selectable and markers can't do multilevel yet */
 		margin:  0;
 		padding: 0;
-		line-height: 1.1rem; /* consistent spacing */
+	}
+	.toc {
+		line-height: 1.1em;
 	}
 
 	/* ToC not indented until third level, but font style & margins show hierarchy */
-	.toc > li             { font-weight: bold;   }
-	.toc > li li          { font-weight: normal; }
-	.toc > li li li       { font-size:   95%;    }
-	.toc > li li li li    { font-size:   90%;    }
-	.toc > li li li li .secno { font-size: 85%; }
-	.toc > li li li li li { font-size:   85%;    }
-	.toc > li li li li li .secno { font-size: 100%; }
+	.toc > li			{ font-weight: bold;   }
+	.toc > li li		 { font-weight: normal; }
+	.toc > li li li	  { font-size:   95%;	}
+	.toc > li li li li	{ font-size:   90%;	}
+	.toc > li li li li li { font-size:   85%;	}
 
 	/* @supports not (display:grid) { */
-		.toc > li             { margin: 1.5rem 0;    }
-		.toc > li li          { margin: 0.3rem 0;    }
-		.toc > li li li       { margin-left: 2rem;   }
+		.toc > li			{ margin: 1.5rem 0;	}
+		.toc > li li		 { margin: 0.3rem 0;	}
+		.toc > li li li	  { margin-left: 2rem;   }
 
 		/* Section numbers in a column of their own */
 		.toc .secno {
@@ -1098,33 +1164,35 @@ Possible extra rowspan handling
 			width: 4rem;
 			white-space: nowrap;
 		}
+		.toc > li li li li .secno { font-size: 85%; }
+		.toc > li li li li li .secno { font-size: 100%; }
 
 		.toc li {
 			clear: both;
 		}
 
-		:not(li) > .toc              { margin-left:  5rem; }
-		.toc .secno                  { margin-left: -5rem; }
-		.toc > li li li .secno       { margin-left: -7rem; }
-		.toc > li li li li .secno    { margin-left: -9rem; }
+		:not(li) > .toc			 { margin-left:  5rem; }
+		.toc .secno				 { margin-left: -5rem; }
+		.toc > li li li .secno	  { margin-left: -7rem; }
+		.toc > li li li li .secno	{ margin-left: -9rem; }
 		.toc > li li li li li .secno { margin-left: -11rem; }
 
 		/* Tighten up indentation in narrow ToCs */
 		@media (max-width: 30em) {
-			:not(li) > .toc              { margin-left:  4rem; }
-			.toc .secno                  { margin-left: -4rem; }
-			.toc > li li li              { margin-left:  1rem; }
-			.toc > li li li .secno       { margin-left: -5rem; }
-			.toc > li li li li .secno    { margin-left: -6rem; }
+			:not(li) > .toc			 { margin-left:  4rem; }
+			.toc .secno				 { margin-left: -4rem; }
+			.toc > li li li			 { margin-left:  1rem; }
+			.toc > li li li .secno	  { margin-left: -5rem; }
+			.toc > li li li li .secno	{ margin-left: -6rem; }
 			.toc > li li li li li .secno { margin-left: -7rem; }
 		}
 		/* Loosen it on wide screens */
 		@media screen and (min-width: 78em) {
-			body:not(.toc-inline) :not(li) > .toc              { margin-left:  4rem; }
-			body:not(.toc-inline) .toc .secno                  { margin-left: -4rem; }
-			body:not(.toc-inline) .toc > li li li              { margin-left:  1rem; }
-			body:not(.toc-inline) .toc > li li li .secno       { margin-left: -5rem; }
-			body:not(.toc-inline) .toc > li li li li .secno    { margin-left: -6rem; }
+			body:not(.toc-inline) :not(li) > .toc			 { margin-left:  4rem; }
+			body:not(.toc-inline) .toc .secno				 { margin-left: -4rem; }
+			body:not(.toc-inline) .toc > li li li			 { margin-left:  1rem; }
+			body:not(.toc-inline) .toc > li li li .secno	  { margin-left: -5rem; }
+			body:not(.toc-inline) .toc > li li li li .secno	{ margin-left: -6rem; }
 			body:not(.toc-inline) .toc > li li li li li .secno { margin-left: -7rem; }
 	}
 	/* } */
@@ -1155,7 +1223,7 @@ Possible extra rowspan handling
 		}
 		#toc > .toc > li > a > span {
 			/* The spans of the top-level list,
-			   comprising the first items of each top-level section. */
+			  comprising the first items of each top-level section. */
 			margin-top: 1.1rem;
 		}
 		#toc#toc .secno { /* Ugh, need more specificity to override base.css */
@@ -1188,12 +1256,12 @@ Possible extra rowspan handling
 /** Index *********************************************************************/
 
 	/* Index Lists: Layout */
-	ul.index       { margin-left: 0; columns: 15em; text-indent: 1em hanging; }
-	ul.index li    { margin-left: 0; list-style: none; break-inside: avoid; }
-	ul.index li li { margin-left: 1em }
-	ul.index dl    { margin-top: 0; }
-	ul.index dt    { margin: .2em 0 .2em 20px;}
-	ul.index dd    { margin: .2em 0 .2em 40px;}
+	ul.index	  { margin-left: 0; columns: 15em; text-indent: 1em hanging; }
+	ul.index li	{ margin-left: 0; list-style: none; break-inside: avoid; }
+	ul.index li li { margin-left: 1em; }
+	ul.index dl	{ margin-top: 0; }
+	ul.index dt	{ margin: .2em 0 .2em 20px;}
+	ul.index dd	{ margin: .2em 0 .2em 40px;}
 	/* Index Lists: Typography */
 	ul.index ul,
 	ul.index dl { font-size: smaller; }
@@ -1237,6 +1305,91 @@ Possible extra rowspan handling
 		font-weight: bold;
 	}
 
+/** Outdated warning **********************************************************/
+
+.outdated-spec {
+	color: black;
+	color: var(--outdatedspec-text);
+	background-color: rgba(0,0,0,0.5);
+	background-color: var(--outdatedspec-bg);
+}
+
+.outdated-warning {
+	position: fixed;
+	bottom: 50%;
+	left: 0;
+	right: 0;
+	margin: 0 auto;
+	width: 50%;
+	background: maroon;
+	background: var(--outdated-bg);
+	color: white;
+	color: var(--outdated-text);
+	border-radius: 1em;
+	box-shadow: 0 0 1em red;
+	box-shadow: 0 0 1em var(--outdated-shadow);
+	padding: 2em;
+	text-align: center;
+	z-index: 2;
+}
+
+.outdated-warning a {
+	color: currentcolor;
+	background: transparent;
+}
+
+.edited-rec-warning {
+	background: darkorange;
+	background: var(--editedrec-bg);
+	box-shadow: 0 0 1em;
+}
+
+.outdated-warning button {
+	color: var(--outdated-text);
+	border-radius: 1em;
+	box-shadow: 0 0 1em red;
+	box-shadow: 0 0 1em var(--outdated-shadow);
+	padding: 2em;
+	text-align: center;
+	z-index: 2;
+}
+
+.outdated-warning a {
+	color: currentcolor;
+	background: transparent;
+}
+
+.edited-rec-warning {
+	background: darkorange;
+	background: var(--editedrec-bg);
+	box-shadow: 0 0 1em;
+}
+
+.outdated-warning button {
+	position: absolute;
+	top: 0;
+	right:0;
+	margin: 0;
+	border: 0;
+	padding: 0.25em 0.5em;
+	background: transparent;
+	color: white;
+	color: var(--outdated-text);
+	font:1em sans-serif;
+	text-align:center;
+}
+
+.outdated-warning span {
+	display: block;
+}
+
+.outdated-collapsed {
+	bottom: 0;
+	border-radius: 0;
+	width: 100%;
+	padding: 0;
+}
+
 /******************************************************************************/
 /*                                    Print                                   */
 /******************************************************************************/
@@ -1249,6 +1402,16 @@ Possible extra rowspan handling
 		/* Serif for print. */
 		body {
 			font-family: serif;
+		}
+
+		.outdated-warning {
+			position: absolute;
+			border-style: solid;
+			border-color: red;
+		}
+
+		.outdated-warning input {
+			display: none;
 		}
 	}
 	@page {
@@ -1268,13 +1431,13 @@ Possible extra rowspan handling
 		margin-right: auto;
 	}
 	.overlarge {
-		/* Magic to create good table positioning:
-		   "content column" is 50ems wide at max; less on smaller screens.
-		   Extra space (after ToC + content) is empty on the right.
+		/* Magic to create good item positioning:
+		  "content column" is 50ems wide at max; less on smaller screens.
+		  Extra space (after ToC + content) is empty on the right.
 
-		   1. When table < content column, centers table in column.
-		   2. When content < table < available, left-aligns.
-		   3. When table > available, fills available + scroll bar.
+		  1. When item < content column, centers item in column.
+		  2. When content < item < available, left-aligns.
+		  3. When item > available, fills available + scroll bar.
 		*/
 		display: grid;
 		grid-template-columns: minmax(0, 50em);
@@ -1309,20 +1472,20 @@ Possible extra rowspan handling
 		.overlarge {
 			overflow-x: auto;
 			/* See Lea Verou's explanation background-attachment:
-			 * http://lea.verou.me/2012/04/background-attachment-local/
-			 *
+			* http://lea.verou.me/2012/04/background-attachment-local/
+			*
 			background: top left  / 4em 100% linear-gradient(to right,  #ffffff, rgba(255, 255, 255, 0)) local,
-			            top right / 4em 100% linear-gradient(to left, #ffffff, rgba(255, 255, 255, 0)) local,
-			            top left  / 1em 100% linear-gradient(to right,  #c3c3c5, rgba(195, 195, 197, 0)) scroll,
-			            top right / 1em 100% linear-gradient(to left, #c3c3c5, rgba(195, 195, 197, 0)) scroll,
-			            white;
+						top right / 4em 100% linear-gradient(to left, #ffffff, rgba(255, 255, 255, 0)) local,
+						top left  / 1em 100% linear-gradient(to right,  #c3c3c5, rgba(195, 195, 197, 0)) scroll,
+						top right / 1em 100% linear-gradient(to left, #c3c3c5, rgba(195, 195, 197, 0)) scroll,
+						white;
 			background-repeat: no-repeat;
 			*/
 		}
 	}
 </style>
   <link href="https://www.w3.org/StyleSheets/TR/2016/cg-draft" rel="stylesheet">
-  <meta content="Bikeshed version 89ebb6ab, updated Fri Oct 9 15:32:07 2020 -0700" name="generator">
+  <meta content="Bikeshed version 4e8dd937, updated Fri Nov 13 16:49:31 2020 -0800" name="generator">
   <link href="https://wicg.github.io/import-maps/" rel="canonical">
 <style>
 .selected-text-file-an-issue {
@@ -1339,12 +1502,6 @@ summary {
   cursor: pointer;
 }
 </style>
-<style>/* darkmode */
-
-            @media (prefers-color-scheme: dark) {
-                html { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cg fill='%23100808' transform='translate(200 200) rotate(-45) translate(-200 -200)' stroke='%23100808' stroke-width='3'%3E%3Ctext x='50%25' y='220' style='font: bold 70px sans-serif; text-anchor: middle; letter-spacing: 6px;'%3EUNOFFICIAL%3C/text%3E%3Ctext x='50%25' y='305' style='font: bold 70px sans-serif; text-anchor: middle; letter-spacing: 6px;'%3EDRAFT%3C/text%3E%3C/g%3E%3C/svg%3E") !important; }
-            }
-            </style>
 <style>/* style-autolinks */
 
 .css.css, .property.property, .descriptor.descriptor {
@@ -1410,17 +1567,13 @@ pre .property::before, pre .property::after {
 <style>/* style-colors */
 
 /* Any --*-text not paired with a --*-bg is assumed to have a transparent bg */
-html {
-    color: black;
-    color: var(--text);
-    background-color: white;
-    background-color: var(--bg);
-}
 :root {
     color-scheme: light dark;
 
     --text: black;
     --bg: white;
+
+    --unofficial-watermark: url(https://www.w3.org/StyleSheets/TR/2016/logos/UD-watermark);
 
     --logo-bg: #1a5e9a;
     --logo-active-bg: #c00;
@@ -1494,6 +1647,11 @@ html {
     --warning-border: red;
     --warning-bg: hsla(40,100%,50%,0.95);
     --warning-text: var(--text);
+
+    --amendment-border: #330099;
+    --amendment-bg: #F5F0FF;
+    --amendment-text: var(--text);
+    --amendmentheading-text: #220066;
 
     --def-border: #8ccbf2;
     --def-bg: #def;
@@ -1724,6 +1882,8 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
         --text: #ddd;
         --bg: black;
 
+        --unofficial-watermark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cg fill='%23100808' transform='translate(200 200) rotate(-45) translate(-200 -200)' stroke='%23100808' stroke-width='3'%3E%3Ctext x='50%25' y='220' style='font: bold 70px sans-serif; text-anchor: middle; letter-spacing: 6px;'%3EUNOFFICIAL%3C/text%3E%3Ctext x='50%25' y='305' style='font: bold 70px sans-serif; text-anchor: middle; letter-spacing: 6px;'%3EDRAFT%3C/text%3E%3C/g%3E%3C/svg%3E");
+
         --logo-bg: #1a5e9a;
         --logo-active-bg: #c00;
         --logo-text: white;
@@ -1798,6 +1958,11 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
         --warning-border: red;
         --warning-bg: hsla(40,100%,20%,0.95);
         --warning-text: var(--text);
+
+        --amendment-border: #330099;
+        --amendment-bg: #080010;
+        --amendment-text: var(--text);
+        --amendmentheading-text: #cc00ff;
 
         --def-border: #8ccbf2;
         --def-bg: #080818;
@@ -1904,7 +2069,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2016/logos/W3C" width="72"> </a> </p>
    <h1 class="p-name no-ref" id="title">Import Maps</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Draft Community Group Report, <time class="dt-updated" datetime="2020-10-23">23 October 2020</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Draft Community Group Report, <time class="dt-updated" datetime="2020-12-02">2 December 2020</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -2164,17 +2329,8 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      <p><a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#fetch-a-modulepreload-module-script-graph" id="ref-for-fetch-a-modulepreload-module-script-graph">fetch a modulepreload module script graph</a></p>
     <li data-md>
      <p><a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#fetch-an-inline-module-script-graph" id="ref-for-fetch-an-inline-module-script-graph">fetch an inline module script graph</a></p>
-    <li data-md>
-     <p><a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#fetch-a-module-worker-script-tree" id="ref-for-fetch-a-module-worker-script-tree">fetch a module worker script graph</a> (using <var>module map settings object</var>)</p>
    </ul>
-   <div class="advisement">
-     In this draft of the spec, which inserts itself into these HTML concepts, the settings object used here is the <var>module map settings object</var>, not <var>fetch client settings object</var>, because <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier">resolve a module specifier</a> uses the import map of <var>module map settings object</var>. In a potential future version of the import maps infrastructure, which interjects itself at the layer of the Fetch spec in order to support <code>import:</code> URLs, we would instead use <var>fetch client settings object</var>. 
-    <p>This only affects <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#fetch-a-module-worker-script-tree" id="ref-for-fetch-a-module-worker-script-tree①">fetch a module worker script graph</a>, where these two settings objects are different. And, given that the import maps for <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#workerglobalscope" id="ref-for-workerglobalscope⑤">WorkerGlobalScope</a></code>s are currently always empty, the only fetch that could be impacted is that of the initial module. But even that would not be impacted, because that fetch is done using URLs, not specifiers. So this is not a future compatibility hazard, just something to keep in mind as we develop import maps in module workers.</p>
-   </div>
-   <div class="advisement">
-     Depending on the exact location of <a data-link-type="dfn" href="#wait-for-import-maps" id="ref-for-wait-for-import-maps②">wait for import maps</a>, <code>import(unresolvableSpecifier)</code> might behave differently between a HTML-spec- and Fetch-spec-based import maps. In particular, in the current draft, <a data-link-type="dfn" href="#document-acquiring-import-maps" id="ref-for-document-acquiring-import-maps②">acquiring import maps</a> is set to false after an <code>import()</code>-initiated failure to <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier①">resolve a module specifier</a>, thus causing any later-encountered import maps to cause an <code>error</code> event instead of being processed. Whereas, if <a data-link-type="dfn" href="#wait-for-import-maps" id="ref-for-wait-for-import-maps③">wait for import maps</a> was called as part of the Fetch spec, it’s possible it would be natural to specify things such that <a data-link-type="dfn" href="#document-acquiring-import-maps" id="ref-for-document-acquiring-import-maps③">acquiring import maps</a> remains true (as it does for cases like <code>&lt;script type="module" src="http://:invalidurl"></code>). 
-    <p>This should not be much of a compatibility hazard, as it only makes esoteric error cases into successes. And we can always preserve the behavior as specced here if necessary, with some potential additional complexity.</p>
-   </div>
+   <p class="advisement">If/when <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#workerglobalscope" id="ref-for-workerglobalscope⑤">WorkerGlobalScope</a></code> gets import map support, there will also be some impact on <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#fetch-a-module-worker-script-tree" id="ref-for-fetch-a-module-worker-script-tree">fetch a module worker script graph</a>, but it’s not clear exactly what.</p>
    <h3 class="heading settled" data-level="2.5" id="integration-register-an-import-map"><span class="secno">2.5. </span><span class="content">Registering an import map</span><a class="self-link" href="#integration-register-an-import-map"></a></h3>
    <div class="algorithm" data-algorithm="register an import map">
      To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="register-an-import-map">register an import map</dfn> given an <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/scripting.html#htmlscriptelement" id="ref-for-htmlscriptelement①">HTMLScriptElement</a></code> <var>element</var>: 
@@ -2207,7 +2363,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      <li data-md>
       <p>If <var>element</var> is <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#concept-script-external" id="ref-for-concept-script-external">from an external file</a>, then <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-event-fire" id="ref-for-concept-event-fire②">fire an event</a> named <code>load</code> at <var>element</var>.</p>
     </ol>
-    <p class="note" role="note"> The timing of <a data-link-type="dfn" href="#register-an-import-map" id="ref-for-register-an-import-map②">register an import map</a> is observable by possible <code>error</code> and <code>load</code> events, or by the fact that after <a data-link-type="dfn" href="#register-an-import-map" id="ref-for-register-an-import-map③">register an import map</a> an import map <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①">script</a></code> can be moved to another <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document③">Document</a></code>. On the other hand, the updated <a data-link-type="dfn" href="#document-import-map" id="ref-for-document-import-map②">import map</a> is not observable until <a data-link-type="dfn" href="#wait-for-import-maps" id="ref-for-wait-for-import-maps④">wait for import maps</a> completes. </p>
+    <p class="note" role="note"> The timing of <a data-link-type="dfn" href="#register-an-import-map" id="ref-for-register-an-import-map②">register an import map</a> is observable by possible <code>error</code> and <code>load</code> events, or by the fact that after <a data-link-type="dfn" href="#register-an-import-map" id="ref-for-register-an-import-map③">register an import map</a> an import map <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①">script</a></code> can be moved to another <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document③">Document</a></code>. On the other hand, the updated <a data-link-type="dfn" href="#document-import-map" id="ref-for-document-import-map②">import map</a> is not observable until <a data-link-type="dfn" href="#wait-for-import-maps" id="ref-for-wait-for-import-maps②">wait for import maps</a> completes. </p>
    </div>
    <h2 class="heading settled" data-level="3" id="parsing"><span class="secno">3. </span><span class="content">Parsing import maps</span><a class="self-link" href="#parsing"></a></h2>
    <div class="algorithm" data-algorithm="parse an import map string">
@@ -2395,19 +2551,19 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    </div>
    <h2 class="heading settled" data-level="4" id="resolving"><span class="secno">4. </span><span class="content">Resolving module specifiers</span><a class="self-link" href="#resolving"></a></h2>
    <div class="note" role="note">
-     During <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier②">resolving a module specifier</a>, the following algorithms check candidate entries of <a data-link-type="dfn" href="#specifier-map" id="ref-for-specifier-map②">specifier maps</a>, from most-specific to least-specific scopes (falling back to top-level "<code>imports</code>"), and from most-specific to least-specific prefixes. For each candidate, the result is one of the following: 
+     During <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier">resolving a module specifier</a>, the following algorithms check candidate entries of <a data-link-type="dfn" href="#specifier-map" id="ref-for-specifier-map②">specifier maps</a>, from most-specific to least-specific scopes (falling back to top-level "<code>imports</code>"), and from most-specific to least-specific prefixes. For each candidate, the result is one of the following: 
     <ul>
      <li data-md>
-      <p>Successfully resolves a specifier to a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url⑧">URL</a>. This makes the <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier③">resolve a module specifier</a> algorithm immediately return that <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url⑨">URL</a>.</p>
+      <p>Successfully resolves a specifier to a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url⑧">URL</a>. This makes the <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier①">resolve a module specifier</a> algorithm immediately return that <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url⑨">URL</a>.</p>
      <li data-md>
-      <p>Throws an error. This makes the <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier④">resolve a module specifier</a> algorithm rethrow the error, without any further fallbacks.</p>
+      <p>Throws an error. This makes the <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier②">resolve a module specifier</a> algorithm rethrow the error, without any further fallbacks.</p>
      <li data-md>
       <p>Fails to resolve, without an error. In this case the algorithm moves on to the next candidate.</p>
     </ul>
    </div>
    <h3 class="heading settled" data-level="4.1" id="new-resolve-algorithm"><span class="secno">4.1. </span><span class="content">New "resolve a module specifier"</span><a class="self-link" href="#new-resolve-algorithm"></a></h3>
    <div class="algorithm" data-algorithm="resolve a module specifier">
-     HTML already has a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier⑤">resolve a module specifier</a> algorithm. We replace it with the following <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="resolve-a-module-specifier">resolve a module specifier</dfn> algorithm, given a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-script" id="ref-for-concept-script④">script</a> <var>referringScript</var> and a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string⑥">JavaScript string</a> <var>specifier</var>: 
+     HTML already has a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier③">resolve a module specifier</a> algorithm. We replace it with the following <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="resolve-a-module-specifier">resolve a module specifier</dfn> algorithm, given a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-script" id="ref-for-concept-script④">script</a> <var>referringScript</var> and a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string⑥">JavaScript string</a> <var>specifier</var>: 
     <ol>
      <li data-md>
       <p>Let <var>settingsObject</var> be the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#current-settings-object" id="ref-for-current-settings-object">current settings object</a>.</p>
@@ -2463,7 +2619,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
         <ol>
          <li data-md>
           <p>If <var>resolutionResult</var> is null, then throw a <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#exceptiondef-typeerror" id="ref-for-exceptiondef-typeerror⑤">TypeError</a></code> indicating that resolution of <var>specifierKey</var> was blocked by a null entry.</p>
-          <p class="note" role="note">This will terminate the entire <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier⑥">resolve a module specifier</a> algorithm, without any further fallbacks.</p>
+          <p class="note" role="note">This will terminate the entire <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier④">resolve a module specifier</a> algorithm, without any further fallbacks.</p>
          <li data-md>
           <p class="assertion">Assert: <var>resolutionResult</var> is a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url①①">URL</a>.</p>
          <li data-md>
@@ -2483,7 +2639,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
         <ol>
          <li data-md>
           <p>If <var>resolutionResult</var> is null, then throw a <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#exceptiondef-typeerror" id="ref-for-exceptiondef-typeerror⑥">TypeError</a></code> indicating that resolution of <var>specifierKey</var> was blocked by a null entry.</p>
-          <p class="note" role="note">This will terminate the entire <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier⑦">resolve a module specifier</a> algorithm, without any further fallbacks.</p>
+          <p class="note" role="note">This will terminate the entire <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier⑤">resolve a module specifier</a> algorithm, without any further fallbacks.</p>
          <li data-md>
           <p class="assertion">Assert: <var>resolutionResult</var> is a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url①②">URL</a>.</p>
          <li data-md>
@@ -2494,7 +2650,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
           <p>Let <var>url</var> be the result of <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-parser" id="ref-for-concept-url-parser③">parsing</a> <var>afterPrefix</var> relative to the base URL <var>resolutionResult</var>.</p>
          <li data-md>
           <p>If <var>url</var> is failure, then throw a <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#exceptiondef-typeerror" id="ref-for-exceptiondef-typeerror⑦">TypeError</a></code> indicating that resolution of <var>specifierKey</var> was blocked due to a URL parse failure.</p>
-          <p class="note" role="note">This will terminate the entire <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier⑧">resolve a module specifier</a> algorithm, without any further fallbacks.</p>
+          <p class="note" role="note">This will terminate the entire <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier⑥">resolve a module specifier</a> algorithm, without any further fallbacks.</p>
          <li data-md>
           <p class="assertion">Assert: <var>url</var> is a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url①③">URL</a>.</p>
          <li data-md>
@@ -2503,18 +2659,18 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
       </ol>
      <li data-md>
       <p>Return null.</p>
-      <p class="note" role="note">The <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier⑨">resolve a module specifier</a> algorithm will fallback to a less specific scope or to "<code>imports</code>", if possible.</p>
+      <p class="note" role="note">The <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier⑦">resolve a module specifier</a> algorithm will fallback to a less specific scope or to "<code>imports</code>", if possible.</p>
     </ol>
    </div>
    <h3 class="heading settled" data-level="4.2" id="resolving-updates"><span class="secno">4.2. </span><span class="content">Updates to other algorithms</span><a class="self-link" href="#resolving-updates"></a></h3>
-   <p>All call sites of HTML’s existing <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier①⓪">resolve a module specifier</a> will need to be updated to pass the appropriate <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-script" id="ref-for-concept-script⑤">script</a>, not just its <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-script-base-url" id="ref-for-concept-script-base-url①">base URL</a>. Some particular interesting cases:</p>
+   <p>All call sites of HTML’s existing <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier⑧">resolve a module specifier</a> will need to be updated to pass the appropriate <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-script" id="ref-for-concept-script⑤">script</a>, not just its <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-script-base-url" id="ref-for-concept-script-base-url①">base URL</a>. Some particular interesting cases:</p>
    <ul>
     <li data-md>
-     <p><a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#js-hostresolveimportedmodule" id="ref-for-js-hostresolveimportedmodule">HostResolveImportedModule</a> and <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#js-hostimportmoduledynamically" id="ref-for-js-hostimportmoduledynamically">HostImportModuleDynamically</a> no longer need to compute the base URL themselves, as <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier①①">resolve a module specifier</a> now handles that.</p>
+     <p><a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#js-hostresolveimportedmodule" id="ref-for-js-hostresolveimportedmodule">HostResolveImportedModule</a> and <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#js-hostimportmoduledynamically" id="ref-for-js-hostimportmoduledynamically">HostImportModuleDynamically</a> no longer need to compute the base URL themselves, as <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier⑨">resolve a module specifier</a> now handles that.</p>
     <li data-md>
      <p><a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#fetch-an-import()-module-script-graph" id="ref-for-fetch-an-import()-module-script-graph①">Fetch an import() module script graph</a> will also need to take a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-script" id="ref-for-concept-script⑥">script</a> instead of a base URL.</p>
    </ul>
-   <p>Call sites will also need to be updated to account for <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier①②">resolve a module specifier</a> now throwing exceptions, instead of returning failure. (Previously most call sites just turned failures into <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#exceptiondef-typeerror" id="ref-for-exceptiondef-typeerror⑧">TypeError</a></code>s manually, so this is straightforward.)</p>
+   <p>Call sites will also need to be updated to account for <a data-link-type="dfn" href="#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier①⓪">resolve a module specifier</a> now throwing exceptions, instead of returning failure. (Previously most call sites just turned failures into <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#exceptiondef-typeerror" id="ref-for-exceptiondef-typeerror⑧">TypeError</a></code>s manually, so this is straightforward.)</p>
    <h2 class="heading settled" data-level="5" id="security-and-privacy"><span class="secno">5. </span><span class="content">Security and Privacy</span><a class="self-link" href="#security-and-privacy"></a></h2>
    <h3 class="heading settled" data-level="5.1" id="threat-models"><span class="secno">5.1. </span><span class="content">Threat models</span><a class="self-link" href="#threat-models"></a></h3>
    <h4 class="heading settled" data-level="5.1.1" id="comparison-with-first-party-scripts"><span class="secno">5.1.1. </span><span class="content">Comparison with first-party scripts</span><a class="self-link" href="#comparison-with-first-party-scripts"></a></h4>
@@ -2536,7 +2692,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <p>To avoid denial of service attacks, explosive memory usage, and the like, import maps are designed to have reasonably bounded time and memory complexity in the worst cases, and to not be Turing complete.</p>
    <h3 class="heading settled" data-level="5.2" id="note-on-import-specifiers"><span class="secno">5.2. </span><span class="content">A note on import specifiers</span><a class="self-link" href="#note-on-import-specifiers"></a></h3>
    <p>The import specifiers that appear in <code>import</code> statements and <code>import()</code> expressions are not <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url①④">URLs</a>, and should not be thought of as such.</p>
-   <p>To date, there has been a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier①③">default mechanism</a> for translating those strings into URLs. And indeed, some of the strings, such as <code>"https://example.com/foo.mjs"</code>, or <code>"./bar.mjs"</code>, might look URL-like; for those, the default translation does what you would expect.</p>
+   <p>To date, there has been a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier" id="ref-for-resolve-a-module-specifier①①">default mechanism</a> for translating those strings into URLs. And indeed, some of the strings, such as <code>"https://example.com/foo.mjs"</code>, or <code>"./bar.mjs"</code>, might look URL-like; for those, the default translation does what you would expect.</p>
    <p>But overall, one should not think of <code>import(x)</code> as corresponding to <code>fetch(x)</code>. Instead, the correspondence is to <code>fetch(translate(x))</code>, where the translation algorithm produces the actual URL to be fetched. In this framing, the way to think about import maps is as providing a mechanism for overriding the default mechanism, i.e. customizing the <code>translate()</code> function.</p>
    <p>This brings some clarity to some common security questions. For example: given an import map which maps the specifier <code>"https://1.example.com/foo.mjs"</code> to the URL <code>&lt;https://2.example.com/bar.mjs></code>, should we apply CSP checks to <code>&lt;https://1.example.com/foo.mjs></code> or to <code>&lt;https://2.example.com/bar.mjs></code>? With this framing we can see that we should apply the checks to the post-translation URL <code>&lt;https://2.example.com/bar.mjs></code> which is actually fetched, and not to the pre-translation <code>"https://1.example.com/foo.mjs"</code> module specifier.</p>
    <p>This also makes it clear that other URL-keyed features of the platform, such as as-yet-unspecified the <code>error.stack</code> property, will use the post-translation URLs, not the pre-translation module specifiers.</p>
@@ -2774,7 +2930,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
   <aside class="dfn-panel" data-for="term-for-fetch-a-module-worker-script-tree">
    <a href="https://html.spec.whatwg.org/multipage/webappapis.html#fetch-a-module-worker-script-tree">https://html.spec.whatwg.org/multipage/webappapis.html#fetch-a-module-worker-script-tree</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-fetch-a-module-worker-script-tree">2.4. Wait for import maps</a> <a href="#ref-for-fetch-a-module-worker-script-tree①">(2)</a>
+    <li><a href="#ref-for-fetch-a-module-worker-script-tree">2.4. Wait for import maps</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-fetch-a-modulepreload-module-script-graph">
@@ -2878,9 +3034,9 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
   <aside class="dfn-panel" data-for="term-for-resolve-a-module-specifier">
    <a href="https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier">https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-resolve-a-module-specifier⑤">4.1. New "resolve a module specifier"</a>
-    <li><a href="#ref-for-resolve-a-module-specifier①⓪">4.2. Updates to other algorithms</a>
-    <li><a href="#ref-for-resolve-a-module-specifier①③">5.2. A note on import specifiers</a>
+    <li><a href="#ref-for-resolve-a-module-specifier③">4.1. New "resolve a module specifier"</a>
+    <li><a href="#ref-for-resolve-a-module-specifier⑧">4.2. Updates to other algorithms</a>
+    <li><a href="#ref-for-resolve-a-module-specifier①①">5.2. A note on import specifiers</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-script">
@@ -3315,7 +3471,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <b><a href="#document-acquiring-import-maps">#document-acquiring-import-maps</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-document-acquiring-import-maps">2.3. Prepare a script</a>
-    <li><a href="#ref-for-document-acquiring-import-maps①">2.4. Wait for import maps</a> <a href="#ref-for-document-acquiring-import-maps②">(2)</a> <a href="#ref-for-document-acquiring-import-maps③">(3)</a>
+    <li><a href="#ref-for-document-acquiring-import-maps①">2.4. Wait for import maps</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="import-map-parse-result">
@@ -3364,8 +3520,8 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
    <b><a href="#wait-for-import-maps">#wait-for-import-maps</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-wait-for-import-maps">2.3. Prepare a script</a>
-    <li><a href="#ref-for-wait-for-import-maps①">2.4. Wait for import maps</a> <a href="#ref-for-wait-for-import-maps②">(2)</a> <a href="#ref-for-wait-for-import-maps③">(3)</a>
-    <li><a href="#ref-for-wait-for-import-maps④">2.5. Registering an import map</a>
+    <li><a href="#ref-for-wait-for-import-maps①">2.4. Wait for import maps</a>
+    <li><a href="#ref-for-wait-for-import-maps②">2.5. Registering an import map</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="register-an-import-map">
@@ -3417,10 +3573,9 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
   <aside class="dfn-panel" data-for="resolve-a-module-specifier">
    <b><a href="#resolve-a-module-specifier">#resolve-a-module-specifier</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-resolve-a-module-specifier">2.4. Wait for import maps</a> <a href="#ref-for-resolve-a-module-specifier①">(2)</a>
-    <li><a href="#ref-for-resolve-a-module-specifier②">4. Resolving module specifiers</a> <a href="#ref-for-resolve-a-module-specifier③">(2)</a> <a href="#ref-for-resolve-a-module-specifier④">(3)</a>
-    <li><a href="#ref-for-resolve-a-module-specifier⑥">4.1. New "resolve a module specifier"</a> <a href="#ref-for-resolve-a-module-specifier⑦">(2)</a> <a href="#ref-for-resolve-a-module-specifier⑧">(3)</a> <a href="#ref-for-resolve-a-module-specifier⑨">(4)</a>
-    <li><a href="#ref-for-resolve-a-module-specifier①①">4.2. Updates to other algorithms</a> <a href="#ref-for-resolve-a-module-specifier①②">(2)</a>
+    <li><a href="#ref-for-resolve-a-module-specifier">4. Resolving module specifiers</a> <a href="#ref-for-resolve-a-module-specifier①">(2)</a> <a href="#ref-for-resolve-a-module-specifier②">(3)</a>
+    <li><a href="#ref-for-resolve-a-module-specifier④">4.1. New "resolve a module specifier"</a> <a href="#ref-for-resolve-a-module-specifier⑤">(2)</a> <a href="#ref-for-resolve-a-module-specifier⑥">(3)</a> <a href="#ref-for-resolve-a-module-specifier⑦">(4)</a>
+    <li><a href="#ref-for-resolve-a-module-specifier⑨">4.2. Updates to other algorithms</a> <a href="#ref-for-resolve-a-module-specifier①⓪">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="resolve-an-imports-match">
