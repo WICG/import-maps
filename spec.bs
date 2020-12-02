@@ -212,19 +212,8 @@ Insert a call to [=wait for import maps=] at the beginning of the following HTML
 - [=fetch an import() module script graph=]
 - [=fetch a modulepreload module script graph=]
 - [=fetch an inline module script graph=]
-- [=fetch a module worker script graph=] (using <var ignore>module map settings object</var>)
 
-<div class="advisement">
-  In this draft of the spec, which inserts itself into these HTML concepts, the settings object used here is the |module map settings object|, not |fetch client settings object|, because [=resolve a module specifier=] uses the import map of |module map settings object|. In a potential future version of the import maps infrastructure, which interjects itself at the layer of the Fetch spec in order to support `import:` URLs, we would instead use |fetch client settings object|.
-
-  This only affects [=fetch a module worker script graph=], where these two settings objects are different. And, given that the import maps for {{WorkerGlobalScope}}s are currently always empty, the only fetch that could be impacted is that of the initial module. But even that would not be impacted, because that fetch is done using URLs, not specifiers. So this is not a future compatibility hazard, just something to keep in mind as we develop import maps in module workers.
-</div>
-
-<div class="advisement">
-  Depending on the exact location of [=wait for import maps=], `import(unresolvableSpecifier)` might behave differently between a HTML-spec- and Fetch-spec-based import maps. In particular, in the current draft, [=acquiring import maps=] is set to false after an `import()`-initiated failure to [=resolve a module specifier=], thus causing any later-encountered import maps to cause an `error` event instead of being processed. Whereas, if [=wait for import maps=] was called as part of the Fetch spec, it's possible it would be natural to specify things such that [=acquiring import maps=] remains true (as it does for cases like `<script type="module" src="http://:invalidurl">`).
-
-  This should not be much of a compatibility hazard, as it only makes esoteric error cases into successes. And we can always preserve the behavior as specced here if necessary, with some potential additional complexity.
-</div>
+<p class="advisement">If/when {{WorkerGlobalScope}} gets import map support, there will also be some impact on [=fetch a module worker script graph=], but it's not clear exactly what.</p>
 
 <h3 id="integration-register-an-import-map">Registering an import map</h3>
 
