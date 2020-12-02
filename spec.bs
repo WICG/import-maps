@@ -418,9 +418,11 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
       1. Let |afterPrefix| be the portion of |normalizedSpecifier| after the initial |specifierKey| prefix.
       1. Assert: |resolutionResult|, [=URL serializer|serialized=], ends with "`/`", as enforced during [=parse an import map string|parsing=].
       1. Let |url| be the result of [=URL parser|parsing=] |afterPrefix| relative to the base URL |resolutionResult|.
-      1. If |url| is failure, then throw a {{TypeError}} indicating that resolution of |specifierKey| was blocked due to a URL parse failure.
+      1. If |url| is failure, then throw a {{TypeError}} indicating that resolution of |normalizedSpecifier| was blocked since the |afterPrefix| portion could not be URL-parsed relative to the |resolutionResult| mapped to by the |specifierKey| prefix.
         <p class="note">This will terminate the entire [=resolve a module specifier=] algorithm, without any further fallbacks.</p>
       1. Assert: |url| is a [=URL=].
+      1. If the [=URL serializer|serialization=] of |url| does not [=string/start with=] the [=URL serializer|serialization=] of |resolutionResult|, then throw a {{TypeError}} indicating that resolution of |normalizedSpecifier| was blocked due to it backtracking above its prefix |specifierKey|.
+        <p class="note">This will terminate the entire [=resolve a module specifier=] algorithm, without any further fallbacks.</p>
       1. Return |url|.
   1. Return null.
      <p class="note">The [=resolve a module specifier=] algorithm will fallback to a less specific scope or to "`imports`", if possible.</p>
