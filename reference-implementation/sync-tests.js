@@ -17,7 +17,7 @@ if (process.env.NO_UPDATE) {
 // 1. Go to https://github.com/w3c/web-platform-tests/tree/master/import-maps/data-driven/resources/
 // 2. Press "y" on your keyboard to get a permalink
 // 3. Copy the commit hash
-const sha = '097305c27bfc7dca542014efdc1e9fda1e54ee05';
+const sha = 'dc60fe2cbd1292bb2166feba1f24971969e26154';
 
 main().catch(e => {
   console.error(e.stack);
