@@ -8,14 +8,16 @@
   ],
   "scripts": {
     "lint": "eslint .",
+    "pretest": "node ./sync-tests.js",
     "test": "jest --coverage"
   },
   "repository": "WICG/import-maps",
   "author": "Domenic Denicola <d@domenic.me> (https://domenic.me/)",
   "license": "MIT",
   "devDependencies": {
-    "eslint": "^6.2.2",
-    "jest": "^24.9.0",
-    "jest-diff": "^24.9.0"
+    "eslint": "^7.14.0",
+    "jest": "^26.6.3",
+    "jest-diff": "^26.6.2",
+    "node-fetch": "^2.6.1"
   }
 }
