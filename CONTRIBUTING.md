@@ -21,7 +21,7 @@ We maintain a reference implementation in the [`reference-implementation/`](http
 
 This specification has [web platform tests](https://github.com/web-platform-tests/wpt), in the [`import-maps/`](https://github.com/web-platform-tests/wpt/tree/master/import-maps) subdirectory. All normative specification updates need accompanying web platform test changes.
 
-Tests for parsing and resolution are driven by [JSON files](https://github.com/web-platform-tests/wpt/tree/master/import-maps/data-driven/resources), in a [documented format](https://github.com/web-platform-tests/wpt/tree/master/import-maps/data-driven). This repository also contains a copy of these files in [`reference-implementation/__tests__/json`](https://github.com/WICG/import-maps/tree/master/reference-implementation/__tests__/json). Currently this repository and the web platform tests repository are synchronized manually.
+Tests for parsing and resolution are driven by [JSON files](https://github.com/web-platform-tests/wpt/tree/master/import-maps/data-driven/resources), in a [documented format](https://github.com/web-platform-tests/wpt/tree/master/import-maps/data-driven). When running tests in this repository, those JSON files are automatically downloaded by the `pretest` npm script. The version downloaded is pinned to a specific commit, which is updated by modifying [the script](https://github.com/WICG/import-maps/blob/master/reference-implementation/__tests__/sync-tests.js).
 
 ## For maintainers: identifying contributors to a pull request
 
