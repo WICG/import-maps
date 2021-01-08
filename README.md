@@ -23,6 +23,7 @@ _Or, how to control the behavior of JavaScript imports_
   - [Installation](#installation)
   - [Dynamic import map example](#dynamic-import-map-example)
   - [Scope](#scope)
+  - [Interaction with speculative parsing/fetching](#interaction-with-speculative-parsingfetching)
 - [Alternatives considered](#alternatives-considered)
   - [The Node.js module resolution algorithm](#the-nodejs-module-resolution-algorithm)
   - [A programmable resolution hook](#a-programmable-resolution-hook)
@@ -432,6 +433,72 @@ Import maps are an application-level thing, somewhat like service workers. (More
 This, in addition to general simplicity, is in part what motivates the above restrictions on `<script type="importmap">`.
 
 Since an application's import map changes the resolution algorithm for every module in the module map, they are not impacted by whether a module's source text was originally from a cross-origin URL. If you load a module from a CDN that uses bare import specifiers, you'll need to know ahead of time what bare import specifiers that module adds to your app, and include them in your application's import map. (That is, you need to know what all of your application's transitive dependencies are.) It's important that control of which URLs are used for each package stay with the application author, so they can holistically manage versioning and sharing of modules.
+
+### Interaction with speculative parsing/fetching
+
+Most browsers have a speculative HTML parser which tries to discover resources declared in HTML markup while the HTML parser is waiting for blocking scripts to be fetched and executed. This is not yet specified, although there are ongoing efforts to do so in [whatwg/html#5959](https://github.com/whatwg/html/pull/5959). This section discusses some of the potential interactions to be aware of.
+
+First, note that although to our knowledge no browsers do so currently, it would be possible for a speculative parser to fetch `https://example.com/foo.mjs` in the following example, while it waits for the blocking script `https://example.com/blocking-1.js`:
+
+```html
+<!DOCTYPE html>
+<!-- This file is https://example.com/ -->
+<script src="blocking-1.js"></script>
+<script type="module">
+import "./foo.mjs";
+</script>
+```
+
+Similarly, a browser could speculatively fetch `https://example.com/foo.mjs` and `https://example.com/bar.mjs` in the following example, by parsing the import map as part of the speculative parsing process:
+
+```html
+<!DOCTYPE html>
+<!-- This file is https://example.com/ -->
+<script src="blocking-2.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "foo": "./foo.mjs",
+    "https://other.example/bar.mjs": "./bar.mjs"
+  }
+}
+</script>
+<script type="module">
+import "foo";
+import "https://other.example/bar.mjs";
+</script>
+```
+
+One interaction to notice here is that browsers which do speculatively parse inline JS modules, but do not support import maps, would probably speculate incorrectly for this example: they might speculatively fetch `https://other.example/bar.mjs`, instead of the `https://example.com/bar.mjs` it is mapped to.
+
+More generally, import map-based speculations can be subject to the same sort of incorrect speculations as other JS module specifier-based speculations. For example, if the contents of `blocking-1.js` were
+
+```js
+const el = document.createElement("base");
+el.href = "/subdirectory/";
+document.currentScript.after(el);
+```
+
+then the speculative fetch of `https://example.com/foo.mjs` in the no-import map example would be wasted, as by the time came to perform the actual evaluation of the module, we'd re-compute the relative specifier `"./foo.mjs"` and realize that what's actually requested is `https://example.com/subdirectory/foo.mjs`.
+
+Similarly for the import map case, if the contents of `blocking-2.js` were
+
+```js
+document.write(`<script type="importmap">
+{
+  "imports": {
+    "foo": "./other-foo.mjs",
+    "https://other.example/bar.mjs": "./other-bar.mjs"
+  }
+}
+</script>`);
+
+// Dynamic import prevents the later-in-the-document <script type="importmap">
+// from having an effect.
+import("foo");
+```
+
+then the speculative fetches of `https://example.com/foo.mjs` and `https://example.com/bar.mjs` would be wasted, as the newly-written import map would be in effect instead of the one that was seen inline in the HTML.
 
 ## Alternatives considered
 
