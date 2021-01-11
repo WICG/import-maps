@@ -588,7 +588,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2016/logos/W3C" width="72"> </a> </p>
    <h1 class="p-name no-ref" id="title">Import Maps</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Draft Community Group Report, <time class="dt-updated" datetime="2021-01-08">8 January 2021</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Draft Community Group Report, <time class="dt-updated" datetime="2021-01-11">11 January 2021</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -749,8 +749,16 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      <p>Insert the following step before <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#prepare-a-script" id="ref-for-prepare-a-script④">prepare a script</a> step 24:</p>
      <ul>
       <li data-md>
-       <p>If <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#concept-script-type" id="ref-for-concept-script-type②">the script’s type</a> is "<code>importmap</code>", and either the element’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node-document" id="ref-for-concept-node-document">node document</a>'s <a data-link-type="dfn" href="#document-acquiring-import-maps" id="ref-for-document-acquiring-import-maps">acquiring import maps</a> is false or the element’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node-document" id="ref-for-concept-node-document①">node document</a>'s <a data-link-type="dfn" href="#document-pending-import-map-script" id="ref-for-document-pending-import-map-script">pending import map script</a> is non-null, then <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#queue-a-task" id="ref-for-queue-a-task">queue a task</a> to <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#concept-event-fire" id="ref-for-concept-event-fire">fire an event</a> named <code>error</code> at the element, and return.</p>
-       <p class="note" role="note">In the future we could loosen the constraint of erroring when the <a data-link-type="dfn" href="#document-pending-import-map-script" id="ref-for-document-pending-import-map-script①">pending import map script</a> is non-null, to allow multiple import maps.</p>
+       <p>If <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#concept-script-type" id="ref-for-concept-script-type②">the script’s type</a> is "<code>importmap</code>":</p>
+       <ol>
+        <li data-md>
+         <p>If the element’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node-document" id="ref-for-concept-node-document">node document</a>'s <a data-link-type="dfn" href="#document-acquiring-import-maps" id="ref-for-document-acquiring-import-maps">acquiring import maps</a> is false, then <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#queue-a-task" id="ref-for-queue-a-task">queue a task</a> to <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#concept-event-fire" id="ref-for-concept-event-fire">fire an event</a> named <code>error</code> at the element, and return.</p>
+        <li data-md>
+         <p>Set the element’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node-document" id="ref-for-concept-node-document①">node document</a>'s <a data-link-type="dfn" href="#document-acquiring-import-maps" id="ref-for-document-acquiring-import-maps①">acquiring import maps</a> to false.</p>
+         <p class="note" role="note">In the future we could skip setting <a data-link-type="dfn" href="#document-acquiring-import-maps" id="ref-for-document-acquiring-import-maps②">acquiring import maps</a> to false, to allow multiple import maps.</p>
+        <li data-md>
+         <p class="assertion">Assert: the element’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node-document" id="ref-for-concept-node-document②">node document</a>'s <a data-link-type="dfn" href="#document-pending-import-map-script" id="ref-for-document-pending-import-map-script">pending import map script</a> is null.</p>
+       </ol>
      </ul>
     <li data-md>
      <p>Insert the following case to <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#prepare-a-script" id="ref-for-prepare-a-script⑤">prepare a script</a> step 24.6:</p>
@@ -777,13 +785,13 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
      <dl>
       <dt>If <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#concept-script-type" id="ref-for-concept-script-type③">the script’s type</a> is "<code>importmap</code>"
       <dd>
-        Set the element’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node-document" id="ref-for-concept-node-document②">node document</a>'s <a data-link-type="dfn" href="#document-pending-import-map-script" id="ref-for-document-pending-import-map-script②">pending import map script</a> to the element.
+        Set the element’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node-document" id="ref-for-concept-node-document③">node document</a>'s <a data-link-type="dfn" href="#document-pending-import-map-script" id="ref-for-document-pending-import-map-script①">pending import map script</a> to the element.
     When <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#the-script-is-ready" id="ref-for-the-script-is-ready①">the script is ready</a>, run the following steps: 
        <ol>
         <li data-md>
-         <p><a data-link-type="dfn" href="#register-an-import-map" id="ref-for-register-an-import-map①">Register an import map</a> given the <a data-link-type="dfn" href="#document-pending-import-map-script" id="ref-for-document-pending-import-map-script③">pending import map script</a>.</p>
+         <p><a data-link-type="dfn" href="#register-an-import-map" id="ref-for-register-an-import-map①">Register an import map</a> given the <a data-link-type="dfn" href="#document-pending-import-map-script" id="ref-for-document-pending-import-map-script②">pending import map script</a>.</p>
         <li data-md>
-         <p>Set the <a data-link-type="dfn" href="#document-pending-import-map-script" id="ref-for-document-pending-import-map-script④">pending import map script</a> to null.</p>
+         <p>Set the <a data-link-type="dfn" href="#document-pending-import-map-script" id="ref-for-document-pending-import-map-script③">pending import map script</a> to null.</p>
          <p class="note" role="note">This will (asynchronously) unblock any <a data-link-type="dfn" href="#wait-for-import-maps" id="ref-for-wait-for-import-maps">wait for import maps</a> algorithm instances.</p>
        </ol>
      </dl>
@@ -829,9 +837,9 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
        <li data-md>
         <p>Let <var>document</var> be <var>settings object</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-global" id="ref-for-concept-settings-object-global①">global object</a>'s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/window-object.html#concept-document-window" id="ref-for-concept-document-window①">associated <code>Document</code></a>.</p>
        <li data-md>
-        <p>Set <var>document</var>’s <a data-link-type="dfn" href="#document-acquiring-import-maps" id="ref-for-document-acquiring-import-maps①">acquiring import maps</a> to false.</p>
+        <p>Set <var>document</var>’s <a data-link-type="dfn" href="#document-acquiring-import-maps" id="ref-for-document-acquiring-import-maps③">acquiring import maps</a> to false.</p>
        <li data-md>
-        <p><a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#spin-the-event-loop" id="ref-for-spin-the-event-loop">Spin the event loop</a> until <var>document</var>’s <a data-link-type="dfn" href="#document-pending-import-map-script" id="ref-for-document-pending-import-map-script⑤">pending import map script</a> is null.</p>
+        <p><a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#spin-the-event-loop" id="ref-for-spin-the-event-loop">Spin the event loop</a> until <var>document</var>’s <a data-link-type="dfn" href="#document-pending-import-map-script" id="ref-for-document-pending-import-map-script④">pending import map script</a> is null.</p>
       </ol>
      <li data-md>
       <p>Asynchronously complete this algorithm.</p>
@@ -878,7 +886,7 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
         <p>Return.</p>
       </ol>
      <li data-md>
-      <p>Set <var>element</var>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node-document" id="ref-for-concept-node-document③">node document</a>'s <a data-link-type="dfn" href="#document-import-map" id="ref-for-document-import-map①">import map</a> to <var>import map parse result</var>’s <a data-link-type="dfn" href="#import-map-parse-result-import-map" id="ref-for-import-map-parse-result-import-map">import map</a>.</p>
+      <p>Set <var>element</var>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node-document" id="ref-for-concept-node-document④">node document</a>'s <a data-link-type="dfn" href="#document-import-map" id="ref-for-document-import-map①">import map</a> to <var>import map parse result</var>’s <a data-link-type="dfn" href="#import-map-parse-result-import-map" id="ref-for-import-map-parse-result-import-map">import map</a>.</p>
      <li data-md>
       <p>If <var>element</var> is <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#concept-script-external" id="ref-for-concept-script-external">from an external file</a>, then <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-event-fire" id="ref-for-concept-event-fire②">fire an event</a> named <code>load</code> at <var>element</var>.</p>
     </ol>
@@ -1283,8 +1291,8 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
   <aside class="dfn-panel" data-for="term-for-concept-node-document">
    <a href="https://dom.spec.whatwg.org/#concept-node-document">https://dom.spec.whatwg.org/#concept-node-document</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-node-document">2.3. Prepare a script</a> <a href="#ref-for-concept-node-document①">(2)</a> <a href="#ref-for-concept-node-document②">(3)</a>
-    <li><a href="#ref-for-concept-node-document③">2.5. Registering an import map</a>
+    <li><a href="#ref-for-concept-node-document">2.3. Prepare a script</a> <a href="#ref-for-concept-node-document①">(2)</a> <a href="#ref-for-concept-node-document②">(3)</a> <a href="#ref-for-concept-node-document③">(4)</a>
+    <li><a href="#ref-for-concept-node-document④">2.5. Registering an import map</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-utf-8-decode">
@@ -1985,15 +1993,15 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
   <aside class="dfn-panel" data-for="document-pending-import-map-script">
    <b><a href="#document-pending-import-map-script">#document-pending-import-map-script</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-document-pending-import-map-script">2.3. Prepare a script</a> <a href="#ref-for-document-pending-import-map-script①">(2)</a> <a href="#ref-for-document-pending-import-map-script②">(3)</a> <a href="#ref-for-document-pending-import-map-script③">(4)</a> <a href="#ref-for-document-pending-import-map-script④">(5)</a>
-    <li><a href="#ref-for-document-pending-import-map-script⑤">2.4. Wait for import maps</a>
+    <li><a href="#ref-for-document-pending-import-map-script">2.3. Prepare a script</a> <a href="#ref-for-document-pending-import-map-script①">(2)</a> <a href="#ref-for-document-pending-import-map-script②">(3)</a> <a href="#ref-for-document-pending-import-map-script③">(4)</a>
+    <li><a href="#ref-for-document-pending-import-map-script④">2.4. Wait for import maps</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="document-acquiring-import-maps">
    <b><a href="#document-acquiring-import-maps">#document-acquiring-import-maps</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-document-acquiring-import-maps">2.3. Prepare a script</a>
-    <li><a href="#ref-for-document-acquiring-import-maps①">2.4. Wait for import maps</a>
+    <li><a href="#ref-for-document-acquiring-import-maps">2.3. Prepare a script</a> <a href="#ref-for-document-acquiring-import-maps①">(2)</a> <a href="#ref-for-document-acquiring-import-maps②">(3)</a>
+    <li><a href="#ref-for-document-acquiring-import-maps③">2.4. Wait for import maps</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="import-map-parse-result">
@@ -2211,7 +2219,7 @@ document.body.addEventListener("click", function(e) {
             }
         }
         function getVarName(el) {
-            return el.textContent.replace(/(\s| )+/, " ").trim();
+            return el.textContent.replace(/(\s|\xa0)+/, " ").trim();
         }
         function chooseHighlightIndex(algoName, varName) {
             let indexes = null;
