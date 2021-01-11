@@ -132,8 +132,11 @@ Inside the <a spec="html">prepare a script</a> algorithm, we make the following 
 - Insert the following step to [=prepare a script=] step 7, under "Determine the script's type as follows:":
   - If the script block's type string is an [=ASCII case-insensitive=] match for the string "`importmap`", <a spec="html">the script's type</a> is "`importmap`".
 - Insert the following step before <a spec="html">prepare a script</a> step 24:
-  - If <a spec="html">the script's type</a> is "`importmap`", and either the element's [=node document=]'s [=Document/acquiring import maps=] is false or the element's [=node document=]'s [=pending import map script=] is non-null, then <a spec="html">queue a task</a> to <a spec="html">fire an event</a> named `error` at the element, and return.
-    <p class="note">In the future we could loosen the constraint of erroring when the [=pending import map script=] is non-null, to allow multiple import maps.</p>
+  - If <a spec="html">the script's type</a> is "`importmap`":
+    1. If the element's [=node document=]'s [=Document/acquiring import maps=] is false, then <a spec="html">queue a task</a> to <a spec="html">fire an event</a> named `error` at the element, and return.
+    1. Set the element's [=node document=]'s [=Document/acquiring import maps=] to false.
+       <p class="note">In the future we could skip setting [=Document/acquiring import maps=] to false, to allow multiple import maps.</p>
+    1. Assert: the element's [=node document=]'s [=Document/pending import map script=] is null.
 - Insert the following case to <a spec="html">prepare a script</a> step 24.6:
   <dl>
     <dt>"`importmap`"</dt>
