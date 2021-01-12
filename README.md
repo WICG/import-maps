@@ -492,10 +492,6 @@ document.write(`<script type="importmap">
   }
 }
 </script>`);
-
-// Dynamic import prevents the later-in-the-document <script type="importmap">
-// from having an effect.
-import("foo");
 ```
 
 then the speculative fetches of `https://example.com/foo.mjs` and `https://example.com/bar.mjs` would be wasted, as the newly-written import map would be in effect instead of the one that was seen inline in the HTML.
