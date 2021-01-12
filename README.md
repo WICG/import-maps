@@ -471,7 +471,7 @@ import "https://other.example/bar.mjs";
 
 One interaction to notice here is that browsers which do speculatively parse inline JS modules, but do not support import maps, would probably speculate incorrectly for this example: they might speculatively fetch `https://other.example/bar.mjs`, instead of the `https://example.com/bar.mjs` it is mapped to.
 
-More generally, import map-based speculations can be subject to the same sort of incorrect speculations as other JS module specifier-based speculations. For example, if the contents of `blocking-1.js` were
+More generally, import map-based speculations can be subject to the same sort of mistakes as other speculations. For example, if the contents of `blocking-1.js` were
 
 ```js
 const el = document.createElement("base");
