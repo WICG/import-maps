@@ -16,7 +16,6 @@ _Or, how to control the behavior of JavaScript imports_
     - [General URL-like specifier remapping](#general-url-like-specifier-remapping)
     - [Mapping away hashes in script filenames](#mapping-away-hashes-in-script-filenames)
     - [Remapping doesn't work for `<script>`](#remapping-doesnt-work-for-script)
-    - [Feature detection](#feature-detection)
   - [Scoping examples](#scoping-examples)
     - [Multiple versions of the same module](#multiple-versions-of-the-same-module)
     - [Scope inheritance](#scope-inheritance)
@@ -25,6 +24,7 @@ _Or, how to control the behavior of JavaScript imports_
   - [Dynamic import map example](#dynamic-import-map-example)
   - [Scope](#scope)
   - [Interaction with speculative parsing/fetching](#interaction-with-speculative-parsingfetching)
+- [Feature detection](#feature-detection)
 - [Alternatives considered](#alternatives-considered)
   - [The Node.js module resolution algorithm](#the-nodejs-module-resolution-algorithm)
   - [A programmable resolution hook](#a-programmable-resolution-hook)
@@ -283,29 +283,6 @@ would not: in all classes of browsers, it would attempt to fetch `app.mjs` direc
 <script type="module">import "./app.mjs";</script>
 ```
 
-### Feature detection
-
-If the browser supports [HTMLScriptElement](https://html.spec.whatwg.org/multipage/scripting.html#htmlscriptelement)'s
-[supports(type)](https://html.spec.whatwg.org/multipage/scripting.html#dom-script-supports) method,
-`HTMLScriptElement.supports('importmap')` must return true.
-
-```js
-if (HTMLScriptElement.supports && HTMLScriptElement.supports('importmap')) {
-  console.log('Your browser supports import maps.');
-}
-```
-
-#### Monkeypatch HTMLScriptElement.supports() method in HTML spec
-
-In the HTML spec's [HTMLScriptElement](https://html.spec.whatwg.org/multipage/scripting.html#htmlscriptelement)'s
-[supports(type)](https://html.spec.whatwg.org/multipage/scripting.html#dom-script-supports) method, before 
-
-> 3. Return false.
-
-add the following step:
-
-3. If type is "`importmap`", then return true.
-
 ### Scoping examples
 
 #### Multiple versions of the same module
@@ -519,6 +496,20 @@ document.write(`<script type="importmap">
 ```
 
 then the speculative fetches of `https://example.com/foo.mjs` and `https://example.com/bar.mjs` would be wasted, as the newly-written import map would be in effect instead of the one that was seen inline in the HTML.
+
+
+## Feature detection
+
+If the browser supports [HTMLScriptElement](https://html.spec.whatwg.org/multipage/scripting.html#htmlscriptelement)'s
+[supports(type)](https://html.spec.whatwg.org/multipage/scripting.html#dom-script-supports) method,
+`HTMLScriptElement.supports('importmap')` must return true.
+
+```js
+if (HTMLScriptElement.supports && HTMLScriptElement.supports('importmap')) {
+  console.log('Your browser supports import maps.');
+}
+```
+
 
 ## Alternatives considered
 

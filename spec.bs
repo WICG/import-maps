@@ -442,6 +442,18 @@ All call sites of HTML's existing <a spec="html">resolve a module specifier</a> 
 
 Call sites will also need to be updated to account for [=resolve a module specifier=] now throwing exceptions, instead of returning failure. (Previously most call sites just turned failures into {{TypeError}}s manually, so this is straightforward.)
 
+
+<h2 id="monkeypatch-dom-script-supports">Monkeypatch HTMLScriptElement.supports() method</h3>
+
+In the HTML spec's {{HTMLScriptElement}}'s  {{script/supports(type)}} method, before
+
+> 3. Return false.
+
+add the following step:
+
+> 3. If type is "`importmap`", then return true.
+
+
 <h2 id="security-and-privacy">Security and Privacy</h2>
 
 <h3 id="threat-models">Threat models</h3>
