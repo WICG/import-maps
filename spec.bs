@@ -182,16 +182,18 @@ Inside the <a spec="html">prepare a script</a> algorithm, we make the following 
   1. Let |request| be a new [=/request=] whose [=request/url=] is |url|, [=request/destination=] is "`script`", [=request/mode=] is "`cors`", [=request/referrer=] is "`client`", and [=request/client=] is |settings object|.
      <p class="note">Here we use "`script`" as the [=request/destination=], which means the `script-src-elem` CSP directive applies.</p>
   1. <a spec="html">Set up the module script request</a> given |request| and |options|.
-  1. [=/Fetch=] |request|. Return from this algorithm, and run the remaining steps as part of the fetch's [=/process response=] for the [=/response=] |response|.
-     <p class="note">|response| is always [=CORS-same-origin=].</p>
-  1. If any of the following conditions are met, asynchronously complete this algorithm with null, and abort these steps:
-    - |response|'s [=response/type=] is "`error`"
-    - |response|'s [=response/status=] is not an [=ok status=]
-    - The result of [=extracting a MIME type=] from |response|'s [=response/header list=] is not `"application/importmap+json"`
-      <p class="note">For more context on MIME type checking, see <a href="https://github.com/WICG/import-maps/issues/105">#105</a> and <a href="https://github.com/WICG/import-maps/pull/119">#119</a>.</p>
-  1. Let |source text| be the result of [=UTF-8 decoding=] response's [=response/body=].
-  1. Asynchronously complete this algorithm with the result of [=create an import map parse result=], given |source text|, |response|'s [=response/url=], and |settings object|.
+  1. Let |processResponseEndOfBody| be the following steps given |response| and |body|:
+    1. If any of the following conditions are met:
+      - |body| is null or failure
+      - |response|'s [=response/type=] is "`error`"
+      - |response|'s [=response/status=] is not an [=ok status=]
+      - The result of [=extracting a MIME type=] from |response|'s [=response/header list=] is not `"application/importmap+json"`
+        <p class="note">For more context on MIME type checking, see <a href="https://github.com/WICG/import-maps/issues/105">#105</a> and <a href="https://github.com/WICG/import-maps/pull/119">#119</a>.</p>
 
+      then asynchronously complete the [=fetch an import map=] algorithm with null.
+    1. Let |source text| be the result of [=UTF-8 decoding=] |body|.
+    1. Asynchronously complete the [=fetch an import map=] algorithm with the result of [=create an import map parse result=], given |source text|, |response|'s [=response/url=], and |settings object|.
+  1. [=/Fetch=] |request| with <i>[=fetch/processResponseEndOfBody=]</i> set to |processResponseEndOfBody|.
 </div>
 
 <h3 id="integration-wait-for-import-maps">Wait for import maps</h3>
