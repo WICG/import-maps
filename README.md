@@ -497,7 +497,6 @@ document.write(`<script type="importmap">
 
 then the speculative fetches of `https://example.com/foo.mjs` and `https://example.com/bar.mjs` would be wasted, as the newly-written import map would be in effect instead of the one that was seen inline in the HTML.
 
-
 ## Feature detection
 
 If the browser supports [HTMLScriptElement](https://html.spec.whatwg.org/multipage/scripting.html#htmlscriptelement)'s
@@ -509,7 +508,6 @@ if (HTMLScriptElement.supports && HTMLScriptElement.supports('importmap')) {
   console.log('Your browser supports import maps.');
 }
 ```
-
 
 ## Alternatives considered
 
