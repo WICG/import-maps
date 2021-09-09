@@ -621,6 +621,7 @@ Several members of the community have been working on polyfills and tooling rela
 * [importly](https://www.npmjs.com/package/importly) generates an import map from a `package.json`.
 * [SystemJS](https://github.com/systemjs/systemjs) provides a polyfill-like workflow for using import maps in older browsers with the System module format and `<script type="systemjs-importmap">`.
 * [webpack-import-map-plugin](https://www.npmjs.com/package/webpack-import-map-plugin) generates import maps for the output of [webpack](https://webpack.js.org/), especially useful for the [hashing use case](#mapping-away-hashes-in-script-filenames).
+* [import_map](https://crates.io/crates/import_map) is a Rust crate implementing the specification. Used by Deno.
 
 Feel free to send a pull request with more! Also, you can use [#146](https://github.com/WICG/import-maps/issues/146) in the issue tracker for discussion about this space.
 
