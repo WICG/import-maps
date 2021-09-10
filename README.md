@@ -24,6 +24,7 @@ _Or, how to control the behavior of JavaScript imports_
   - [Dynamic import map example](#dynamic-import-map-example)
   - [Scope](#scope)
   - [Interaction with speculative parsing/fetching](#interaction-with-speculative-parsingfetching)
+- [Feature detection](#feature-detection)
 - [Alternatives considered](#alternatives-considered)
   - [The Node.js module resolution algorithm](#the-nodejs-module-resolution-algorithm)
   - [A programmable resolution hook](#a-programmable-resolution-hook)
@@ -495,6 +496,18 @@ document.write(`<script type="importmap">
 ```
 
 then the speculative fetches of `https://example.com/foo.mjs` and `https://example.com/bar.mjs` would be wasted, as the newly-written import map would be in effect instead of the one that was seen inline in the HTML.
+
+## Feature detection
+
+If the browser supports [HTMLScriptElement](https://html.spec.whatwg.org/multipage/scripting.html#htmlscriptelement)'s
+[supports(type)](https://html.spec.whatwg.org/multipage/scripting.html#dom-script-supports) method,
+`HTMLScriptElement.supports('importmap')` must return true.
+
+```js
+if (HTMLScriptElement.supports && HTMLScriptElement.supports('importmap')) {
+  console.log('Your browser supports import maps.');
+}
+```
 
 ## Alternatives considered
 
