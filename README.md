@@ -610,7 +610,7 @@ The primary challenges here are in achieving agreement about built-in modules on
 Several members of the community have been working on polyfills and tooling related to import maps. Here are the ones we know about:
 
 * [@import-maps/resolve](https://www.npmjs.com/package/@import-maps/resolve) resolves a specifier relative to an import map.
-* [@jsenv/node-module-import-map](https://www.npmjs.com/package/@jsenv/node-module-import-map) generates an import map from your `package.json` and `node_modules/` directories.
+* [@jsenv/importmap-node-module](https://www.npmjs.com/package/@jsenv/importmap-node-module) generates an import map from your `package.json` and `node_modules/` directories.
 * [@jsenv/importmap-eslint-resolver](https://www.npmjs.com/package/@jsenv/importmap-eslint-resolver) enables import map resolution in [ESLint](https://eslint.org/)
 * [@node-loader/import-maps](https://www.npmjs.com/package/@node-loader/import-maps) is a [Node.js loader](https://nodejs.org/dist/latest/docs/api/esm.html#esm_experimental_loaders) for using import maps in Node.js.
 * [@web/dev-server-import-maps](https://www.npmjs.com/package/@web/dev-server-import-maps) allows using import maps during development and testing with [@web/dev-server](https://www.npmjs.com/package/@web/dev-server) and [@web/test-runner](https://www.npmjs.com/package/@web/test-runner).
