@@ -36,10 +36,7 @@ _Or, how to control the behavior of JavaScript imports_
 - [Further work](#further-work)
   - [Multiple import map support](#multiple-import-map-support)
   - [Programmatic API](#programmatic-api)
-  - [Fallback support](#fallback-support)
-  - [`import:` URLs](#import-urls)
   - [`import.meta.resolve()`](#importmetaresolve)
-  - [Built-in module remapping](#built-in-module-remapping)
 - [Community polyfills and tooling](#community-polyfills-and-tooling)
 - [Acknowledgments](#acknowledgments)
 
@@ -574,10 +571,6 @@ The import map _could_ be that manifest file. However, it may not be the best fi
 
 ## Further work
 
-[Previous versions of this repository](https://github.com/WICG/import-maps/tree/93f94c6dfb268bde3009644b65580fb2fbb98fcf) contained more features for import maps, including support for multiple import maps, built-in module remapping, fallbacks, and a new type of URL, the `import:` URL. These have since been removed in the interest of first explaining and specifying a solid, implementable "v1" core.
-
-We may bring some of those features back, and the issue tracker is a good place for discussing such future extensions. This section contains a discussion of these potential future features.
-
 ### Multiple import map support
 
 It is natural for multiple `<script type="importmap">`s to appear on a page, just as multiple `<script>`s of other types can. We would like to enable this in the future.
@@ -594,29 +587,15 @@ The challenges here are around how to reconcile the declarative import maps with
 
 See [these open issues](https://github.com/WICG/import-maps/milestone/8) for more discussion and use cases where a programmatic API could help.
 
-### Fallback support
-
-It is possible to extend import maps such that instead of mapping from an import specifier to a single URL, they instead map to multiple URLs. Then, the first successfully-fetchable URL would be the result of the mapping. This enables fallback behavior, both for user-defined packages, and potentially for built-in modules. See [this section of a previous revision of the explainer](https://github.com/WICG/import-maps/tree/93f94c6dfb268bde3009644b65580fb2fbb98fcf#fallback-examples) for more examples and use cases, and [these open issues](https://github.com/WICG/import-maps/milestone/6).
-
-The challenge with this is that it makes module resolution effectively network-dependent and asynchronous, instead of requiring a synchronous lookup in the import map structure. For fallbacks against built-in modules only, this can be sidestepped, since the user agent synchronously knows what built-in modules it implements. But for the more general case this complexity holds.
-
-### `import:` URLs
-
-The `import:` URL scheme is envisioned as providing a way to access the import specifier mappings in URL contexts, not just import specifier contexts. This allows sharing the notion of "import specifiers" between JavaScript importing contexts and traditional URL contexts, such as `fetch()`, `<img src="">` or `<link href="">`, so that those APIs can also benefit from the mapping and package abstractions. See [this section of a previous revision of the explainer](https://github.com/WICG/import-maps/tree/93f94c6dfb268bde3009644b65580fb2fbb98fcf#import-urls) for more examples and use cases, and [these open issues](https://github.com/WICG/import-maps/milestone/7).
-
-The biggest challenge here is that this would require rearchitecturing the import maps specification to operate on the general level of fetches and URL resolutions. Whereas, currently import maps only impact import specifier resolution, i.e., a specific phase of module script fetching. There are also challenges around the meaning of "relative `import:` URLs" such as `import:./a.mjs`, the origin of pages or workers loaded via `import:` URLs, and other interactions with loading infrastructure.
-
 ### `import.meta.resolve()`
 
-The proposed `import.meta.resolve(specifier)` function serves a similar purpose to `import:` URLs, extending the applicability of import specifiers beyond just `import` statements and `import()` expressions. It allows module scripts to resolve import specifiers to URLs at any time.
+The proposed `import.meta.resolve(specifier)` function allows module scripts to resolve import specifiers to URLs at any time. See [whatwg/html#5572](https://github.com/whatwg/html/pull/5572) for more. This is related to import maps since it allows you to resolve "package-relative" resources, e.g.
 
-The challenges with this proposal are intimately tied up with [fallback support](#fallback-support). In particular, if fallbacks make the module resolution process asynchronous, then `import.meta.resolve()` cannot be a simple string-returning function as one might expect. See more discussion in [#79](https://github.com/WICG/import-maps/issues/79).
+```js
+const url = import.meta.resolve("somepackage/resource.json");
+```
 
-### Built-in module remapping
-
-Currently import maps are only specified to remap URL-like import specifiers that correspond to a [fetch scheme](https://fetch.spec.whatwg.org/#fetch-scheme), since those are the only URLs that could result in a module being fetched. If browsers support built-in modules (which would likely come with their own scheme, such as `std:`), then we could consider also allowing built-in module URLs to be remapped. This combines well with [fallback support](#fallback-support) and scopes; see [this section of a previous revision of the explainer](https://github.com/WICG/import-maps/tree/93f94c6dfb268bde3009644b65580fb2fbb98fcf#for-built-in-modules-in-module-import-map-supporting-browsers) for more examples on fallback, and [this section](https://github.com/WICG/import-maps#virtualization-examples) for more use cases and examples surrounding virtualization of built-in modules.
-
-The primary challenges here are in achieving agreement about built-in modules on the web in the first place. Built-in modules also make other aspects of import maps more complicated, e.g. they tend to necessitate [fallback support](#fallback-support) to enable polyfilling, or [multiple import map support](#multiple-import-map-support) to enable multi-party virtualization.
+would give you the appropriately-mapped location of `resource.json` within the `somepackage/` namespace controlled by the page's import map.
 
 ## Community polyfills and tooling
 
