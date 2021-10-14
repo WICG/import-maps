@@ -390,7 +390,7 @@ const im = document.createElement('script');
 im.type = 'importmap';
 im.textContent = JSON.stringify({
   imports: {
-    'my-library': Math.random() > 0.5 ? '/my-awesome-library.mjs' : '/my-rad-library.mjs';
+    'my-library': Math.random() > 0.5 ? '/my-awesome-library.mjs' : '/my-rad-library.mjs'
   }
 });
 document.currentScript.after(im);
