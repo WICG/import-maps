@@ -466,6 +466,7 @@ We do still need to apply the traditional protections against first-party malici
 
 - CSP to protect against injection vulnerabilities. (See [#105](https://github.com/WICG/import-maps/issues/105) for further discussion.)
 - CORS and strict MIME type checking (with a new MIME type, "`application/importmap+json`") for external import maps.
+- Manual sanitization code (that doesn't rely on CSP for blocking injected scripts) will need to ensure it disallows `<script type="importmap">` just like it already disallows `<script>`.
 
 But there is no fundamentally new capability introduced here, that needs new consideration.
 
