@@ -24,6 +24,7 @@ _Or, how to control the behavior of JavaScript imports_
   - [Dynamic import map example](#dynamic-import-map-example)
   - [Scope](#scope)
   - [Interaction with speculative parsing/fetching](#interaction-with-speculative-parsingfetching)
+  - [`<base>` element](#base-element)
 - [Feature detection](#feature-detection)
 - [Alternatives considered](#alternatives-considered)
   - [The Node.js module resolution algorithm](#the-nodejs-module-resolution-algorithm)
@@ -493,6 +494,25 @@ document.write(`<script type="importmap">
 ```
 
 then the speculative fetches of `https://example.com/foo.mjs` and `https://example.com/bar.mjs` would be wasted, as the newly-written import map would be in effect instead of the one that was seen inline in the HTML.
+
+### `<base>` element
+
+When `<base>` element is present in the document, all URLs and URL-like specifiers in the import map are converted to absolute URLs using the `href` from `<base>`.
+
+```html
+<base href="https://www.unpkg.com/vue/dist/">
+<script type="importmap">
+{
+  "imports": {
+    "vue": "./vue.runtime.esm.js",
+  }
+}
+</script>
+
+<script>
+import("vue"); // resolves to https://www.unpkg.com/vue/dist/vue.runtime.esm.js
+</script>
+```
 
 ## Feature detection
 
