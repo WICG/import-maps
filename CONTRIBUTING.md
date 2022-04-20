@@ -15,13 +15,13 @@ To build the specification, you can use one of:
 
 ## Reference implementation
 
-We maintain a reference implementation in the [`reference-implementation/`](https://github.com/WICG/import-maps/tree/master/reference-implementation) subfolder. This reference implementation, along with its tests, is meant to co-evolve along with the specification and stay in sync.
+We maintain a reference implementation in the [`reference-implementation/`](https://github.com/WICG/import-maps/tree/main/reference-implementation) subfolder. This reference implementation, along with its tests, is meant to co-evolve along with the specification and stay in sync.
 
 ## Tests
 
 This specification has [web platform tests](https://github.com/web-platform-tests/wpt), in the [`import-maps/`](https://github.com/web-platform-tests/wpt/tree/master/import-maps) subdirectory. All normative specification updates need accompanying web platform test changes.
 
-Tests for parsing and resolution are driven by [JSON files](https://github.com/web-platform-tests/wpt/tree/master/import-maps/data-driven/resources), in a [documented format](https://github.com/web-platform-tests/wpt/tree/master/import-maps/data-driven). When running tests in this repository, those JSON files are automatically downloaded by the `pretest` npm script. The version downloaded is pinned to a specific commit, which is updated by modifying [the script](https://github.com/WICG/import-maps/blob/master/reference-implementation/__tests__/sync-tests.js).
+Tests for parsing and resolution are driven by [JSON files](https://github.com/web-platform-tests/wpt/tree/master/import-maps/data-driven/resources), in a [documented format](https://github.com/web-platform-tests/wpt/tree/master/import-maps/data-driven). When running tests in this repository, those JSON files are automatically downloaded by the `pretest` npm script. The version downloaded is pinned to a specific commit, which is updated by modifying [the script](https://github.com/WICG/import-maps/blob/main/reference-implementation/__tests__/sync-tests.js).
 
 ## For maintainers: identifying contributors to a pull request
 

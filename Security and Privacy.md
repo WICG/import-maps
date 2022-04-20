@@ -26,7 +26,7 @@ No.
 
 No, is the plan.
 
-There are some open questions about the potential design of future work that leverages import maps to support HTTPS → HTTPS fallback cases ([see README for more detail](https://github.com/WICG/import-maps/blob/master/README.md#fallback-support)), especially when combined with another future feature, [`import:` URLs](https://github.com/WICG/import-maps/blob/master/README.md#import-urls), in contexts like `<link>` or `<img>` that do not respect the same-origin policy. If specified and implemented naïvely, these could give rise to the ability to determine the network status of resources in ways that might be new. See more discussion in [#76](https://github.com/WICG/import-maps/issues/76).
+There are some open questions about the potential design of future work that leverages import maps to support HTTPS → HTTPS fallback cases ([see README for more detail](https://github.com/WICG/import-maps/blob/main/README.md#fallback-support)), especially when combined with another future feature, [`import:` URLs](https://github.com/WICG/import-maps/blob/main/README.md#import-urls), in contexts like `<link>` or `<img>` that do not respect the same-origin policy. If specified and implemented naïvely, these could give rise to the ability to determine the network status of resources in ways that might be new. See more discussion in [#76](https://github.com/WICG/import-maps/issues/76).
 
 However, we will be sure to solve this before finalizing any specification for these future features.
 

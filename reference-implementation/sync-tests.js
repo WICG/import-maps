@@ -14,7 +14,7 @@ if (process.env.NO_UPDATE) {
 // We pin to specific version, and update this as the spec or tests update.
 //
 // To get the latest commit:
-// 1. Go to https://github.com/w3c/web-platform-tests/tree/master/import-maps/data-driven/resources/
+// 1. Go to https://github.com/web-platform-tests/wpt/tree/master/import-maps/data-driven/resources/
 // 2. Press "y" on your keyboard to get a permalink
 // 3. Copy the commit hash
 const sha = 'dc60fe2cbd1292bb2166feba1f24971969e26154';

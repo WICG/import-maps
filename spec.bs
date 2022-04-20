@@ -11,7 +11,7 @@ Boilerplate: omit conformance, omit feedback-header
 Editor: Domenic Denicola, Google https://www.google.com/, d@domenic.me, https://domenic.me/
 Abstract: Import maps allow web pages to control the behavior of JavaScript imports.
 !Participate: <a href="https://github.com/WICG/import-maps">GitHub WICG/import-maps</a> (<a href="https://github.com/WICG/import-maps/issues/new">new issue</a>, <a href="https://github.com/WICG/import-maps/issues?state=open">open issues</a>)
-!Commits: <a href="https://github.com/WICG/import-maps/commits/master/spec.bs">GitHub spec.bs commits</a>
+!Commits: <a href="https://github.com/WICG/import-maps/commits/main/spec.bs">GitHub spec.bs commits</a>
 Complain About: accidental-2119 yes
 Indent: 2
 Default Biblio Status: current
@@ -458,7 +458,7 @@ add the following step:
 
 <h4 id="comparison-with-first-party-scripts">Comparison with first-party scripts</h4>
 
-Import maps are explicitly designed to be installed by page authors, i.e. those who have the ability to run first-party scripts. (See the explainer's ["Scope" section](https://github.com/WICG/import-maps/blob/master/README.md#scope).)
+Import maps are explicitly designed to be installed by page authors, i.e. those who have the ability to run first-party scripts. (See the explainer's ["Scope" section](https://github.com/WICG/import-maps/blob/main/README.md#scope).)
 
 Although it may seem that the ability to change how resources are imported from JavaScript and the capability of rewriting rules are powerful, there is no extra power really granted here, compared with first-party scripts. That is, they only change things which the page author could change already, by manually editing their code to use different URLs.
 
