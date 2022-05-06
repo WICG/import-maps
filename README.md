@@ -285,7 +285,7 @@ would not: in all classes of browsers, it would attempt to fetch `app.mjs` direc
 
 #### Multiple versions of the same module
 
-It is often the case that you want to use the same import specifier to refer to multiple versions of a single library, depending on who is importing them. This encapsulates the versions of each dependency in use, and avoids [dependency hell](http://npm.github.io/how-npm-works-docs/theory-and-design/dependency-hell.html) ([longer blog post](http://blog.timoxley.com/post/20772365842/node-js-npm-reducing-dependency-overheads)).
+It is often the case that you want to use the same import specifier to refer to multiple versions of a single library, depending on who is importing them. This encapsulates the versions of each dependency in use, and avoids [dependency hell](https://npm.github.io/how-npm-works-docs/theory-and-design/dependency-hell.html) ([longer blog post](https://blog.timoxley.com/post/20772365842/node-js-npm-reducing-dependency-overheads)).
 
 We support this use case in import maps by allowing you to change the meaning of a specifier within a given _scope_:
 
