@@ -133,7 +133,7 @@ Inside the <a spec="html">prepare a script</a> algorithm, we make the following 
   - If the script block's type string is an [=ASCII case-insensitive=] match for the string "`importmap`", <a spec="html">the script's type</a> is "`importmap`".
 - Insert the following step before <a spec="html">prepare a script</a> step 24:
   - If <a spec="html">the script's type</a> is "`importmap`":
-    1. If the element's [=node document=]'s [=Document/acquiring import maps=] is false, then <a spec="html">queue a task</a> to <a spec="html">fire an event</a> named `error` at the element, and return.
+    1. If the element's [=node document=]'s [=Document/acquiring import maps=] is false, then <a spec="html">queue a task</a> to <a spec="html">fire an event</a> named <a event for="Window,WorkerGlobalScope,HTMLElement,EventSource,Worker,SharedWorker,AbstractWorker">`error`</a> at the element, and return.
     1. Set the element's [=node document=]'s [=Document/acquiring import maps=] to false.
        <p class="note">In the future we could skip setting [=Document/acquiring import maps=] to false, to allow multiple import maps.</p>
     1. Assert: the element's [=node document=]'s [=Document/pending import map script=] is null.
@@ -225,7 +225,7 @@ Insert a call to [=wait for import maps=] at the beginning of the following HTML
 <div algorithm>
 To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
 
-1. If |element|'s [=the script's result=] is null, then [=fire an event=] named `error` at |element|, and return.
+1. If |element|'s [=the script's result=] is null, then [=fire an event=] named <a event for="Window,WorkerGlobalScope,HTMLElement,EventSource,Worker,SharedWorker,AbstractWorker">`error`</a> at |element|, and return.
 1. Let |import map parse result| be |element|'s [=the script's result=].
 1. Assert: |element|'s <a spec="html">the script's type</a> is "`importmap`".
 1. Assert: |import map parse result| is an [=import map parse result=].
@@ -238,7 +238,7 @@ To <dfn>register an import map</dfn> given an {{HTMLScriptElement}} |element|:
      <p class="issue">There are no relevant [=script=], because [=import map parse result=] isn't a [=script=]. This needs to wait for <a href="https://github.com/whatwg/html/issues/958">whatwg/html#958</a> before it is fixable.</p>
   1. Return.
 1. Set |element|'s [=node document=]'s [=Document/import map=] to |import map parse result|'s [=import map parse result/import map=].
-1. If |element| is <a spec="html">from an external file</a>, then [=fire an event=] named `load` at |element|.
+1. If |element| is <a spec="html">from an external file</a>, then [=fire an event=] named <a event for='Window,HTMLElement'>`load`</a> at |element|.
 
 <p class="note">
   The timing of [=/register an import map=] is observable by possible `error` and `load` events, or by the fact that after [=/register an import map=] an import map <{script}> can be moved to another {{Document}}. On the other hand, the updated [=Document/import map=] is not observable until [=/wait for import maps=] completes.
