@@ -6,12 +6,7 @@ This repository is being used for work in the W3C [Web Platform Incubator Commun
 
 ## Editing the specification
 
-Edits to the specification are done in the `spec.bs` file, which is then compiled with the [Bikeshed](https://tabatkins.github.io/bikeshed/) spec pre-processor.
-
-To build the specification, you can use one of:
-
-- `make local`: uses a locally-installed copy of Bikeshed
-- `make remote`: uses a Bikeshed web service, so you don't have to install anything locally
+The specification is now maintained as part of the HTML Standard, in [whatwg/html](https://github.com/whatwg/html). Small updates are best done as a pull request against that repository. Large feature proposals might work well being incubated in this repository; we can discuss on the issue tracker about adding a specification document here for such incubations.
 
 ## Reference implementation
 

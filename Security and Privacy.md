@@ -1,8 +1,4 @@
-# Security and privacy
-
-See spec's [Security and Privacy](https://wicg.github.io/import-maps/#security-and-privacy) section.
-
-## Questionnaire answers
+# Security and privacy questionnaire answers
 
 The following are the answers to the W3C TAG's [security and privacy self-review questionnaire](https://www.w3.org/TR/security-privacy-questionnaire/).
 
@@ -72,7 +68,7 @@ No, apart from via the HTTP cache.
 
 **Does this specification have a "Security Considerations" and "Privacy Considerations" section?**
 
-[Yes](https://wicg.github.io/import-maps/#security-and-privacy).
+Yes.
 
 **Does this specification allow downgrading default security characteristics?**
 

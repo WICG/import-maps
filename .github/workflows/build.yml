@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build
-      run: make ci
+      run: mkdir out && mv redirect.html out/index.html
     - name: Deploy
       if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
       uses: peaceiris/actions-gh-pages@v3
